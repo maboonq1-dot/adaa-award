@@ -165,8 +165,8 @@
 
 **صفحات GitHub (عامّة):** `https://<USERNAME>.github.io/adaa-award/` — تُخدَم من `docs/`.
 
-**نسخة Artifact (خاصّة):**
-<https://claude.ai/code/artifact/d532e780-6f12-41be-b2fb-13ed1797569c>
+**نسخة Artifact:** <https://claude.ai/artifact/TKx2Y8vG4tZ4apwnsLXAgb>
+(المشاركة الآن «كلُّ من يملك الرابط» — تُضبَط من قائمة المشاركة في الصفحة نفسها.)
 
 **محلياً:**
 
