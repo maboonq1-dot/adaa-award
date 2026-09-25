@@ -1,0 +1,172 @@
+/* ===========================================================
+   جائزة أداء الصحة · الدورة الثامنة — رموز التصميم
+   ملفٌّ واحد يحكم اللون والخطّ والمسافة والحركة.
+   -----------------------------------------------------------
+   ثلاث قواعد لونيّة تحكم المنصّة كلّها:
+
+   ‏**الأخضر إطارٌ لا حُكم.** أخضر وزارة الصحة يبني القائمة
+   والرأس والأزرار الأساسية. لا يدخل الأخضرُ خانةَ درجةٍ ولا
+   شريطَ تقدُّمٍ أبداً، كي لا يُقرأ الإطارُ نتيجةً.
+
+   ‏**الذهب لا يُمنَح إلا لمن فاز.** محجوزٌ لأربعة مواضع:
+   وسام الفائز، ولوحة الشرف، وشارة التكريم الفخريّ، وشعار
+   الجائزة. الدرجاتُ والمراحلُ والتصفياتُ تُقرأ بالحبر لا
+   بالذهب — فالتصفية ليست فوزاً.
+
+   ‏**الدرجة تُقرأ بالحِبر والنسبة، لا بلونٍ ينوب عنها.**
+   الحِبر النيليّ يقيس، والقرمزيّ يقف عند خطرٍ إجرائيّ واحد:
+   تباعُد المقيّمَيْن، والحجب، والتظلّم. ثلاثةٌ فقط.
+   =========================================================== */
+
+:root {
+  /* سمةٌ واحدة عن قصد: واجهةٌ حكوميّة نهاريّة، والأخضرُ العميق في الشريط هو
+     الظلُّ الوحيد المسموح. كلُّ لونٍ مُعلَنٌ هنا ولا يُستعار من المضيف. */
+  color-scheme: light;
+
+  /* ---- أخضر الوزارة: الإطار والهويّة ---- */
+  --g-50:  #eef6f1;
+  --g-100: #d7ebe0;
+  --g-200: #aad6c0;
+  --g-300: #76b997;
+  --g-400: #439a72;
+  --g-500: #197f53;
+  --g-600: #046a38;
+  --g-700: #05552e;
+  --g-800: #064125;
+  --g-900: #05301c;
+  --g-950: #031d11;
+
+  /* ---- الذهب: الفوز والتكريم ولوحة الشرف والشعار. لا خامس ---- */
+  --au-50:  #fbf4e2;
+  --au-100: #f4e6c2;
+  --au-200: #e9cf90;
+  --au-300: #d9b45d;
+  --au-400: #c39a3c;
+  --au-500: #a67f28;
+  --au-600: #85641d;
+  --au-700: #634a16;
+
+  /* ---- الحِبر النيليّ: الدرجات والمراحل والتقدّم ---- */
+  --ink-50:  #eef2fa;
+  --ink-100: #dbe3f4;
+  --ink-200: #b6c6e7;
+  --ink-300: #8aa3d4;
+  --ink-400: #6180be;
+  --ink-500: #43619f;
+  --ink-600: #334c82;
+  --ink-700: #283c67;
+  --ink-800: #1f2e4e;
+  --ink-900: #17233b;
+
+  /* ---- القرمزيّ: التباعُد والحجب والتظلّم. لا رابع ---- */
+  --r-50:  #fdeeee;
+  --r-100: #fbd9d9;
+  --r-200: #f4b0b0;
+  --r-300: #e87d7d;
+  --r-400: #d55151;
+  --r-500: #b93636;
+  --r-600: #98292a;
+  --r-700: #772123;
+
+  /* ---- الكهرمانيّ: انتظارٌ أو نقصٌ قابلٌ للإصلاح ---- */
+  --am-50:  #fdf4e3;
+  --am-100: #f9e6bf;
+  --am-200: #f0cd84;
+  --am-300: #e0ac47;
+  --am-400: #c68d24;
+  --am-500: #a3711a;
+  --am-600: #7d5715;
+
+  /* ---- محايدات دافئة بميلٍ أخضرَ طفيف ---- */
+  --n-0:   #ffffff;
+  --n-25:  #fbfcfa;
+  --n-50:  #f5f7f4;
+  --n-100: #edefea;
+  --n-200: #dfe2db;
+  --n-300: #c6cabf;
+  --n-400: #9ba095;
+  --n-500: #747a6e;
+  --n-600: #555b50;
+  --n-700: #3e433b;
+  --n-800: #292d27;
+  --n-900: #171a16;
+
+  /* ---- أدوار دلاليّة ---- */
+  --bg:        var(--n-25);
+  --surface:   var(--n-0);
+  --surface-2: var(--n-50);
+  --line:      var(--n-200);
+  --line-soft: var(--n-100);
+  --text:      var(--n-900);
+  --text-2:    var(--n-600);
+  --text-3:    var(--n-500);
+  --brand:     var(--g-600);
+  --brand-d:   var(--g-800);
+
+  /* ---- الخطوط ---- */
+  --f-title: 'Alexandria', 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --f-body:  'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --f-num:   'IBM Plex Sans Arabic', ui-monospace, monospace;
+
+  /* ---- المقاسات ---- */
+  --s-1: 4px;   --s-2: 8px;   --s-3: 12px;  --s-4: 16px;
+  --s-5: 20px;  --s-6: 24px;  --s-7: 32px;  --s-8: 40px;
+  --s-9: 56px;  --s-10: 72px;
+
+  --r-xs: 5px;  --r-sm: 8px;  --r-md: 12px;
+  --r-lg: 16px; --r-xl: 22px; --r-full: 999px;
+
+  --sh-1: 0 1px 2px rgba(4,48,27,.06), 0 1px 1px rgba(4,48,27,.04);
+  --sh-2: 0 3px 10px rgba(4,48,27,.07), 0 1px 3px rgba(4,48,27,.05);
+  --sh-3: 0 12px 34px rgba(4,48,27,.13), 0 4px 10px rgba(4,48,27,.07);
+  --sh-in: inset 0 1px 2px rgba(4,48,27,.05);
+
+  --rail-w: 252px;
+  --ease: cubic-bezier(.2,.8,.3,1);
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--f-body);
+  font-size: 14px;
+  line-height: 1.72;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'ss01';
+}
+
+h1, h2, h3, h4 { font-family: var(--f-title); font-weight: 600; line-height: 1.4; margin: 0; letter-spacing: -.01em; }
+h1 { font-size: 26px; }
+h2 { font-size: 19px; }
+h3 { font-size: 16px; }
+h4 { font-size: 14px; }
+p  { margin: 0 0 var(--s-3); }
+a  { color: var(--g-700); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+.num { font-family: var(--f-num); font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }
+
+::selection { background: var(--g-100); }
+
+:focus-visible {
+  outline: 2px solid var(--g-500);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+
+.skip {
+  position: absolute; inset-inline-start: -9999px; top: 0; z-index: 999;
+  background: var(--g-800); color: #fff; padding: var(--s-3) var(--s-5);
+  border-radius: 0 0 var(--r-md) 0;
+}
+.skip:focus { inset-inline-start: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

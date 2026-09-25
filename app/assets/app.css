@@ -1,0 +1,110 @@
+/* جائزة أداء الصحة — الهيكل: الشريط الجانبيّ، والرأس، والصفحة */
+
+/* ============ الغلاف ============ */
+.shell { display: grid; grid-template-columns: var(--rail-w) 1fr; min-block-size: 100vh; }
+.main  { min-inline-size: 0; display: flex; flex-direction: column; }
+.page  { padding: var(--s-6) var(--s-7) var(--s-10); max-inline-size: 1240px; width: 100%; margin-inline: auto; }
+.page > * + * { margin-block-start: var(--s-5); }
+
+/* ============ الشريط الجانبيّ ============ */
+.rail {
+  background: linear-gradient(180deg, var(--g-900), var(--g-950));
+  color: var(--g-100);
+  padding: var(--s-5) var(--s-4) var(--s-6);
+  display: flex; flex-direction: column; gap: var(--s-5);
+  position: sticky; top: 0; block-size: 100vh; overflow-y: auto;
+  border-inline-start: 1px solid var(--g-800);
+}
+.rail::-webkit-scrollbar { inline-size: 6px; }
+.rail::-webkit-scrollbar-thumb { background: var(--g-700); border-radius: 3px; }
+
+.brand { display: flex; align-items: center; gap: var(--s-3); text-decoration: none; color: inherit; padding-inline: var(--s-2); }
+.brand__mk {
+  inline-size: 38px; block-size: 38px; flex: none; border-radius: 10px;
+  background: linear-gradient(150deg, var(--au-300), var(--au-500));
+  display: grid; place-items: center; color: var(--g-950);
+  font-family: var(--f-title); font-weight: 700; font-size: 15px;
+  box-shadow: 0 2px 10px rgba(196,154,60,.35);
+}
+.brand__t { font-family: var(--f-title); font-weight: 600; font-size: 15px; line-height: 1.35; color: #fff; }
+.brand__s { font-size: 11px; color: var(--g-300); letter-spacing: .01em; }
+
+.nav { display: flex; flex-direction: column; gap: 1px; }
+.nav__g { font-size: 10.5px; color: var(--g-400); padding: var(--s-3) var(--s-3) var(--s-1); letter-spacing: .06em; font-weight: 600; }
+.nav a {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: 8px var(--s-3); border-radius: var(--r-sm);
+  color: var(--g-200); text-decoration: none; font-size: 13px;
+  transition: background .16s var(--ease), color .16s var(--ease);
+}
+.nav a:hover { background: rgba(255,255,255,.06); color: #fff; }
+.nav a[aria-current="page"] { background: var(--g-700); color: #fff; font-weight: 500; }
+.nav a[aria-current="page"] .i { color: var(--au-300); }
+.nav .i { inline-size: 17px; block-size: 17px; flex: none; opacity: .9; }
+.nav__n {
+  margin-inline-start: auto; font-size: 10.5px; background: rgba(255,255,255,.13);
+  padding: 1px 6px; border-radius: var(--r-full); font-family: var(--f-num);
+}
+.nav__n--red { background: var(--r-400); color: #fff; }
+
+.rail__foot { margin-block-start: auto; font-size: 11px; color: var(--g-400); padding-inline: var(--s-3); line-height: 1.65; }
+.rail__foot a { color: var(--g-200); }
+.rail__ind {
+  margin-block-start: var(--s-3); padding-block-start: var(--s-3);
+  border-block-start: 1px solid var(--g-800); color: var(--g-300); font-size: 10.5px;
+}
+.rail__ind b { color: var(--g-100); font-weight: 600; }
+
+/* ============ شريط البيئة ============ */
+.envbar {
+  background: var(--am-100); color: var(--am-600);
+  font-size: 11.5px; padding: 5px var(--s-6); text-align: center;
+  border-block-end: 1px solid var(--am-200); position: relative; z-index: 5;
+}
+.envbar b { color: var(--am-600); }
+
+/* ============ الرأس: من أنت الآن ============ */
+.top {
+  display: flex; align-items: center; gap: var(--s-4); flex-wrap: wrap;
+  padding: var(--s-3) var(--s-7); background: var(--surface);
+  border-block-end: 1px solid var(--line); position: sticky; top: 0; z-index: 4;
+}
+.top__who { display: flex; align-items: center; gap: var(--s-2); font-size: 12.5px; color: var(--text-2); }
+.top__sel {
+  appearance: none; background: var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' fill='none' stroke='%23555b50' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat left 10px center/11px;
+  border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: 6px var(--s-3) 6px var(--s-7); font-size: 13px; font-weight: 500; cursor: pointer;
+}
+.top__sel:hover { border-color: var(--g-400); }
+.top__ctx { font-size: 12px; color: var(--text-3); border-inline-start: 1px solid var(--line); padding-inline-start: var(--s-4); }
+.top__sp { margin-inline-start: auto; display: flex; gap: var(--s-2); align-items: center; }
+
+/* ============ رأس الصفحة ============ */
+.ph { display: flex; align-items: flex-start; gap: var(--s-5); flex-wrap: wrap; }
+.ph__t { flex: 1 1 340px; min-inline-size: 0; }
+.ph h1 { margin-block-end: var(--s-2); }
+.ph__s { color: var(--text-2); font-size: 13.5px; margin: 0; max-inline-size: 74ch; }
+.ph__a { display: flex; gap: var(--s-2); flex-wrap: wrap; align-items: center; }
+.crumb { font-size: 12px; color: var(--text-3); margin-block-end: var(--s-2); display: flex; gap: 6px; align-items: center; }
+.crumb a { color: var(--text-3); }
+
+/* ============ الشبكات ============ */
+.grid  { display: grid; gap: var(--s-4); }
+.g-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.g-3 { grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); }
+.g-4 { grid-template-columns: repeat(auto-fit, minmax(176px, 1fr)); }
+.g-6 { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.split { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: var(--s-4); align-items: start; }
+
+@media (max-width: 1080px) { .split { grid-template-columns: 1fr; } }
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; }
+  .rail {
+    position: static; block-size: auto; flex-direction: row; flex-wrap: wrap;
+    align-items: center; gap: var(--s-3); padding: var(--s-3) var(--s-4);
+  }
+  .rail .nav { flex-direction: row; flex-wrap: wrap; gap: 2px; }
+  .rail .nav__g, .rail__foot { display: none; }
+  .nav a { padding: 6px 10px; font-size: 12px; }
+  .page, .top { padding-inline: var(--s-4); }
+}
