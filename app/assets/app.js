@@ -60,8 +60,8 @@ function buildRail() {
     ]],
     ['العمل', [
       ['desk',    'مكتبي',          '#/desk',     'desk',   mine || null],
-      ['judging', 'قاعة التحكيم',   '#/judging',  'judge',  null],
-      ['appeals', 'الحجب والتظلّم', '#/appeals',  'shield', null],
+      ['judging', 'قاعة التحكيم',   '#/judging',  'gavel',  null],
+      ['appeals', 'الحجب والتظلّم', '#/appeals',  'scale',  null],
       ['log',     'السجلّ',          '#/log',      'log',    null]
     ]],
     ['', [
@@ -73,7 +73,7 @@ function buildRail() {
     const vis = list.filter(([id]) => !CAN[id] || CAN[id].includes(role));
     if (!vis.length) return '';
     return `${g ? `<div class="nav__g">${esc(g)}</div>` : '<div style="block-size:8px"></div>'}
-      ${vis.map(([id, t, h, i, n]) => `<a href="${h}" data-nav="${id}">${ic(i)}<span>${esc(t)}</span>
+      ${vis.map(([id, t, h, i, n]) => `<a href="${h}" data-nav="${id}"><span class="nav__ic">${ic(i)}</span><span>${esc(t)}</span>
         ${id === 'desk' && n ? `<span class="nav__n nav__n--red">${ar(n)}</span>`
           : id === 'appeals' && openDiv ? `<span class="nav__n">${ar(openDiv)}</span>` : ''}</a>`).join('')}`;
   }).join('');
@@ -147,9 +147,21 @@ function render() {
   });
 
   bind();
+  centerRailNav();
   const h1 = (page.querySelector('h1')?.textContent || '').trim();
   document.title = !h1 ? 'جائزة أداء الصحة · ' + CYCLE.name
     : h1.startsWith('جائزة أداء الصحة') ? h1 : 'جائزة أداء الصحة · ' + h1;
+}
+
+/* يوسّط عنصر الشريط الحاليّ على الجوّال.
+   نُحرِّك الشريطَ بنفسه: scrollIntoView يُحرِّك كلَّ الأسلاف القابلة للتمرير فتنزاح الصفحةُ كلُّها أفقياً.
+   scrollLeft يزداد نحو اليمين في كلّ الاتّجاهات، فالفرقُ بين المركزين يصلح كما هو في RTL. */
+function centerRailNav() {
+  if (!(window.matchMedia && matchMedia('(max-width: 900px)').matches)) return;
+  const strip = document.querySelector('.rail .nav'), cur = strip && strip.querySelector('a[aria-current="page"]');
+  if (!cur) return;
+  const a = cur.getBoundingClientRect(), b = strip.getBoundingClientRect();
+  strip.scrollLeft += (a.left + a.width / 2) - (b.left + b.width / 2);
 }
 
 /* ============ إنشاء ملفٍّ جديد عند التسجيل ============ */
@@ -272,7 +284,7 @@ function bind() {
     const d = DB.submissions[cid] || { sec: {}, files: [], at: null };
     const filled = FORM.filter(f => (d.sec[f.id] || '').trim().length > 40).length;
     if (filled < FORM.length || !d.files.length) {
-      alert(`لا تُرسَل الاستمارةُ قبل اكتمالها:\n• الأقسام المكتملة ${filled} من ${FORM.length} (٤٠ حرفاً فأكثر لكلّ قسم)\n• الأدلّة المرفوعة ${d.files.length} — ودليلٌ واحدٌ على الأقلّ شرط.\n\nنصُّ الدليل: «أدلّةٌ داعمة لكلّ نتيجةٍ مُبلَّغٍ عنها».`);
+      alert(`لا تُرسَل الاستمارةُ قبل اكتمالها:\n• الأقسام المكتملة ${filled} من ${FORM.length} (40 حرفاً فأكثر لكلّ قسم)\n• الأدلّة المرفوعة ${d.files.length} — ودليلٌ واحدٌ على الأقلّ شرط.\n\nنصُّ الدليل: «أدلّةٌ داعمة لكلّ نتيجةٍ مُبلَّغٍ عنها».`);
       return;
     }
     d.at = todayISO();
@@ -377,3 +389,5 @@ document.documentElement.setAttribute('dir', 'rtl');
 document.documentElement.setAttribute('lang', 'ar');
 window.addEventListener('hashchange', render);
 render();
+/* الخطوط تأتي من الشبكة وتتبدّل بعد أول رسم فتتغيّر عروض الأقراص — نعيد التوسيط حين تستقرّ */
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(centerRailNav);

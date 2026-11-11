@@ -1,6 +1,10 @@
 /* جائزة أداء الصحة — المكوّنات */
 
 .i { inline-size: 15px; block-size: 15px; flex: none; }
+/* ظلُّ الأيقونة: طبقةٌ خافتةٌ من اللون نفسه تمنحها جسماً بلا لونٍ ثانٍ */
+.i .s { fill: currentColor; fill-opacity: .16; stroke: none; }
+.rail .i .s { fill-opacity: .3; }
+.btn--p .i .s, .tb--play .i .s, .tr__c--play .i .s, .dk .i .s { fill-opacity: .28; }
 
 /* ============ البطاقة ============ */
 .card {
@@ -61,13 +65,32 @@
 .tag i { font-style: normal; color: var(--text-3); font-size: 11px; }
 
 /* ============ الأرقام الكبيرة ============ */
-.stat { padding: var(--s-4); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
-.stat b { display: block; font-size: 27px; font-family: var(--f-title); font-weight: 600; line-height: 1.15; letter-spacing: -.02em; }
-.stat span { display: block; font-size: 12px; color: var(--text-2); margin-block-start: 2px; }
-.stat em { display: block; font-size: 11px; color: var(--text-3); font-style: normal; margin-block-start: 3px; }
+.stat {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; column-gap: 10px;
+  padding: 14px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: linear-gradient(180deg, var(--surface), var(--n-25));
+}
+.stat b { grid-column: 1; font-size: 28px; font-family: var(--f-title); font-weight: 600; line-height: 1.15; letter-spacing: -.01em; }
+.stat__i {
+  grid-column: 2; grid-row: 1; inline-size: 36px; block-size: 36px; border-radius: 11px; display: grid; place-items: center;
+  background: var(--g-50); color: var(--g-600); box-shadow: inset 0 0 0 1px var(--g-100);
+}
+.stat__i .i { inline-size: 20px; block-size: 20px; }
+.stat span { grid-column: 1 / -1; margin-block-start: var(--s-2); font-size: 12.5px; font-weight: 500; color: var(--text-2); }
+.stat em { grid-column: 1 / -1; margin-block-start: 2px; font-size: 11px; font-style: normal; color: var(--text-3); }
 .stat--gold b { color: var(--au-600); }
+.stat--gold .stat__i { background: var(--au-50); color: var(--au-600); box-shadow: inset 0 0 0 1px var(--au-100); }
 .stat--ink  b { color: var(--ink-600); }
+.stat--ink  .stat__i { background: var(--ink-50); color: var(--ink-600); box-shadow: inset 0 0 0 1px var(--ink-100); }
 .stat--red  b { color: var(--r-500); }
+.stat--red  .stat__i { background: var(--r-50); color: var(--r-500); box-shadow: inset 0 0 0 1px var(--r-100); }
+
+/* بلاطةُ المسار: رمزٌ لكلّ مسار */
+.tk { inline-size: 34px; block-size: 34px; flex: none; border-radius: 10px; display: grid; place-items: center;
+  background: var(--g-50); color: var(--g-600); box-shadow: inset 0 0 0 1px var(--g-100); }
+.tk .i { inline-size: 20px; block-size: 20px; }
+.tk--lg { inline-size: 40px; block-size: 40px; border-radius: 12px; }
+.tk--lg .i { inline-size: 23px; block-size: 23px; }
 
 /* ============ الملاحظات ============ */
 .note {

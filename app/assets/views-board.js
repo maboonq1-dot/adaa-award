@@ -8,7 +8,7 @@ function boardTable(b, full = false) {
   });
   if (!rows.length) return empty('لا مشاركات في هذا المسار.');
 
-  return table([['#', 'c'], ['الجهة'], ['القطاع'], ['الحالة'], ['م١', 'c'], ['م٢', 'c'], ['المركّبة', 'c'], ['التباعُد', 'c'], ['', 'c']],
+  return table([['#', 'c'], ['الجهة'], ['القطاع'], ['الحالة'], ['م1', 'c'], ['م2', 'c'], ['المركّبة', 'c'], ['التباعُد', 'c'], ['', 'c']],
     rows.map((r, i) => {
       const ent = E(r.c.entity);
       const cut = full && b.qualified.length && r.c.id === b.qualified[b.qualified.length - 1].c.id;
@@ -40,8 +40,8 @@ function viewBoard() {
     ${stat(ar(st.entities), 'جهةٌ مُسجَّلة')}
     ${stat(ar(st.cases), 'ملفّ مشاركة', ar(st.cats) + ' فئات')}
     ${stat(ar(st.eligible), 'اجتاز الأهليّة', pc(st.eligible / st.cases * 100, 0), 'ink')}
-    ${stat(ar(st.qualified), 'متأهّلٌ للمرحلة ٢', 'أفضل ١٠/فئة', 'ink')}
-    ${stat(ar(st.finalists), 'بلغ التحكيم', 'أفضل ٥/فئة', 'gold')}
+    ${stat(ar(st.qualified), 'متأهّلٌ للمرحلة 2', 'أفضل 10/فئة', 'ink')}
+    ${stat(ar(st.finalists), 'بلغ التحكيم', 'أفضل 5/فئة', 'gold')}
     ${stat(ar(st.diverging), 'تباعُدٌ مفتوح', st.diverging ? 'يوقف الاعتماد' : 'لا شيء', st.diverging ? 'red' : '')}
   </div>
 
@@ -50,7 +50,7 @@ function viewBoard() {
         const tt = trackTotals(t.id);
         return `<div style="margin-block-end:var(--s-4)">
           <div class="rowj" style="margin-block-end:6px">
-            <a href="#/track/${t.id}" style="font-weight:600;font-size:13px;color:inherit;text-decoration:none">${ic('track')} ${esc(t.name)}</a>
+            <a href="#/track/${t.id}" style="display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:13px;color:inherit;text-decoration:none">${trackIc(t.id)}${esc(t.name)}</a>
             <span class="sm mut">${ar(tt.all)} مُسجَّلاً · ${ar(tt.eligible)} مؤهَّلاً${t.cats.length > 1 ? ' · ' + num(t.cats.length, '', 'فئتان', 'فئاتٍ', 'فئةً') : ''}</span>
           </div>
           <div class="funnel">${t.cats.map(cat => {
@@ -60,7 +60,7 @@ function viewBoard() {
               <div class="fn__l"><a href="#/cat/${cat.key}" style="color:inherit;text-decoration:none">${esc(t.cats.length > 1 ? cat.short : 'الفئة العامة')}</a>
                 <em>${esc(cat.unit === 'cluster' ? 'تجمّعات' : cat.unit === 'hospital' ? 'منشآت مفردة' : 'تجمّعاتٌ ومنشآت')} · ${ar(c.all)} مُسجَّلاً</em></div>
               <div class="fn__t">
-                ${seg.map(([n, i]) => n > 0 ? `<i style="flex:${n};background:${['var(--n-300)', 'var(--ink-200)', 'var(--ink-400)', 'var(--ink-700)', 'linear-gradient(90deg,var(--au-500),var(--au-300))'][i]}" title="${['خارج الأهليّة', 'خرج بعد م١', 'خرج بعد م٢', 'بلغ التحكيم', 'مُكرَّم'][i]}: ${n}"></i>` : '').join('')}
+                ${seg.map(([n, i]) => n > 0 ? `<i style="flex:${n};background:${['var(--n-300)', 'var(--ink-200)', 'var(--ink-400)', 'var(--ink-700)', 'linear-gradient(90deg,var(--au-500),var(--au-300))'][i]}" title="${['خارج الأهليّة', 'خرج بعد م1', 'خرج بعد م2', 'بلغ التحكيم', 'مُكرَّم'][i]}: ${n}"></i>` : '').join('')}
                 <i style="flex:${Math.max(0, maxAll - c.all)};background:transparent"></i>
               </div>
               <div class="fn__n">${bb.confirmed ? `<span style="color:var(--au-600)">${ar(3)}</span>` : `<span class="mut">${ar(c.finalists)}</span>`}</div>
@@ -70,8 +70,8 @@ function viewBoard() {
     + `<div class="dv__lg" style="margin-block-start:var(--s-3)">
       <span><i style="background:var(--au-400)"></i>مُكرَّم</span>
       <span><i style="background:var(--ink-700)"></i>بلغ التحكيم</span>
-      <span><i style="background:var(--ink-400)"></i>خرج بعد المرحلة ٢</span>
-      <span><i style="background:var(--ink-200)"></i>خرج بعد المرحلة ١</span>
+      <span><i style="background:var(--ink-400)"></i>خرج بعد المرحلة 2</span>
+      <span><i style="background:var(--ink-200)"></i>خرج بعد المرحلة 1</span>
       <span><i style="background:var(--n-300)"></i>لم يجتز الأهليّة</span>
     </div>`)}
 
@@ -139,7 +139,7 @@ function allTable() {
   CATS.forEach(c => boards()[c.key].rows.forEach(r => rows.push(r)));
   const o = { winner: 0, honored: 1, finalist: 2, qualified: 3, out2: 4, out1: 5, ineligible: 6, blocked: 7 };
   rows.sort((x, y) => (o[x.state] - o[y.state]) || ((y.comp ?? y.s1s) - (x.comp ?? x.s1s)));
-  return table([['الجهة'], ['المسار · الفئة'], ['الحالة'], ['م١', 'c'], ['م٢', 'c'], ['المركّبة', 'c'], ['', 'c']],
+  return table([['الجهة'], ['المسار · الفئة'], ['الحالة'], ['م1', 'c'], ['م2', 'c'], ['المركّبة', 'c'], ['', 'c']],
     rows.slice(0, 60).map(r => {
       const ent = E(r.c.entity), win = ['winner', 'honored'].includes(r.state);
       return `<tr class="${win ? 'is-win' : ''} ${['out1', 'out2', 'ineligible'].includes(r.state) ? 'is-out' : ''}">
@@ -149,7 +149,7 @@ function allTable() {
         <td class="c n">${fmt(r.s1s, 1)}</td><td class="c n">${fmt(r.s2s, 1)}</td>
         <td class="c n"><b>${fmt(r.comp, 1)}</b></td>
         <td class="c"><a href="#/case/${r.c.id}">افتح</a></td></tr>`;
-    })) + `<p class="sm mut" style="margin-block-start:var(--s-3)">تُعرَض أوّلُ ٦٠ صفّاً — اختر فئةً لترى ترتيبَها كاملاً.</p>`;
+    })) + `<p class="sm mut" style="margin-block-start:var(--s-3)">تُعرَض أوّلُ 60 صفّاً — اختر فئةً لترى ترتيبَها كاملاً.</p>`;
 }
 
 /* ============ قاعة التحكيم ============ */
@@ -233,7 +233,7 @@ function judgeCat(t, cat, b, isChair) {
     </div>`, conf ? 'card--gold' : '');
 }
 
-/* حالةُ النافذة تُحسَب من تاريخ اليوم — «مفتوحة الآن» نصّاً ثابتاً كذبةٌ بعد ٢١ أكتوبر */
+/* حالةُ النافذة تُحسَب من تاريخ اليوم — «مفتوحة الآن» نصّاً ثابتاً كذبةٌ بعد 21 أكتوبر */
 function appealNote() {
   const w = appealWindow();
   if (w.st === 'open') {

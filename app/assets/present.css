@@ -3,7 +3,7 @@
    ------------------------------------------------------------
    ثلاثُ قطع: أزرارُ الرأس، وشرائحُ العرض، ولوحةُ الجولة.
    الشريحةُ تُقاس بوحدة --u (واحدٌ بالمئة من عرضها)، فتبدو واحدةً
-   على كلّ شاشة. وتحت ٧٦٠px تتحوّل إلى صفحةٍ تُقرأ لا شريحةٍ تُعرَض.
+   على كلّ شاشة. وتحت 760px تتحوّل إلى صفحةٍ تُقرأ لا شريحةٍ تُعرَض.
    ============================================================ */
 
 /* ============ أزرار الرأس ============ */
@@ -173,7 +173,7 @@
 .nx { display: grid; grid-template-columns: 1.5fr 1fr; gap: calc(var(--u) * 3.2); align-items: start; }
 .nx ol { list-style: none; counter-reset: s; margin: 0; padding: 0; display: grid; gap: calc(var(--u) * 1.3); }
 .nx ol > li { counter-increment: s; display: grid; grid-template-columns: calc(var(--u) * 3.4) 1fr; gap: calc(var(--u) * 1.5); align-items: start; font-size: calc(var(--u) * 1.8); line-height: 1.7; }
-.nx ol > li::before { content: counter(s, arabic-indic); inline-size: calc(var(--u) * 3.4); block-size: calc(var(--u) * 3.4); border-radius: 50%; display: grid; place-items: center; background: var(--ink-600); color: #fff; font-family: var(--f-num); font-weight: 600; font-size: calc(var(--u) * 1.5); }
+.nx ol > li::before { content: counter(s, decimal); inline-size: calc(var(--u) * 3.4); block-size: calc(var(--u) * 3.4); border-radius: 50%; display: grid; place-items: center; background: var(--ink-600); color: #fff; font-family: var(--f-num); font-weight: 600; font-size: calc(var(--u) * 1.5); }
 .nx ol > li b { color: var(--g-800); }
 .nx__n { padding-inline-start: calc(var(--u) * 2.4); border-inline-start: 1px solid var(--line); }
 .nx__n h3 { margin: 0 0 calc(var(--u) * 1); font-size: calc(var(--u) * 1.6); color: var(--text-3); font-weight: 600; }

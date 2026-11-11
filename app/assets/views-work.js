@@ -24,7 +24,7 @@ function viewDesk() {
   if (role === 'entity') {
     const cs = CASES.filter(c => c.entity === me().entity);
     return `${pageHead('ملفّات جهتي', esc(E(me().entity).name))}
-      ${card(head('المشاركات') + (cs.length ? table([['المسار'], ['الحالة'], ['المرحلة ١', 'c'], ['المرحلة ٢', 'c'], ['المركّبة', 'c'], ['', 'c']],
+      ${card(head('المشاركات') + (cs.length ? table([['المسار'], ['الحالة'], ['المرحلة 1', 'c'], ['المرحلة 2', 'c'], ['المركّبة', 'c'], ['', 'c']],
         cs.map(c => { const r = rowOf(c.id); return `<tr>
           <td><b>${esc(caseLabel(c))}</b></td><td>${stateBadge(r.state)}</td>
           <td class="c n">${fmt(r.s1s, 1)}</td><td class="c n">${fmt(r.s2s, 1)}</td><td class="c n"><b>${fmt(r.comp, 1)}</b></td>
@@ -51,7 +51,7 @@ function viewDesk() {
   </div>
 
   ${div.length ? card(head('يلزمه حوارُ توحيد', 'الدرجةُ لا تُعتمَد ما دام التباعُد مفتوحاً — والاعتمادُ فوقه ثغرةُ تظلّمٍ جاهزة.', pill('عاجل', 'r'))
-    + table([['الجهة'], ['المسار'], ['مقيّم ١', 'c'], ['مقيّم ٢', 'c'], ['الفارق', 'c'], ['', 'c']],
+    + table([['الجهة'], ['المسار'], ['مقيّم 1', 'c'], ['مقيّم 2', 'c'], ['الفارق', 'c'], ['', 'c']],
       div.map(({ r }) => {
         const evs = Object.values(r.reviews).filter(x => x.by.startsWith('U-EV'));
         return `<tr><td><span class="ent">${esc(E(r.c.entity).name)}</span></td>
@@ -147,11 +147,11 @@ function viewCase(cid) {
 
       ${card(head('الدرجات')
         + `<div class="row" style="gap:var(--s-5);justify-content:space-around;padding-block:var(--s-3)">
-            ${dial(r.s1s, 68, 'المرحلة ١')}${dial(r.s2s, 68, 'المرحلة ٢')}${dial(r.comp, 78, 'المركّبة')}</div>
+            ${dial(r.s1s, 68, 'المرحلة 1')}${dial(r.s2s, 68, 'المرحلة 2')}${dial(r.comp, 78, 'المركّبة')}</div>
           <div class="hr"></div>
-          ${kv([['مصدر درجة المرحلة ٢', esc(r.s2source)],
+          ${kv([['مصدر درجة المرحلة 2', esc(r.s2source)],
                 ['التباعُد', r.divergence === null ? '<span class="mut">لم تكتمل درجتا المقيّمَيْن</span>' : `<b class="num" style="color:${r.divergence > CFG.divergence ? 'var(--r-500)' : 'inherit'}">${fmt(r.divergence, 1)}</b> نقطة · العتبة ${ar(CFG.divergence)}`],
-                ['المرتبة في الفئة', r.rank2 ? ar(r.rank2) : r.rank1 ? ar(r.rank1) + ' (بالمرحلة ١)' : '—'],
+                ['المرتبة في الفئة', r.rank2 ? ar(r.rank2) : r.rank1 ? ar(r.rank1) + ' (بالمرحلة 1)' : '—'],
                 ['الوزن', `${pc(CFG.w1 * 100, 0)} + ${pc(CFG.w2 * 100, 0)}`]])}
           ${r.needsConsensus ? `<div class="hr"></div>${link('افتح حوار التوحيد', '#/consensus/' + cid, 'red')}` : ''}`)}
 
@@ -267,8 +267,8 @@ function viewConsensus(cid) {
               <div class="dv__n" style="color:${x.gap > CFG.dimGap ? 'var(--r-500)' : 'inherit'}">${ar(x.gap)}</div>
             </div>`;
           }).join('')}
-          <div class="dv__lg"><span><i style="background:var(--ink-500)"></i>مقيّم ١</span>
-            <span><i style="background:var(--au-500)"></i>مقيّم ٢</span>
+          <div class="dv__lg"><span><i style="background:var(--ink-500)"></i>مقيّم 1</span>
+            <span><i style="background:var(--au-500)"></i>مقيّم 2</span>
             <span><i style="background:var(--g-600)"></i>خبير اللجنة العلمية</span>
             <span><i style="background:var(--r-200)"></i>مدى التباعُد</span></div>
         </div>`)}
@@ -291,7 +291,7 @@ function viewConsensus(cid) {
             <div class="row" style="justify-content:center;padding-block:var(--s-3)">${dial((reviewScore(evs[0]) + reviewScore(evs[1])) / 2, 84, 'المقترَحة')}</div>
             <div class="fld"><label for="cs-r">مبرَّرُ التوحيد <span>*</span></label>
               <em>ما الذي حسم الخلاف: دليلٌ جديد، أم قراءةٌ مصحّحة للمرسى، أم نقصٌ في الاستمارة؟</em>
-              <textarea id="cs-r" placeholder="مثال: اتّفق المقيّمان بعد مراجعة المحضر رقم ٤ على أن التطبيق يشمل ثلاث وحداتٍ لا خمساً، فاستقرّ البُعد D عند ٦٠."></textarea></div>
+              <textarea id="cs-r" placeholder="مثال: اتّفق المقيّمان بعد مراجعة المحضر رقم 4 على أن التطبيق يشمل ثلاث وحداتٍ لا خمساً، فاستقرّ البُعد D عند 60."></textarea></div>
             <div class="row" style="justify-content:flex-end">${btn('اعتمادُ الدرجة الموحَّدة', `data-cons="${cid}"`, 'p')}</div>`
           : note('هذه الصفحة للاطّلاع فقط بدورك الحاليّ. تسجيلُ التوحيد صلاحيةُ خبير اللجنة العلمية ورئيسها.', 'n', 'lock')))}
 

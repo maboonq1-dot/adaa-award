@@ -210,20 +210,33 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .brand__s { font-size: 11px; color: var(--g-300); letter-spacing: .01em; }
 
 .nav { display: flex; flex-direction: column; gap: 1px; }
-.nav__g { font-size: 10.5px; color: var(--g-400); padding: var(--s-3) var(--s-3) var(--s-1); letter-spacing: .06em; font-weight: 600; }
+.nav__g { font-size: 10.5px; color: var(--g-400); padding: var(--s-4) var(--s-3) var(--s-1); letter-spacing: .06em; font-weight: 600; }
 .nav a {
-  display: flex; align-items: center; gap: var(--s-3);
-  padding: 8px var(--s-3); border-radius: var(--r-sm);
-  color: var(--g-200); text-decoration: none; font-size: 13px;
-  transition: background .16s var(--ease), color .16s var(--ease);
+  position: relative; display: flex; align-items: center; gap: 12px; min-block-size: 42px;
+  padding: 5px 8px; border-radius: 13px; color: var(--g-200); text-decoration: none; font-size: 13px;
+  transition: background .18s var(--ease), color .18s var(--ease);
 }
-.nav a:hover { background: rgba(255,255,255,.06); color: #fff; }
-.nav a[aria-current="page"] { background: var(--g-700); color: #fff; font-weight: 500; }
-.nav a[aria-current="page"] .i { color: var(--au-300); }
-.nav .i { inline-size: 17px; block-size: 17px; flex: none; opacity: .9; }
+.nav__ic {
+  inline-size: 30px; block-size: 30px; flex: none; display: grid; place-items: center; border-radius: 10px;
+  background: rgba(255,255,255,.06); color: var(--g-200);
+  transition: background .18s var(--ease), color .18s var(--ease), box-shadow .18s var(--ease), transform .18s var(--ease);
+}
+.nav__ic .i { inline-size: 18px; block-size: 18px; }
+.nav a:hover { background: rgba(255,255,255,.05); color: #fff; }
+.nav a:hover .nav__ic { background: rgba(255,255,255,.13); color: #fff; transform: translateY(-1px); }
+.nav a[aria-current="page"] {
+  color: #fff; font-weight: 500;
+  background: linear-gradient(270deg, rgba(255,255,255,.1), rgba(255,255,255,.02));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.07);
+}
+.nav a[aria-current="page"] .nav__ic {
+  background: linear-gradient(145deg, var(--g-300), var(--g-500)); color: var(--g-950);
+  box-shadow: 0 5px 14px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.nav a[aria-current="page"] .nav__ic .i .s { fill-opacity: .34; }
 .nav__n {
   margin-inline-start: auto; font-size: 10.5px; background: rgba(255,255,255,.13);
-  padding: 1px 6px; border-radius: var(--r-full); font-family: var(--f-num);
+  padding: 1px 7px; border-radius: var(--r-full); font-family: var(--f-num);
 }
 .nav__n--red { background: var(--r-400); color: #fff; }
 
@@ -280,14 +293,24 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 @media (max-width: 1080px) { .split { grid-template-columns: 1fr; } }
 @media (max-width: 900px) {
-  .shell { grid-template-columns: 1fr; }
+  /* minmax(0,1fr) لا 1fr: الشريطُ الأفقيّ بلا التفافٍ يوسّع العمودَ إلى عرضه فتنزاح الصفحةُ كلُّها */
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  /* على الجوّال: الاسمُ فوق، وتحته شريطٌ أفقيّ واحدٌ قابلٌ للتمرير — لا ستّةُ صفوفٍ تأكل الشاشة */
   .rail {
-    position: static; block-size: auto; flex-direction: row; flex-wrap: wrap;
-    align-items: center; gap: var(--s-3); padding: var(--s-3) var(--s-4);
+    position: static; block-size: auto; overflow: visible; flex-direction: column; align-items: stretch;
+    gap: 10px; padding: var(--s-3) var(--s-4) var(--s-3); min-inline-size: 0;
   }
-  .rail .nav { flex-direction: row; flex-wrap: wrap; gap: 2px; }
-  .rail .nav__g, .rail__foot { display: none; }
-  .nav a { padding: 6px 10px; font-size: 12px; }
+  .rail .nav {
+    flex-direction: row; flex-wrap: nowrap; gap: 6px; overflow-x: auto; padding-block: 2px 4px;
+    margin-inline: calc(var(--s-4) * -1); padding-inline: var(--s-4); scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .rail .nav::-webkit-scrollbar { display: none; }
+  .rail .nav > div { display: none; }                 /* فواصلُ المجموعات */
+  .rail__foot { display: none; }
+  .nav a { flex: none; min-block-size: 40px; padding: 4px 12px 4px 5px; border-radius: 999px; font-size: 12px; background: rgba(255,255,255,.05); }
+  .nav__ic { inline-size: 28px; block-size: 28px; border-radius: 999px; }
+  .nav__ic .i { inline-size: 16px; block-size: 16px; }
+  .nav a[aria-current="page"] { background: rgba(255,255,255,.14); }
   .page, .top { padding-inline: var(--s-4); }
 }
 
@@ -296,6 +319,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* جائزة أداء الصحة — المكوّنات */
 
 .i { inline-size: 15px; block-size: 15px; flex: none; }
+/* ظلُّ الأيقونة: طبقةٌ خافتةٌ من اللون نفسه تمنحها جسماً بلا لونٍ ثانٍ */
+.i .s { fill: currentColor; fill-opacity: .16; stroke: none; }
+.rail .i .s { fill-opacity: .3; }
+.btn--p .i .s, .tb--play .i .s, .tr__c--play .i .s, .dk .i .s { fill-opacity: .28; }
 
 /* ============ البطاقة ============ */
 .card {
@@ -356,13 +383,32 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .tag i { font-style: normal; color: var(--text-3); font-size: 11px; }
 
 /* ============ الأرقام الكبيرة ============ */
-.stat { padding: var(--s-4); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
-.stat b { display: block; font-size: 27px; font-family: var(--f-title); font-weight: 600; line-height: 1.15; letter-spacing: -.02em; }
-.stat span { display: block; font-size: 12px; color: var(--text-2); margin-block-start: 2px; }
-.stat em { display: block; font-size: 11px; color: var(--text-3); font-style: normal; margin-block-start: 3px; }
+.stat {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; column-gap: 10px;
+  padding: 14px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: linear-gradient(180deg, var(--surface), var(--n-25));
+}
+.stat b { grid-column: 1; font-size: 28px; font-family: var(--f-title); font-weight: 600; line-height: 1.15; letter-spacing: -.01em; }
+.stat__i {
+  grid-column: 2; grid-row: 1; inline-size: 36px; block-size: 36px; border-radius: 11px; display: grid; place-items: center;
+  background: var(--g-50); color: var(--g-600); box-shadow: inset 0 0 0 1px var(--g-100);
+}
+.stat__i .i { inline-size: 20px; block-size: 20px; }
+.stat span { grid-column: 1 / -1; margin-block-start: var(--s-2); font-size: 12.5px; font-weight: 500; color: var(--text-2); }
+.stat em { grid-column: 1 / -1; margin-block-start: 2px; font-size: 11px; font-style: normal; color: var(--text-3); }
 .stat--gold b { color: var(--au-600); }
+.stat--gold .stat__i { background: var(--au-50); color: var(--au-600); box-shadow: inset 0 0 0 1px var(--au-100); }
 .stat--ink  b { color: var(--ink-600); }
+.stat--ink  .stat__i { background: var(--ink-50); color: var(--ink-600); box-shadow: inset 0 0 0 1px var(--ink-100); }
 .stat--red  b { color: var(--r-500); }
+.stat--red  .stat__i { background: var(--r-50); color: var(--r-500); box-shadow: inset 0 0 0 1px var(--r-100); }
+
+/* بلاطةُ المسار: رمزٌ لكلّ مسار */
+.tk { inline-size: 34px; block-size: 34px; flex: none; border-radius: 10px; display: grid; place-items: center;
+  background: var(--g-50); color: var(--g-600); box-shadow: inset 0 0 0 1px var(--g-100); }
+.tk .i { inline-size: 20px; block-size: 20px; }
+.tk--lg { inline-size: 40px; block-size: 40px; border-radius: 12px; }
+.tk--lg .i { inline-size: 23px; block-size: 23px; }
 
 /* ============ الملاحظات ============ */
 .note {
@@ -623,7 +669,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
    ------------------------------------------------------------
    ثلاثُ قطع: أزرارُ الرأس، وشرائحُ العرض، ولوحةُ الجولة.
    الشريحةُ تُقاس بوحدة --u (واحدٌ بالمئة من عرضها)، فتبدو واحدةً
-   على كلّ شاشة. وتحت ٧٦٠px تتحوّل إلى صفحةٍ تُقرأ لا شريحةٍ تُعرَض.
+   على كلّ شاشة. وتحت 760px تتحوّل إلى صفحةٍ تُقرأ لا شريحةٍ تُعرَض.
    ============================================================ */
 
 /* ============ أزرار الرأس ============ */
@@ -793,7 +839,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .nx { display: grid; grid-template-columns: 1.5fr 1fr; gap: calc(var(--u) * 3.2); align-items: start; }
 .nx ol { list-style: none; counter-reset: s; margin: 0; padding: 0; display: grid; gap: calc(var(--u) * 1.3); }
 .nx ol > li { counter-increment: s; display: grid; grid-template-columns: calc(var(--u) * 3.4) 1fr; gap: calc(var(--u) * 1.5); align-items: start; font-size: calc(var(--u) * 1.8); line-height: 1.7; }
-.nx ol > li::before { content: counter(s, arabic-indic); inline-size: calc(var(--u) * 3.4); block-size: calc(var(--u) * 3.4); border-radius: 50%; display: grid; place-items: center; background: var(--ink-600); color: #fff; font-family: var(--f-num); font-weight: 600; font-size: calc(var(--u) * 1.5); }
+.nx ol > li::before { content: counter(s, decimal); inline-size: calc(var(--u) * 3.4); block-size: calc(var(--u) * 3.4); border-radius: 50%; display: grid; place-items: center; background: var(--ink-600); color: #fff; font-family: var(--f-num); font-weight: 600; font-size: calc(var(--u) * 1.5); }
 .nx ol > li b { color: var(--g-800); }
 .nx__n { padding-inline-start: calc(var(--u) * 2.4); border-inline-start: 1px solid var(--line); }
 .nx__n h3 { margin: 0 0 calc(var(--u) * 1); font-size: calc(var(--u) * 1.6); color: var(--text-3); font-weight: 600; }
@@ -927,7 +973,7 @@ body.touring .shell { pointer-events: none; }
 
 <script>
 /* ============================================================
-   جائزة أداء الصحة · الدورة الثامنة ٢٠٢٦ — طبقة البيانات
+   جائزة أداء الصحة · الدورة الثامنة 2026 — طبقة البيانات
    ------------------------------------------------------------
    البنية والمسارات والمراحل واللجان والحوكمة: مأخوذةٌ حرفياً من
    «الدليل المختصر للجهات المشاركة ووسائل الإعلام — الدورة الثامنة».
@@ -938,7 +984,7 @@ body.touring .shell { pointer-events: none; }
 const CYCLE = {
   no: 8, year: 2026,
   name: 'الدورة الثامنة',
-  centenary: 'إحياءً لمرور ١٠٠ عام على تأسيس أول مديرية للصحة عام ١٣٤٣هـ في مكة المكرمة',
+  centenary: 'إحياءً لمرور 100 عام على تأسيس أول مديرية للصحة عام 1343هـ في مكة المكرمة',
   email: 'adaa-award@moh.gov.sa',
   appealWeeks: 6,
   regOpen: '2026-01-12', regClose: '2026-02-25',
@@ -952,17 +998,17 @@ const CYCLE = {
 const STAGES = [
   { id: 1, key: 'kpi',   name: 'مؤشّرات الأداء',
     desc: 'مراجعةٌ قائمة على البيانات لمؤشّرات الأداء الرئيسة، والاتجاهات، والمقارنات المرجعية.',
-    cut: 10, cutLabel: 'أفضل ١٠ جهات لكلّ فئة',
+    cut: 10, cutLabel: 'أفضل 10 جهات لكلّ فئة',
     model: 'LeTCI', weight: 0.5,
     owner: 'اللجنة العلمية', ownerId: 'SCI' },
   { id: 2, key: 'sys',   name: 'تقييم الأنظمة',
     desc: 'نموذج طلب مشاركة منظَّم، وزيارةٌ ميدانية للتحقّق من المعلومات والأدلة.',
-    cut: 5, cutLabel: 'أفضل ٥ جهات لكلّ فئة',
+    cut: 5, cutLabel: 'أفضل 5 جهات لكلّ فئة',
     model: 'ADLI', weight: 0.5,
     owner: 'اللجنة العلمية · مقيّمان وخبير', ownerId: 'SCI' },
   { id: 3, key: 'judge', name: 'التحكيم واتخاذ القرار',
     desc: 'مراجعةٌ نهائية من لجنة التحكيم لتأكيد الجهات الفائزة واعتماد أوجه التكريم.',
-    cut: 3, cutLabel: 'أفضل ٣ جهات لكلّ فئة',
+    cut: 3, cutLabel: 'أفضل 3 جهات لكلّ فئة',
     model: 'قرار', weight: 0,
     owner: 'اللجنة التحكيمية', ownerId: 'JUD' }
 ];
@@ -1003,14 +1049,14 @@ const LETCI = [
    — تجربة المستفيد ورضا العاملين — إلى جانب مؤشّرات الأداء السريرية
    والتشغيلية الخاصة بكل مسار، ويتم أيضاً إضافة نضج أداء النظام الصحي». */
 const SHARED = [
-  { id: 'PX',   name: 'تجربة المستفيد',        unit: '٪', better: 'up', target: 85, src: 'moh' },
-  { id: 'ESAT', name: 'رضا العاملين الصحيين',  unit: '٪', better: 'up', target: 78, src: 'moh' },
+  { id: 'PX',   name: 'تجربة المستفيد',        unit: '%', better: 'up', target: 85, src: 'moh' },
+  { id: 'ESAT', name: 'رضا العاملين الصحيين',  unit: '%', better: 'up', target: 78, src: 'moh' },
   { id: 'MAT',  name: 'نضج أداء النظام الصحي', unit: 'درجة', better: 'up', target: 70, src: 'moh' }
 ];
 
 /* ============ المسارات الستّة ============ */
 /* ============ المسارات الستّة وفئاتُها ============
-   حفلُ الدورة الثامنة (٩ سبتمبر ٢٠٢٦) كشف ما لا يذكره الدليل صراحةً:
+   حفلُ الدورة الثامنة (9 سبتمبر 2026) كشف ما لا يذكره الدليل صراحةً:
    ‏**التصفيةُ تجري داخل الفئة لا داخل المسار**، و**وحدةُ التنافس تختلف
    بين مسارٍ وآخر**: التجمّعات تتنافس في الرعاية الأولية والإقلاع عن التبغ،
    والمستشفياتُ المفردة تتنافس في إنقاذ الأرواح والطوارئ والأمومة والكفاءة.
@@ -1022,21 +1068,21 @@ const TRACKS = [
     cats: [
       { id: 'MI', name: 'أفضل مستشفى استقبالاً لحالات الجلطة القلبية', short: 'الجلطة القلبية', unit: 'hospital',
         kpis: [
-          { id: 'L11', name: 'تخطيط القلب خلال ١٠ دقائق من الوصول',    unit: '٪',  better: 'up',   target: 90, src: 'moh' },
-          { id: 'L12', name: 'الباب إلى البالون خلال ٩٠ دقيقة',        unit: '٪',  better: 'up',   target: 80, src: 'moh' },
-          { id: 'L13', name: 'وفيات الجلطة القلبية خلال ٣٠ يوماً',     unit: '٪',  better: 'down', target: 7,  src: 'moh' }
+          { id: 'L11', name: 'تخطيط القلب خلال 10 دقائق من الوصول',    unit: '%',  better: 'up',   target: 90, src: 'moh' },
+          { id: 'L12', name: 'الباب إلى البالون خلال 90 دقيقة',        unit: '%',  better: 'up',   target: 80, src: 'moh' },
+          { id: 'L13', name: 'وفيات الجلطة القلبية خلال 30 يوماً',     unit: '%',  better: 'down', target: 7,  src: 'moh' }
         ] },
       { id: 'CVA', name: 'أفضل مستشفى استقبالاً لحالات السكتة الدماغية', short: 'السكتة الدماغية', unit: 'hospital',
         kpis: [
-          { id: 'L21', name: 'إذابة جلطة الدماغ خلال ٦٠ دقيقة',        unit: '٪',  better: 'up',   target: 70, src: 'moh' },
-          { id: 'L22', name: 'الاستقلال الوظيفيّ بعد ٩٠ يوماً',        unit: '٪',  better: 'up',   target: 50, src: 'moh' },
-          { id: 'L23', name: 'التقييم بمقياس السكتة خلال ١٥ دقيقة',    unit: '٪',  better: 'up',   target: 85, src: 'moh' }
+          { id: 'L21', name: 'إذابة جلطة الدماغ خلال 60 دقيقة',        unit: '%',  better: 'up',   target: 70, src: 'moh' },
+          { id: 'L22', name: 'الاستقلال الوظيفيّ بعد 90 يوماً',        unit: '%',  better: 'up',   target: 50, src: 'moh' },
+          { id: 'L23', name: 'التقييم بمقياس السكتة خلال 15 دقيقة',    unit: '%',  better: 'up',   target: 85, src: 'moh' }
         ] },
       { id: 'TRA', name: 'أفضل مستشفى استقبالاً لحالات الإصابات', short: 'الإصابات', unit: 'hospital',
         kpis: [
-          { id: 'L31', name: 'تفعيل فريق الإصابات خلال ٥ دقائق',       unit: '٪',  better: 'up',   target: 90, src: 'moh' },
-          { id: 'L32', name: 'الوصول إلى غرفة العمليات خلال ٦٠ دقيقة', unit: '٪',  better: 'up',   target: 75, src: 'moh' },
-          { id: 'L33', name: 'البقاء في الإصابات الحرجة',              unit: '٪',  better: 'up',   target: 88, src: 'moh' }
+          { id: 'L31', name: 'تفعيل فريق الإصابات خلال 5 دقائق',       unit: '%',  better: 'up',   target: 90, src: 'moh' },
+          { id: 'L32', name: 'الوصول إلى غرفة العمليات خلال 60 دقيقة', unit: '%',  better: 'up',   target: 75, src: 'moh' },
+          { id: 'L33', name: 'البقاء في الإصابات الحرجة',              unit: '%',  better: 'up',   target: 88, src: 'moh' }
         ] }
     ]
   },
@@ -1046,11 +1092,11 @@ const TRACKS = [
     cats: [
       { id: 'GEN', name: 'التميّز في الرعاية الأولية', short: 'الفئة العامة', unit: 'cluster',
         kpis: [
-          { id: 'P1', name: 'تسجيل السكّان في برنامج طبّ الأسرة',      unit: '٪',   better: 'up',   target: 80, src: 'moh' },
-          { id: 'P2', name: 'ضبط السكّري (تراكميّ < ٧٪)',              unit: '٪',   better: 'up',   target: 55, src: 'moh' },
-          { id: 'P3', name: 'ضبط ضغط الدم (< ١٤٠/٩٠)',                unit: '٪',   better: 'up',   target: 65, src: 'moh' },
-          { id: 'P4', name: 'إتاحة موعدٍ خلال ٣ أيام',                 unit: '٪',   better: 'up',   target: 75, src: 'moh' },
-          { id: 'P5', name: 'التحويلات غير الضرورية للطوارئ',          unit: '٪',   better: 'down', target: 12, src: 'moh' }
+          { id: 'P1', name: 'تسجيل السكّان في برنامج طبّ الأسرة',      unit: '%',   better: 'up',   target: 80, src: 'moh' },
+          { id: 'P2', name: 'ضبط السكّري (تراكميّ < 7%)',              unit: '%',   better: 'up',   target: 55, src: 'moh' },
+          { id: 'P3', name: 'ضبط ضغط الدم (< 140/90)',                unit: '%',   better: 'up',   target: 65, src: 'moh' },
+          { id: 'P4', name: 'إتاحة موعدٍ خلال 3 أيام',                 unit: '%',   better: 'up',   target: 75, src: 'moh' },
+          { id: 'P5', name: 'التحويلات غير الضرورية للطوارئ',          unit: '%',   better: 'down', target: 12, src: 'moh' }
         ] }
     ]
   },
@@ -1060,11 +1106,11 @@ const TRACKS = [
     cats: [
       { id: 'GEN', name: 'التميّز في الرعاية الطارئة', short: 'الفئة العامة', unit: 'hospital',
         kpis: [
-          { id: 'E1', name: 'زمن الفرز خلال ٥ دقائق من الوصول',        unit: '٪',   better: 'up',   target: 85, src: 'moh' },
-          { id: 'E2', name: 'المغادرة قبل تلقّي العلاج',               unit: '٪',   better: 'down', target: 3,  src: 'moh' },
-          { id: 'E3', name: 'مكوث الطوارئ فوق ٦ ساعات',               unit: '٪',   better: 'down', target: 10, src: 'moh' },
-          { id: 'E4', name: 'قرار الإدخال خلال ٤ ساعات',              unit: '٪',   better: 'up',   target: 80, src: 'moh' },
-          { id: 'E5', name: 'إعادة الزيارة خلال ٧٢ ساعة',             unit: '٪',   better: 'down', target: 4,  src: 'moh' }
+          { id: 'E1', name: 'زمن الفرز خلال 5 دقائق من الوصول',        unit: '%',   better: 'up',   target: 85, src: 'moh' },
+          { id: 'E2', name: 'المغادرة قبل تلقّي العلاج',               unit: '%',   better: 'down', target: 3,  src: 'moh' },
+          { id: 'E3', name: 'مكوث الطوارئ فوق 6 ساعات',               unit: '%',   better: 'down', target: 10, src: 'moh' },
+          { id: 'E4', name: 'قرار الإدخال خلال 4 ساعات',              unit: '%',   better: 'up',   target: 80, src: 'moh' },
+          { id: 'E5', name: 'إعادة الزيارة خلال 72 ساعة',             unit: '%',   better: 'down', target: 4,  src: 'moh' }
         ] }
     ]
   },
@@ -1074,16 +1120,16 @@ const TRACKS = [
     cats: [
       { id: 'SMK', name: 'فئة معدّل الإقلاع عن التبغ', short: 'الإقلاع عن التبغ', unit: 'cluster',
         kpis: [
-          { id: 'V11', name: 'الإقلاع المؤكَّد بعد ٦ أشهر',            unit: '٪',   better: 'up',   target: 25, src: 'moh' },
-          { id: 'V12', name: 'إحالة المدخّنين إلى عيادات الإقلاع',     unit: '٪',   better: 'up',   target: 45, src: 'moh' },
-          { id: 'V13', name: 'إكمال برنامج الإقلاع',                   unit: '٪',   better: 'up',   target: 45, src: 'moh' }
+          { id: 'V11', name: 'الإقلاع المؤكَّد بعد 6 أشهر',            unit: '%',   better: 'up',   target: 25, src: 'moh' },
+          { id: 'V12', name: 'إحالة المدخّنين إلى عيادات الإقلاع',     unit: '%',   better: 'up',   target: 45, src: 'moh' },
+          { id: 'V13', name: 'إكمال برنامج الإقلاع',                   unit: '%',   better: 'up',   target: 45, src: 'moh' }
         ] },
       { id: 'SCR', name: 'فئة الفحص المبكّر للأمراض المزمنة', short: 'الفحص المبكّر', unit: 'any',
         kpis: [
-          { id: 'V21', name: 'الفحص المبكّر لسرطان الثدي (٤٠–٦٩)',     unit: '٪',   better: 'up',   target: 40, src: 'moh' },
-          { id: 'V22', name: 'الفحص المبكّر لسرطان القولون (٤٥–٧٥)',   unit: '٪',   better: 'up',   target: 35, src: 'moh' },
-          { id: 'V23', name: 'الفحص المبكّر للسكّري وارتفاع الضغط',    unit: '٪',   better: 'up',   target: 55, src: 'moh' },
-          { id: 'V24', name: 'الفحص المبكّر لاعتلال الشبكيّة السكّريّ', unit: '٪',   better: 'up',   target: 60, src: 'moh' }
+          { id: 'V21', name: 'الفحص المبكّر لسرطان الثدي (40–69)',     unit: '%',   better: 'up',   target: 40, src: 'moh' },
+          { id: 'V22', name: 'الفحص المبكّر لسرطان القولون (45–75)',   unit: '%',   better: 'up',   target: 35, src: 'moh' },
+          { id: 'V23', name: 'الفحص المبكّر للسكّري وارتفاع الضغط',    unit: '%',   better: 'up',   target: 55, src: 'moh' },
+          { id: 'V24', name: 'الفحص المبكّر لاعتلال الشبكيّة السكّريّ', unit: '%',   better: 'up',   target: 60, src: 'moh' }
         ] }
     ]
   },
@@ -1093,10 +1139,10 @@ const TRACKS = [
     cats: [
       { id: 'GEN', name: 'التميّز في رعاية الأمومة', short: 'الفئة العامة', unit: 'hospital',
         kpis: [
-          { id: 'M1', name: 'الزيارة الأولى للحمل قبل الأسبوع ١٢',      unit: '٪',   better: 'up',   target: 70, src: 'moh' },
-          { id: 'M2', name: 'القيصريّة الأوليّة (روبسون ١)',           unit: '٪',   better: 'down', target: 15, src: 'moh' },
-          { id: 'M3', name: 'وفيات الأمّهات لكل ١٠٠ ألف ولادة',        unit: 'حالة', better: 'down', target: 14, src: 'moh' },
-          { id: 'M4', name: 'الرضاعة الطبيعية خلال الساعة الأولى',      unit: '٪',   better: 'up',   target: 72, src: 'moh' },
+          { id: 'M1', name: 'الزيارة الأولى للحمل قبل الأسبوع 12',      unit: '%',   better: 'up',   target: 70, src: 'moh' },
+          { id: 'M2', name: 'القيصريّة الأوليّة (روبسون 1)',           unit: '%',   better: 'down', target: 15, src: 'moh' },
+          { id: 'M3', name: 'وفيات الأمّهات لكل 100 ألف ولادة',        unit: 'حالة', better: 'down', target: 14, src: 'moh' },
+          { id: 'M4', name: 'الرضاعة الطبيعية خلال الساعة الأولى',      unit: '%',   better: 'up',   target: 72, src: 'moh' },
           { id: 'M5', name: 'النزف التالي للولادة الشديد',             unit: '‰',   better: 'down', target: 10,  src: 'moh' }
         ] }
     ]
@@ -1108,18 +1154,18 @@ const TRACKS = [
     cats: [
       { id: 'ACC', name: 'فئة التميّز في المساءلة على منظومة الرعاية الصحية', short: 'المساءلة', unit: 'any',
         kpis: [
-          { id: 'F11', name: 'اكتمال بطاقة الأداء المتوازن',           unit: '٪',   better: 'up',   target: 85, src: 'moh' },
-          { id: 'F12', name: 'إغلاق خطط التحسين في موعدها',            unit: '٪',   better: 'up',   target: 75, src: 'moh' },
-          { id: 'F13', name: 'دقّة البيانات المُبلَّغة عند التدقيق',    unit: '٪',   better: 'up',   target: 90, src: 'moh' },
-          { id: 'F14', name: 'الاستجابة لملاحظات المستفيدين خلال ٥ أيام', unit: '٪', better: 'up',  target: 80, src: 'moh' }
+          { id: 'F11', name: 'اكتمال بطاقة الأداء المتوازن',           unit: '%',   better: 'up',   target: 85, src: 'moh' },
+          { id: 'F12', name: 'إغلاق خطط التحسين في موعدها',            unit: '%',   better: 'up',   target: 75, src: 'moh' },
+          { id: 'F13', name: 'دقّة البيانات المُبلَّغة عند التدقيق',    unit: '%',   better: 'up',   target: 90, src: 'moh' },
+          { id: 'F14', name: 'الاستجابة لملاحظات المستفيدين خلال 5 أيام', unit: '%', better: 'up',  target: 80, src: 'moh' }
         ] },
       { id: 'EFF', name: 'فئة كفاءة الخدمات', short: 'كفاءة الخدمات', unit: 'hospital',
         kpis: [
           { id: 'F21', name: 'متوسّط مدّة الإقامة',                     unit: 'يوم', better: 'down', target: 4.2, src: 'moh' },
-          { id: 'F22', name: 'إشغال الأسرّة',                           unit: '٪',   better: 'band', band: [70, 85], target: 80, src: 'moh' },
-          { id: 'F23', name: 'إلغاء العمليات في اليوم نفسه',            unit: '٪',   better: 'down', target: 5,  src: 'moh' },
-          { id: 'F24', name: 'إعادة الدخول خلال ٣٠ يوماً',              unit: '٪',   better: 'down', target: 8,  src: 'moh' },
-          { id: 'F25', name: 'تحوُّل الإجراءات إلى جراحة اليوم الواحد',  unit: '٪',   better: 'up',   target: 65, src: 'moh' }
+          { id: 'F22', name: 'إشغال الأسرّة',                           unit: '%',   better: 'band', band: [70, 85], target: 80, src: 'moh' },
+          { id: 'F23', name: 'إلغاء العمليات في اليوم نفسه',            unit: '%',   better: 'down', target: 5,  src: 'moh' },
+          { id: 'F24', name: 'إعادة الدخول خلال 30 يوماً',              unit: '%',   better: 'down', target: 8,  src: 'moh' },
+          { id: 'F25', name: 'تحوُّل الإجراءات إلى جراحة اليوم الواحد',  unit: '%',   better: 'up',   target: 65, src: 'moh' }
         ] }
     ]
   }
@@ -1242,11 +1288,11 @@ const COMMITTEES = [
   { id: 'STE', name: 'اللجنة التوجيهية', role: 'تحدّد التوجّه الاستراتيجي، وتضمن التوافق مع أولويات الصحة.',
     can: ['يعتمد المسارات والمستهدفات', 'لا يرى ملفّاً مفرداً'], stage: 'ما قبل الدورة' },
   { id: 'SCI', name: 'اللجنة العلمية', role: 'تتولّى إدارة التقييم وتحليل البيانات وضمان سلامة المنهجية.',
-    can: ['يُسنِد المقيّمين', 'يفضّ التباعُد', 'يعتمد نتيجة المرحلتين ١ و٢'], stage: 'المرحلتان ١ و٢' },
+    can: ['يُسنِد المقيّمين', 'يفضّ التباعُد', 'يعتمد نتيجة المرحلتين 1 و2'], stage: 'المرحلتان 1 و2' },
   { id: 'JUD', name: 'اللجنة التحكيمية', role: 'تتحقّق من سلامة عملية التقييم، وتعتمد الفائزين والترتيب النهائي.',
-    can: ['يعتمد الفائزين', 'يُعدِّل الترتيب بمبرَّرٍ مُسجَّل', 'يمنح أوجه التكريم'], stage: 'المرحلة ٣' },
+    can: ['يعتمد الفائزين', 'يُعدِّل الترتيب بمبرَّرٍ مُسجَّل', 'يمنح أوجه التكريم'], stage: 'المرحلة 3' },
   { id: 'APP', name: 'لجنة الحجب والتظلّم', role: 'تتولّى النظر في حالات الحجب والتظلّمات، والتحقّق من سلامة الإجراءات، وفق الضوابط المعتمدة.',
-    can: ['يحجب مسارأً أو جهة', 'يبتّ التظلّم', 'يُعيد ملفاً للتقييم'], stage: 'بعد الإعلان · ٦ أسابيع' },
+    can: ['يحجب مسارأً أو جهة', 'يبتّ التظلّم', 'يُعيد ملفاً للتقييم'], stage: 'بعد الإعلان · 6 أسابيع' },
   { id: 'EXE', name: 'اللجنة التنفيذية', role: 'متابعة ودعم أعمال الجائزة (مالياً وإدارياً وفنياً).',
     can: ['يدير الجدول والتشغيل', 'لا يرى درجة قبل الاعتماد'], stage: 'الدورة كاملة' }
 ];
@@ -1262,7 +1308,7 @@ const ROLES = {
   chair:   { name: 'رئيس اللجنة العلمية',   comm: 'SCI', icon: 'gavel',
              desk: 'الإسناد، والتباعُد، واعتماد نتيجة المرحلتين.' },
   judge:   { name: 'عضو لجنة التحكيم',      comm: 'JUD', icon: 'star',
-             desk: 'قاعة التحكيم — أفضل ٥ لكل مسار.' },
+             desk: 'قاعة التحكيم — أفضل 5 لكل مسار.' },
   appeals: { name: 'لجنة الحجب والتظلّم',   comm: 'APP', icon: 'shield',
              desk: 'الحجب، والتظلّمات، وسلامة الإجراءات.' },
   sec:     { name: 'أمانة الجائزة',         comm: 'EXE', icon: 'grid',
@@ -1281,8 +1327,8 @@ const PEOPLE = [
   { id: 'U-EX1', name: 'د. عبدالله الزهراني', role: 'expert', entity: null, aff: 'C12' },
   { id: 'U-EX2', name: 'د. هند العنزي',    role: 'expert', entity: null, aff: 'A02' },
   { id: 'U-JD1', name: 'رئيس لجنة التحكيم', role: 'judge', entity: null, chairOf: 'JUD' },
-  { id: 'U-JD2', name: 'عضو لجنة التحكيم ١', role: 'judge', entity: null },
-  { id: 'U-JD3', name: 'عضو لجنة التحكيم ٢', role: 'judge', entity: null },
+  { id: 'U-JD2', name: 'عضو لجنة التحكيم 1', role: 'judge', entity: null },
+  { id: 'U-JD3', name: 'عضو لجنة التحكيم 2', role: 'judge', entity: null },
   { id: 'U-AP1', name: 'لجنة الحجب والتظلّم', role: 'appeals', entity: null },
   { id: 'U-SE1', name: 'أمانة الجائزة',    role: 'sec',    entity: null },
   { id: 'U-EN1', name: 'ممثّل تجمّع الرياض الصحي الأول', role: 'entity', entity: 'C01' },
@@ -1300,7 +1346,7 @@ function mulberry32(a) {
 }
 /* خلطٌ حتميّ حقيقيّ (Fisher–Yates) بمولّدٍ مبذور.
    لا يصحّ الخلطُ بـ sort(() => r() - 0.5): المقارِنُ غيرُ متّسق، فنتيجتُه ممّا يتركه المحرّك
-   لنفسه — وقد قلبت نتيجةَ الإسناد عند النداء رقم ١٨٦ حين سُخِّنت الدالّة (JIT) فتبدّل اسمُ
+   لنفسه — وقد قلبت نتيجةَ الإسناد عند النداء رقم 186 حين سُخِّنت الدالّة (JIT) فتبدّل اسمُ
    المقيّم المُسنَد لنفس الملف في منتصف الجلسة، وتختلف النتيجةُ بين المتصفّحات أصلاً. */
 function shuffled(arr, rnd) {
   const a = arr.slice();
@@ -1335,10 +1381,10 @@ function series(entId, catKey, kpi) {
     let rel = bias + slope * c + noise;              // انحرافٌ نسبيّ عن المستهدَف
     let v = band ? 77 + rel * 26 : tgt * (1 + (down ? -rel : rel));
     v = Math.max(0, v);
-    // سقفٌ مقارِبٌ للنِّسَب: لا تتجاوز ١٠٠٪ ولا تبلغها، ويبقى الترتيب محفوظاً.
+    // سقفٌ مقارِبٌ للنِّسَب: لا تتجاوز 100% ولا تبلغها، ويبقى الترتيب محفوظاً.
     // وأثرُه مقصود: مَن قارب السقف يضيق مجالُ تحسُّنه — وهو «أثرُ السقف» الذي
     // يُعاقِب المتفوّقَ الثابت في شرط «الاتجاه الموجب لثلاث دورات». انظر README.
-    if (kpi.unit === '٪' && v > 99) v = 99 + 0.8 * (v - 99) / (1 + (v - 99));
+    if (kpi.unit === '%' && v > 99) v = 99 + 0.8 * (v - 99) / (1 + (v - 99));
     out.push(+v.toFixed(kpi.unit === 'يوم' ? 2 : 1));
   }
   return out;
@@ -1395,20 +1441,20 @@ const CASE = id => CASES.find(c => c.id === id);
    مسمّاةٌ ثابتة**، تُمنَح عبر المسارات كلّها لا داخل مسار، وقد ذهبت في
    الدورة الثامنة إلى جهاتٍ أمٍّ خارج وزارة الصحة. */
 const MEDALS = [
-  { id: 'MAT', no: '٠١', name: 'وسام التميّز في نضج إدارة الأداء',
+  { id: 'MAT', no: '01', name: 'وسام التميّز في نضج إدارة الأداء',
     desc: 'نضجُ منظومة إدارة الأداء: التخطيط، والقياس، والمساءلة، والتحسين المتّصل.' },
-  { id: 'ESAT', no: '٠٢', name: 'وسام تحسين تجربة الموظفين',
+  { id: 'ESAT', no: '02', name: 'وسام تحسين تجربة الموظفين',
     desc: 'أثرٌ مُقاسٌ في تجربة العاملين الصحيين ورضاهم واستبقائهم.' },
-  { id: 'PX', no: '٠٣', name: 'وسام التميّز في تجربة المريض',
+  { id: 'PX', no: '03', name: 'وسام التميّز في تجربة المريض',
     desc: 'أثرٌ مُقاسٌ في تجربة المستفيد عبر رحلته كاملةً.' }
 ];
 
 const HONORS = [
-  { no: '٠١', id: 'winner', name: 'الفائز الأعلى أداءً', scope: 'لكلّ فئةٍ داخل المسار',
+  { no: '01', id: 'winner', name: 'الفائز الأعلى أداءً', scope: 'لكلّ فئةٍ داخل المسار',
     desc: 'الجهةُ الأولى في فئتها بعد اعتماد لجنة التحكيم.' },
-  { no: '٠٢', id: 'honor',  name: 'تكريمٌ فخريّ', scope: 'تُضاف إلى لوحة الشرف',
+  { no: '02', id: 'honor',  name: 'تكريمٌ فخريّ', scope: 'تُضاف إلى لوحة الشرف',
     desc: 'جهةٌ بلغت المرحلة الثالثة في فئتها وأظهرت أداءً يستحقّ التسجيل في لوحة الشرف.' },
-  { no: '٠٣', id: 'medal',  name: 'وسامٌ مسمّى', scope: 'عبر المسارات · ثلاثةٌ لا رابع',
+  { no: '03', id: 'medal',  name: 'وسامٌ مسمّى', scope: 'عبر المسارات · ثلاثةٌ لا رابع',
     desc: 'يُمنَح على بُعدٍ منظوميّ يعبر المسارات: نضج إدارة الأداء، أو تجربة الموظفين، أو تجربة المريض.' }
 ];
 
@@ -1419,7 +1465,7 @@ const HONORS = [
 const RESULTS = {
   cycle: 8, year: 2026, day: '2026-09-09',
   source: 'الإعلان الرسميّ · وزارة الصحة — حفل جائزة أداء الصحة',
-  headline: '٢٥ جهة تتوَّج بجائزة أداء الصحة ضمن ٦ مسارات للتميّز',
+  headline: '25 جهة تتوَّج بجائزة أداء الصحة ضمن 6 مسارات للتميّز',
   medals: [
     { medal: 'MAT',  winner: 'الإدارة العامة للخدمات الطبية بوزارة الداخلية', eid: 'M05' },
     { medal: 'ESAT', winner: 'الشؤون الصحية بوزارة الحرس الوطني',            eid: 'M01' },
@@ -1460,15 +1506,15 @@ const GIFTS = ['شهادة تمييز', 'درعٌ تذكاريّ', 'إدراجٌ
 const TIMELINE = [
   { d: '2026-01-12', t: 'فتح تسجيل الجهات وتفويض الممثّلين', s: 'done', who: 'أمانة الجائزة' },
   { d: '2026-02-25', t: 'إقفال التسجيل واعتماد قوائم الأهليّة', s: 'done', who: 'اللجنة العلمية' },
-  { d: '2026-03-15', t: 'المرحلة ١ — احتساب مؤشّرات الأداء لكلّ فئة', s: 'done', who: 'اللجنة العلمية' },
-  { d: '2026-04-02', t: 'إعلان المتأهّلين — أفضل ١٠ لكلّ فئة', s: 'done', who: 'اللجنة العلمية' },
+  { d: '2026-03-15', t: 'المرحلة 1 — احتساب مؤشّرات الأداء لكلّ فئة', s: 'done', who: 'اللجنة العلمية' },
+  { d: '2026-04-02', t: 'إعلان المتأهّلين — أفضل 10 لكلّ فئة', s: 'done', who: 'اللجنة العلمية' },
   { d: '2026-04-06', t: 'فتح استمارة المشاركة للمتأهّلين', s: 'done', who: 'الجهات المتأهّلة' },
-  { d: '2026-05-20', t: 'المرحلة ٢ — التقييم المستقلّ ومراجعة التوحيد', s: 'done', who: 'مقيّمان وخبير' },
+  { d: '2026-05-20', t: 'المرحلة 2 — التقييم المستقلّ ومراجعة التوحيد', s: 'done', who: 'مقيّمان وخبير' },
   { d: '2026-06-15', t: 'الزيارات الميدانية للتحقّق', s: 'done', who: 'فرق الزيارة' },
-  { d: '2026-07-20', t: 'إعلان أفضل ٥ لكلّ فئة', s: 'done', who: 'اللجنة العلمية' },
-  { d: '2026-08-25', t: 'المرحلة ٣ — قاعة التحكيم واعتماد الفائزين', s: 'done', who: 'اللجنة التحكيمية' },
-  { d: '2026-09-09', t: 'حفل الجائزة وإعلان النتائج — ٢٥ جهةً وثلاثةُ أوسمة', s: 'now', who: 'اللجنة التنفيذية' },
-  { d: '2026-10-21', t: 'إقفال نافذة التظلّم (٦ أسابيع من الحفل)', s: 'next', who: 'لجنة الحجب والتظلّم' }
+  { d: '2026-07-20', t: 'إعلان أفضل 5 لكلّ فئة', s: 'done', who: 'اللجنة العلمية' },
+  { d: '2026-08-25', t: 'المرحلة 3 — قاعة التحكيم واعتماد الفائزين', s: 'done', who: 'اللجنة التحكيمية' },
+  { d: '2026-09-09', t: 'حفل الجائزة وإعلان النتائج — 25 جهةً وثلاثةُ أوسمة', s: 'now', who: 'اللجنة التنفيذية' },
+  { d: '2026-10-21', t: 'إقفال نافذة التظلّم (6 أسابيع من الحفل)', s: 'next', who: 'لجنة الحجب والتظلّم' }
 ];
 
 </script>
@@ -1496,7 +1542,7 @@ const CFG = {
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-/* ============ ١ · قراءة مؤشّر ============ */
+/* ============ 1 · قراءة مؤشّر ============ */
 
 /** هل بلغت القيمةُ المستهدَف الوطنيّ؟ */
 function meets(k, v) {
@@ -1514,7 +1560,7 @@ function gain(k, a, b) {
   return k.better === 'down' ? a - b : b - a;
 }
 
-/** درجةُ المستوى ٠–١ : أين القيمةُ من المستهدَف */
+/** درجةُ المستوى 0–1 : أين القيمةُ من المستهدَف */
 function levelScore(k, v) {
   if (v === null || v === undefined) return null;
   if (k.better === 'band') {
@@ -1524,7 +1570,7 @@ function levelScore(k, v) {
   const ratio = k.better === 'down'
     ? (v <= 0 ? 1.25 : k.target / v)
     : v / k.target;
-  return clamp((ratio - 0.55) / 0.70, 0, 1);   // ‏٥٥٪ من المستهدَف = صفر، ١٢٥٪ = واحد
+  return clamp((ratio - 0.55) / 0.70, 0, 1);   // ‏55% من المستهدَف = صفر، 125% = واحد
 }
 
 /** حكمُ الاتجاه عبر ثلاث دورات: ‎2 موجبٌ لثلاث، 1 موجبٌ لدورتين، 0 غيرُ ذلك */
@@ -1537,7 +1583,7 @@ function trendGrade(k, s) {
   return 0;
 }
 
-/* ============ ٢ · بوابة الأهليّة ============
+/* ============ 2 · بوابة الأهليّة ============
    نصُّ الدليل — «ما الذي يؤهّل الجهة للمشاركة؟»:
      • بياناتٌ مستمدّة من المصادر الرسمية لوزارة الصحة وشركائها.
      • أداءٌ يحقّق المستهدفات الوطنية أو يتجاوزها.
@@ -1568,12 +1614,12 @@ function eligibility(c) {
       val: `${ks.length - c.missing.length}/${ks.length} مؤشّراً متوفّراً رسمياً`,
       miss: c.missing },
     { id: 'targets', name: 'بلوغ المستهدفات الوطنية',
-      req: `تحقيقُ ${Math.round(CFG.metRatio * 100)}٪ من مؤشّرات الحزمة للمستهدَف أو تجاوزُه`,
+      req: `تحقيقُ ${Math.round(CFG.metRatio * 100)}% من مؤشّرات الحزمة للمستهدَف أو تجاوزُه`,
       pass: withData.length > 0 && metN / ks.length >= CFG.metRatio,
       val: `${metN}/${ks.length} مؤشّراً بالغٌ المستهدَف`,
       ratio: metN / ks.length },
     { id: 'trend', name: 'اتجاهٌ موجبٌ لثلاث دورات',
-      req: `اتجاهٌ إيجابيّ متّصلٌ عبر ${CFG.cycles} دوراتٍ في ${Math.round(CFG.trendRatio * 100)}٪ من المؤشّرات`,
+      req: `اتجاهٌ إيجابيّ متّصلٌ عبر ${CFG.cycles} دوراتٍ في ${Math.round(CFG.trendRatio * 100)}% من المؤشّرات`,
       pass: withData.length > 0 && trendN / ks.length >= CFG.trendRatio,
       val: `${trendN}/${ks.length} مؤشّراً باتجاهٍ موجبٍ متّصل`,
       ratio: trendN / ks.length }
@@ -1582,7 +1628,7 @@ function eligibility(c) {
   return { rows, gates, pass: gates.every(g => g.pass) };
 }
 
-/* ============ ٣ · المرحلة الأولى — LeTCI على المؤشّرات ============
+/* ============ 3 · المرحلة الأولى — LeTCI على المؤشّرات ============
    نصُّ الدليل: «مراجعةٌ قائمة على البيانات لمؤشّرات الأداء الرئيسة،
    والاتجاهات، والمقارنات المرجعية» — وهي أبعادُ LeTCI الأربعة. */
 function stage1Raw(c) {
@@ -1633,7 +1679,7 @@ function stage1(id) {
   return _S1[id];
 }
 
-/* ============ ٤ · المرحلة الثانية — ADLI + LeTCI + الزيارة ============
+/* ============ 4 · المرحلة الثانية — ADLI + LeTCI + الزيارة ============
    نصُّ الدليل: «يُقيَّم كل مسار بصورةٍ مستقلّة من قِبَل مقيّمَيْن اثنين،
    إلى جانب خبيرٍ عن اللجنة العلمية، ثم تُوحَّد النتائج بالتوافق،
    وتُعتمد نهائياً من لجنة التحكيم». */
@@ -1672,15 +1718,15 @@ function reviewScore(rv) {
   return +(avg(rv.adli) * CFG.s2.adli + avg(rv.letci) * CFG.s2.letci + avg(rv.visit) * CFG.s2.visit).toFixed(1);
 }
 
-/* ============ ٥ · الحالة والتصفية ============
-   القِمع: كل الجهات ← المؤهّلون ← أفضل ١٠ ← أفضل ٥ ← أفضل ٣ */
+/* ============ 5 · الحالة والتصفية ============
+   القِمع: كل الجهات ← المؤهّلون ← أفضل 10 ← أفضل 5 ← أفضل 3 */
 
 const STATE = {
   ineligible: { name: 'غير مؤهّل',          tone: 'off',  desc: 'لم تستوفِ شروط الأهليّة الثلاثة' },
-  out1:       { name: 'خرج بعد المرحلة ١',  tone: 'off',  desc: 'مؤهَّلٌ ولم يبلغ العشرة الأوائل في مساره' },
-  qualified:  { name: 'متأهّل للمرحلة ٢',   tone: 'ink',  desc: 'ضمن أفضل ١٠ في المسار — استمارةٌ وزيارةٌ ميدانية' },
-  out2:       { name: 'خرج بعد المرحلة ٢',  tone: 'off',  desc: 'لم يبلغ الخمسة الأوائل بعد تقييم الأنظمة' },
-  finalist:   { name: 'متأهّل للتحكيم',     tone: 'ink',  desc: 'ضمن أفضل ٥ — أمام لجنة التحكيم' },
+  out1:       { name: 'خرج بعد المرحلة 1',  tone: 'off',  desc: 'مؤهَّلٌ ولم يبلغ العشرة الأوائل في مساره' },
+  qualified:  { name: 'متأهّل للمرحلة 2',   tone: 'ink',  desc: 'ضمن أفضل 10 في المسار — استمارةٌ وزيارةٌ ميدانية' },
+  out2:       { name: 'خرج بعد المرحلة 2',  tone: 'off',  desc: 'لم يبلغ الخمسة الأوائل بعد تقييم الأنظمة' },
+  finalist:   { name: 'متأهّل للتحكيم',     tone: 'ink',  desc: 'ضمن أفضل 5 — أمام لجنة التحكيم' },
   honored:    { name: 'مُكرَّم',             tone: 'gold', desc: 'ضمن الثلاثة الأوائل — تكريمٌ ولوحةُ شرف' },
   winner:     { name: 'فائزٌ بالمسار',       tone: 'gold', desc: 'الأعلى أداءً في مساره باعتماد لجنة التحكيم' },
   blocked:    { name: 'محجوب',              tone: 'red',  desc: 'قرارُ حجبٍ من لجنة الحجب والتظلّم' }
@@ -1764,11 +1810,11 @@ function buildCase(entId, catKey) {
 }
 
 /* ---- بناء الترتيب الكامل للفئة ----
-   ‏**افتراضٌ فرضَته النتيجة المعلنة:** الدليل يقول «أفضل ١٠ لكل مسار»،
+   ‏**افتراضٌ فرضَته النتيجة المعلنة:** الدليل يقول «أفضل 10 لكل مسار»،
    والنتيجةُ المعلنة توّجت في مسار إنقاذ الأرواح خمسَ جهاتٍ موزَّعةً على
    ثلاث فئات — أي أن التتويج يقع في **الفئة**. ولمّا كان آخرُ الغربال
    في الفئة، وجب أن يكون أوّلُه فيها أيضاً، وإلّا خلَت فئةٌ من مرشَّحين.
-   فالعتباتُ ١٠ ← ٥ ← ٣ تُطبَّق هنا **لكلّ فئة**، وهذا مُعلَنٌ في المنهجية. */
+   فالعتباتُ 10 ← 5 ← 3 تُطبَّق هنا **لكلّ فئة**، وهذا مُعلَنٌ في المنهجية. */
 function catBoard(catKey) {
   const all = CASES.filter(c => c.key === catKey);
   const rows = all.map(c => {
@@ -1781,7 +1827,7 @@ function catBoard(catKey) {
   const cut1 = STAGES[0].cut;
   const q = elig.slice(0, cut1);
 
-  // المرحلة ٢: الدرجة الموحَّدة إن وُجدت، وإلا متوسّط المقيّمين
+  // المرحلة 2: الدرجة الموحَّدة إن وُجدت، وإلا متوسّط المقيّمين
   q.forEach(r => {
     const rev = reviewsOf(r.c.id);
     const cons = DB.consensus[r.c.id];
@@ -1806,7 +1852,7 @@ function catBoard(catKey) {
   const cut2 = STAGES[1].cut;
   const fin = scored.slice(0, cut2);
 
-  // المرحلة ٣: بطاقات المحكّمين (بوردا) ثم اعتمادُ رئيس اللجنة
+  // المرحلة 3: بطاقات المحكّمين (بوردا) ثم اعتمادُ رئيس اللجنة
   const conf = DB.confirmed[catKey];
   let order = null;
   if (conf) order = conf.order;
@@ -1869,7 +1915,7 @@ function reviewsOf(caseId) {
   const base = clamp(s1.score * 0.9 + 8, 25, 92);
   const r = mulberry32(seedOf(caseId + 'progress'));
   const out = {};
-  // نحو ١٥٪ من الملفّات ما تزال قيد التقييم — واقعُ دورةٍ جارية
+  // نحو 15% من الملفّات ما تزال قيد التقييم — واقعُ دورةٍ جارية
   const done = r() > 0.15;
   if (done) {
     a.evals.forEach(u => { out[u] = genReview(caseId, u, base); });
@@ -1925,12 +1971,12 @@ function cycleStats() {
 <script>
 /* جائزة أداء الصحة — أدوات العرض المشتركة */
 
-const AR_D = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
-
-/** الأرقام عربية-هنديّة، والفاصلة العشرية «٫» وفاصلة الآلاف «٬» */
+/** الأرقام إنجليزيّة (0-9) في المنصّة كلّها، والعشريّة «.» والآلاف «,» والنسبة «%».
+    دليلُ الجائزة نفسه يكتب بها («2026» و«50%»)، فالمنصّةُ تطابق مصدرَها.
+    وبقي اسمُ الدالّة القديم ar() كي لا تُلمَس مئاتُ المواضع التي تستدعيها؛ وصارت تُعيد الرقمَ كما هو. */
 function ar(x) {
   if (x === null || x === undefined || x === '') return '—';
-  return String(x).replace(/[0-9]/g, d => AR_D[+d]).replace(/\./g, '٫').replace(/,/g, '٬');
+  return String(x);
 }
 function fmt(n, d = 0) {
   if (n === null || n === undefined || Number.isNaN(n)) return '—';
@@ -1938,7 +1984,7 @@ function fmt(n, d = 0) {
   const [i, f] = s.split('.');
   return ar(f ? i.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '.' + f : i.replace(/\B(?=(\d{3})+(?!\d))/g, ','));
 }
-const pc = (n, d = 1) => fmt(n, d) + '٪';
+const pc = (n, d = 1) => fmt(n, d) + '%';
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 
 /** تمييز العدد في العربية: مفرد ومثنّى وجمع قلّة وجمع كثرة */
@@ -1960,44 +2006,70 @@ function dt(s) {
   return `${ar(+d)} ${M[+m - 1]} ${ar(y)}`;
 }
 
-/* ============ الأيقونات ============ */
+/* ============ الأيقونات ============
+   كلُّ أيقونةٍ بطبقتين: خطٌّ رئيسيّ، وظلٌّ خافتٌ من اللون نفسه (class="s") يمنحها جسماً.
+   مرسومةٌ على شبكة 24، بسُمك 1.7 وأطرافٍ مدوَّرة، فتبدو مجموعةً واحدة لا قطعاً متفرّقة. */
 const I = {
-  home:    '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
-  track:   '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
-  stage:   '<path d="M4 18h4V9H4zM10 18h4V4h-4zM16 18h4v-6h-4z"/>',
-  gov:     '<path d="M3 21h18M5 21V10M19 21V10M12 3 3 8h18zM9 21v-6h6v6"/>',
-  reg:     '<path d="M15 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7z"/><path d="M14 3v5h5M8 13h8M8 17h5"/>',
-  board:   '<path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z"/>',
-  desk:    '<path d="M4 5h16v6H4zM4 13h16v6H4z"/><path d="M8 8h.01M8 16h.01"/>',
-  judge:   '<path d="m12 3 2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.4 6.7 19.2l1.1-5.9L3.5 9.2l5.9-.8z"/>',
-  shield:  '<path d="M12 3 5 6v6c0 4.4 3 8.1 7 9 4-.9 7-4.6 7-9V6z"/>',
-  method:  '<path d="M9 3v6l-5 9a2 2 0 0 0 1.8 3h12.4a2 2 0 0 0 1.8-3l-5-9V3z"/><path d="M8 3h8"/>',
-  verdict: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/>',
-  log:     '<path d="M8 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H8zM8 3 4 7v14h4"/><path d="M11 8h6M11 12h6M11 16h4"/>',
+  /* ---- التنقّل ---- */
+  home:    '<path class="s" d="M5.2 10.4V19a2 2 0 0 0 2 2h9.6a2 2 0 0 0 2-2v-8.6L12 4.6z"/><path d="M3.2 11.2 11.2 4.1a1.2 1.2 0 0 1 1.6 0l8 7.1"/><path d="M5.2 9.8V19a2 2 0 0 0 2 2h9.6a2 2 0 0 0 2-2V9.8"/><path d="M10 21v-5a2 2 0 0 1 4 0v5"/>',
+  board:   '<rect class="s" x="13.2" y="11.2" width="7.3" height="9.3" rx="2"/><rect x="3.5" y="3.5" width="7.3" height="9.3" rx="2"/><rect x="13.2" y="3.5" width="7.3" height="5.6" rx="2"/><rect x="13.2" y="11.2" width="7.3" height="9.3" rx="2"/><rect x="3.5" y="14.9" width="7.3" height="5.6" rx="2"/>',
+  method:  '<path class="s" d="M6.6 15.2h10.8l2.1 3.9a1.9 1.9 0 0 1-1.7 2.8H6.2a1.9 1.9 0 0 1-1.7-2.8z"/><path d="M9.2 3.5h5.6"/><path d="M10 3.5v6L4.6 19.2a1.9 1.9 0 0 0 1.7 2.8h11.4a1.9 1.9 0 0 0 1.7-2.8L14 9.5v-6"/><path d="M7.2 14.6h9.6"/>',
+  gov:     '<path class="s" d="M4.8 10h14.4v8.4H4.8z"/><path d="M3 9.4 11.2 4a1.4 1.4 0 0 1 1.6 0L21 9.4z"/><path d="M6.3 10v8.4M10.1 10v8.4M13.9 10v8.4M17.7 10v8.4"/><path d="M3.5 21h17M4.8 18.4h14.4"/>',
+  medal:   '<path d="M8.3 3.2 10.9 8.6M15.7 3.2 13.1 8.6"/><circle class="s" cx="12" cy="14.8" r="6"/><circle cx="12" cy="14.8" r="6"/><path d="m12 11.9.95 1.9 2.1.3-1.5 1.5.35 2.1-1.9-1-1.9 1 .35-2.1-1.5-1.5 2.1-.3z"/>',
+  reg:     '<path class="s" d="M6.2 3.5H14l4.8 4.8v10.2a2 2 0 0 1-2 2H6.2a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2z"/><path d="M6.2 3.5H14l4.8 4.8v10.2a2 2 0 0 1-2 2H6.2a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2z"/><path d="M14 3.5v3.8a1 1 0 0 0 1 1h3.8"/><path d="M11.5 11.8v5.4M8.8 14.5h5.4"/>',
+  desk:    '<path class="s" d="M3.5 13.4h4.9l1.3 2.2h4.6l1.3-2.2h4.9V18a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2z"/><path d="M3.5 13.4 5.9 5.9a2 2 0 0 1 1.9-1.4h8.4a2 2 0 0 1 1.9 1.4l2.4 7.5"/><path d="M3.5 13.4h4.9l1.3 2.2h4.6l1.3-2.2h4.9V18a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2z"/>',
+  gavel:   '<g transform="rotate(-40 12 12)"><rect class="s" x="6.5" y="3" width="11" height="5.8" rx="1.8"/><rect x="6.5" y="3" width="11" height="5.8" rx="1.8"/><path d="M12 8.8V20"/></g><path d="M11.2 21h9.3"/>',
+  scale:   '<path d="M12 4.6V20.5M7.5 20.5h9M5 7.8h14"/><circle cx="12" cy="4.4" r="1.2"/><path class="s" d="M5 7.8 2.5 14.6a2.9 2.9 0 0 0 5 0z"/><path d="M5 7.8 2.5 14.6a2.9 2.9 0 0 0 5 0z"/><path class="s" d="m19 7.8-2.5 6.8a2.9 2.9 0 0 0 5 0z"/><path d="m19 7.8-2.5 6.8a2.9 2.9 0 0 0 5 0z"/>',
+  log:     '<rect class="s" x="4.5" y="3.5" width="15" height="17" rx="2.5"/><rect x="4.5" y="3.5" width="15" height="17" rx="2.5"/><path d="M10.4 8.4h5.4M10.4 12h5.4M10.4 15.6h3.4"/><circle cx="7.7" cy="8.4" r=".9" fill="currentColor" stroke="none"/><circle cx="7.7" cy="12" r=".9" fill="currentColor" stroke="none"/><circle cx="7.7" cy="15.6" r=".9" fill="currentColor" stroke="none"/>',
+  verdict: '<circle class="s" cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="8.6"/><path d="m15.7 8.3-2 5.4-5.4 2 2-5.4z"/>',
+
+  /* ---- مساراتُ الجائزة الستّة ---- */
+  heartbeat: '<path class="s" d="M12 20.4s-7.9-4.6-7.9-10.4A4.5 4.5 0 0 1 8.6 5.5c1.4 0 2.6.7 3.4 1.8.8-1.1 2-1.8 3.4-1.8a4.5 4.5 0 0 1 4.5 4.5c0 5.8-7.9 10.4-7.9 10.4z"/><path d="M12 20.4s-7.9-4.6-7.9-10.4A4.5 4.5 0 0 1 8.6 5.5c1.4 0 2.6.7 3.4 1.8.8-1.1 2-1.8 3.4-1.8a4.5 4.5 0 0 1 4.5 4.5c0 5.8-7.9 10.4-7.9 10.4z"/><path d="M3.2 12.4h4.3l1.5-2.9 2.3 5.6 1.7-2.7h7.8"/>',
+  clinic:  '<path class="s" d="M5.2 10.2V19a1.6 1.6 0 0 0 1.6 1.6h10.4a1.6 1.6 0 0 0 1.6-1.6v-8.8L12 5z"/><path d="M3.2 11 11.2 4.2a1.2 1.2 0 0 1 1.6 0L20.8 11"/><path d="M5.2 9.8V19a1.6 1.6 0 0 0 1.6 1.6h10.4a1.6 1.6 0 0 0 1.6-1.6V9.8"/><path d="M12 11.6v5M9.5 14.1h5"/>',
+  siren:   '<path class="s" d="M7 17v-4.6a5 5 0 0 1 10 0V17z"/><path d="M7 17v-4.6a5 5 0 0 1 10 0V17"/><path d="M5.6 17h12.8a1 1 0 0 1 1 1v2.5H4.6V18a1 1 0 0 1 1-1z"/><path d="M12 3v1.7M4.7 6.2 6 7.4M19.3 6.2 18 7.4M2.8 12.2h1.7M21.2 12.2h-1.7"/>',
+  shieldcheck: '<path class="s" d="M12 3.2 4.8 6v5.5c0 4.4 3 7.9 7.2 9.3 4.2-1.4 7.2-4.9 7.2-9.3V6z"/><path d="M12 3.2 4.8 6v5.5c0 4.4 3 7.9 7.2 9.3 4.2-1.4 7.2-4.9 7.2-9.3V6z"/><path d="m8.9 12 2.2 2.2 4-4.3"/>',
+  mother:  '<circle class="s" cx="9" cy="7" r="2.9"/><circle cx="9" cy="7" r="2.9"/><path d="M3.4 20.5v-1.4a5.3 5.3 0 0 1 5.3-5.3h.6a5.3 5.3 0 0 1 3.4 1.2"/><circle class="s" cx="17.2" cy="13.6" r="2"/><circle cx="17.2" cy="13.6" r="2"/><path d="M13.9 20.5v-.7a3.3 3.3 0 0 1 3.3-3.3 3.3 3.3 0 0 1 3.3 3.3v.7"/>',
+  gauge:   '<path class="s" d="M4 16.6a8 8 0 0 1 16 0z"/><path d="M4 16.6a8 8 0 0 1 16 0"/><path d="M12 16.6 15.6 11.4"/><circle cx="12" cy="16.6" r="1.3"/><path d="M7.1 11.6l1 .9M12 8.7v1.3M16.9 11.6l-1 .9"/><path d="M6.5 20.4h11"/>',
+
+  /* ---- مربّعات الأرقام ---- */
+  files:   '<path d="M6.6 16.6V6.6a2 2 0 0 1 2-2H16"/><rect class="s" x="9.4" y="7.4" width="11.1" height="13.1" rx="2.1"/><rect x="9.4" y="7.4" width="11.1" height="13.1" rx="2.1"/><path d="M12.4 12.2h5.1M12.4 15.6h3.4"/>',
+  building:'<path class="s" d="M5 20.5V6.6A1.6 1.6 0 0 1 6.6 5h6.8A1.6 1.6 0 0 1 15 6.6v13.9z"/><path d="M5 20.5V6.6A1.6 1.6 0 0 1 6.6 5h6.8A1.6 1.6 0 0 1 15 6.6v13.9"/><path d="M15 10.5h2.4A1.6 1.6 0 0 1 19 12.1v8.4"/><path d="M3.4 20.5h17.2M8.4 9h3.2M8.4 12.6h3.2M8.4 16.2h3.2"/>',
+  verified:'<circle class="s" cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="8.6"/><path d="m8.3 12.3 2.6 2.6 4.9-5.3"/>',
+  funnel:  '<path class="s" d="M4 5.5h16l-6.1 7.1V18l-3.8 2.2v-7.6z"/><path d="M4 5.5h16l-6.1 7.1V18l-3.8 2.2v-7.6z"/>',
+  split:   '<path d="M12 20.5v-7"/><path d="M12 13.5 6.2 8M12 13.5 17.8 8"/><path d="M6.2 8v3.7M6.2 8h3.7M17.8 8v3.7M17.8 8h-3.7"/>',
+  layers:  '<path class="s" d="M12 3.6 21 8.3l-9 4.7-9-4.7z"/><path d="M12 3.6 21 8.3l-9 4.7-9-4.7z"/><path d="m3 12.3 9 4.7 9-4.7M3 16.3l9 4.7 9-4.7"/>',
+  trophy:  '<path class="s" d="M7.5 4h9v5.5a4.5 4.5 0 0 1-9 0z"/><path d="M7.5 4h9v5.5a4.5 4.5 0 0 1-9 0z"/><path d="M7.5 6H4.8v1.6a3.2 3.2 0 0 0 3 3.2M16.5 6h2.7v1.6a3.2 3.2 0 0 1-3 3.2"/><path d="M12 14v3.2M8.8 20.5h6.4M9.8 17.2h4.4"/>',
+  target:  '<circle class="s" cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="4.7"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>',
+  calendar:'<rect class="s" x="3.5" y="5" width="17" height="15.5" rx="2.5"/><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3.2v3.6M16 3.2v3.6"/>',
+  users:   '<circle class="s" cx="9" cy="8.4" r="3.3"/><circle cx="9" cy="8.4" r="3.3"/><path d="M2.8 20a6.2 6.2 0 0 1 12.4 0"/><path d="M15.6 5.4a3.2 3.2 0 0 1 0 6M17.6 14.4a6 6 0 0 1 3.6 5.4"/>',
+  chart:   '<rect x="3.8" y="12.4" width="4" height="8.1" rx="1.2"/><rect class="s" x="10" y="4.5" width="4" height="16" rx="1.2"/><rect x="10" y="4.5" width="4" height="16" rx="1.2"/><rect x="16.2" y="9" width="4" height="11.5" rx="1.2"/>',
+  clock:   '<circle class="s" cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="8.6"/><path d="M12 7.2V12l3.2 2"/>',
+
+  /* ---- أساسيّة ---- */
+  track:   '<circle class="s" cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
+  stage:   '<rect class="s" x="10" y="4" width="4" height="14" rx="1"/><path d="M4 18h4V9H4zM10 18h4V4h-4zM16 18h4v-6h-4z"/>',
+  judge:   '<g transform="rotate(-40 12 12)"><rect class="s" x="6.5" y="3" width="11" height="5.8" rx="1.8"/><rect x="6.5" y="3" width="11" height="5.8" rx="1.8"/><path d="M12 8.8V20"/></g><path d="M11.2 21h9.3"/>',
+  shield:  '<path class="s" d="M12 3.2 4.8 6v5.5c0 4.4 3 7.9 7.2 9.3 4.2-1.4 7.2-4.9 7.2-9.3V6z"/><path d="M12 3.2 4.8 6v5.5c0 4.4 3 7.9 7.2 9.3 4.2-1.4 7.2-4.9 7.2-9.3V6z"/>',
   check:   '<path d="m4 12.5 5 5L20 6.5"/>',
   x:       '<path d="M6 6 18 18M18 6 6 18"/>',
-  warn:    '<path d="M12 4 2.5 20h19z"/><path d="M12 10v4M12 17h.01"/>',
+  warn:    '<path class="s" d="M12 4.2 2.9 19.6h18.2z"/><path d="M12 4.2 2.9 19.6h18.2z"/><path d="M12 10.2v4M12 16.9h.01"/>',
   up:      '<path d="M12 19V5M5 12l7-7 7 7"/>',
   down:    '<path d="M12 5v14M19 12l-7 7-7-7"/>',
   flat:    '<path d="M5 12h14"/>',
-  user:    '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
-  building:'<path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16M15 10h4a1 1 0 0 1 1 1v10M4 21h17"/><path d="M8 8h3M8 12h3M8 16h3"/>',
-  file:    '<path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7z"/><path d="M13 3v5h5"/>',
+  user:    '<circle class="s" cx="12" cy="8.2" r="4"/><circle cx="12" cy="8.2" r="4"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/>',
+  file:    '<path class="s" d="M14 3.5H7.5a1.5 1.5 0 0 0-1.5 1.5v14a1.5 1.5 0 0 0 1.5 1.5h9a1.5 1.5 0 0 0 1.5-1.5V7.5z"/><path d="M14 3.5H7.5A1.5 1.5 0 0 0 6 5v14a1.5 1.5 0 0 0 1.5 1.5h9A1.5 1.5 0 0 0 18 19V7.5z"/><path d="M13.5 3.5v4h4.5"/>',
   clip:    '<path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7L10 17.9a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"/>',
-  eye:     '<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12"/><circle cx="12" cy="12" r="2.6"/>',
-  lock:    '<rect x="4" y="10" width="16" height="11" rx="1.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
-  split:   '<path d="M4 6h5l6 12h5M20 6h-5"/><path d="m17 3 3 3-3 3M17 15l3 3-3 3"/>',
+  eye:     '<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12"/><circle class="s" cx="12" cy="12" r="2.8"/><circle cx="12" cy="12" r="2.8"/>',
+  lock:    '<rect class="s" x="4.5" y="10.5" width="15" height="10" rx="2.2"/><rect x="4.5" y="10.5" width="15" height="10" rx="2.2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
   merge:   '<path d="M4 6h5l6 6 5 0M4 18h5l3-3"/><path d="m17 9 3 3-3 3"/>',
-  medal:   '<circle cx="12" cy="15" r="6"/><path d="m8 3 2.5 6M16 3l-2.5 6M12 12.5l.9 1.9 2 .3-1.5 1.4.4 2-1.8-1-1.8 1 .4-2L9.1 14.7l2-.3z"/>',
-  visit:   '<path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11"/><circle cx="12" cy="10" r="2.6"/>',
-  flask:   '<path d="M9 3v6l-5 9a2 2 0 0 0 1.8 3h12.4a2 2 0 0 0 1.8-3l-5-9V3z"/>',
-  grid:    '<path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/>',
-  star:    '<path d="m12 3 2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.4 6.7 19.2l1.1-5.9L3.5 9.2l5.9-.8z"/>',
-  gavel:   '<path d="m14 3 7 7-3 3-7-7zM3 21h10M10 10 3 17l3 3 7-7"/>',
+  visit:   '<path class="s" d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"/><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11"/><circle cx="12" cy="10" r="2.6"/>',
+  flask:   '<path class="s" d="M6.6 15.2h10.8l2.1 3.9a1.9 1.9 0 0 1-1.7 2.8H6.2a1.9 1.9 0 0 1-1.7-2.8z"/><path d="M10 3.5v6L4.6 19.2a1.9 1.9 0 0 0 1.7 2.8h11.4a1.9 1.9 0 0 0 1.7-2.8L14 9.5v-6M9.2 3.5h5.6"/>',
+  grid:    '<rect class="s" x="13" y="13" width="7.5" height="7.5" rx="1.6"/><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.6"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="1.6"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="1.6"/><rect x="13" y="13" width="7.5" height="7.5" rx="1.6"/>',
+  star:    '<path class="s" d="m12 3.4 2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.7 6.8 19.4l1-5.8-4.2-4.1 5.8-.8z"/><path d="m12 3.4 2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.7 6.8 19.4l1-5.8-4.2-4.1 5.8-.8z"/>',
   plus:    '<path d="M12 5v14M5 12h14"/>',
   arrow:   '<path d="M19 12H5M12 5l-7 7 7 7"/>',
-  deck:    '<rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M8 21h8M12 17v4"/>',
-  play:    '<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/>',
+  deck:    '<rect class="s" x="3" y="4" width="18" height="12.5" rx="2"/><rect x="3" y="4" width="18" height="12.5" rx="2"/><path d="M8 20.5h8M12 16.5v4"/>',
+  play:    '<circle class="s" cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="9"/><path d="M10 8.6v6.8l5.6-3.4z" fill="currentColor"/>',
   next:    '<path d="M15 6l-6 6 6 6"/>',
   prev:    '<path d="M9 6l6 6-6 6"/>',
   stop:    '<rect x="6" y="6" width="12" height="12" rx="2"/>',
@@ -2083,7 +2155,7 @@ const TOUR_HEADS = {
   'القِمع في الفئات العشر': 'board-funnel',
   'الأوسمة الثلاثة': 'res-medals',
   'حكمُ بوّابة الأهليّة — فوريّ': 'gates',
-  '١ — بوّابة الأهليّة': 'gates',
+  '1 — بوّابة الأهليّة': 'gates',
   'الملفّات المُسنَدة': 'desk-list',
   'نتائج المؤشّرات · المرحلة الأولى': 's1-break',
   'الإسناد': 'assign',
@@ -2092,7 +2164,7 @@ const TOUR_HEADS = {
   'الدرجة الموحَّدة': 'cons',
   'نافذة التظلّم': 'appeal-window',
   'التظلّمات': 'appeal-list',
-  '٥ — التظلّم': 'appeal',
+  '5 — التظلّم': 'appeal',
   'من يرى ماذا — مصفوفة الصلاحيات': 'matrix',
   'الأوزان والعتبات': 'weights'
 };
@@ -2101,8 +2173,26 @@ const head = (title, sub = '', right = '', tid = TOUR_HEADS[title]) =>
 const note = (txt, tone = 'n', icon = 'verdict') =>
   `<div class="note note--${tone}">${ic(icon)}<div>${txt}</div></div>`;
 const kv = rows => `<dl class="kv">${rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
-const stat = (v, l, sub = '', tone = '') =>
-  `<div class="stat ${tone ? 'stat--' + tone : ''}"><b class="num">${v}</b><span>${esc(l)}</span>${sub ? `<em>${esc(sub)}</em>` : ''}</div>`;
+/* رمزُ المربّع: يُمرَّر صراحةً (الوسيط الخامس) أو يُستنتَج من تسميته، فلا تُلمَس 23 نداءً.
+   التسميةُ تُطبَّع (بلا تشكيل ولا همزات) كي لا يكسرها حرفٌ مُشكَّل. */
+const STAT_ICON = [
+  [/جهه مسجله/, 'building'], [/ملف مشاركه|ملف مسند/, 'files'], [/اجتاز الاهليه/, 'verified'],
+  [/متاهل للمرحله/, 'funnel'], [/بلغ التحكيم/, 'gavel'], [/تباعد مفتوح/, 'split'],
+  [/ملف محجوب/, 'lock'], [/تظلم مقدم/, 'scale'], [/قيد النظر|بانتظار درجتي/, 'clock'],
+  [/اسابيع النافذه/, 'calendar'], [/فئات للتنافس|فئه واحده/, 'layers'], [/جهه توجت|جهه تتوج/, 'trophy'],
+  [/مسارات للتميز/, 'target'], [/اوسمه مسماه/, 'medal'], [/جهه مختلفه/, 'users'], [/فئه معتمده/, 'verified']
+];
+const normAr = t => String(t).replace(/[ً-ْٰـ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي');
+const statIcon = (l, tone) => {
+  const n = normAr(l); const hit = STAT_ICON.find(([re]) => re.test(n));
+  return hit ? hit[1] : ({ gold: 'trophy', red: 'warn', ink: 'chart' }[tone] || 'files');
+};
+const stat = (v, l, sub = '', tone = '', icon = '') =>
+  `<div class="stat ${tone ? 'stat--' + tone : ''}"><b class="num">${v}</b><i class="stat__i">${ic(icon || statIcon(l, tone))}</i><span>${esc(l)}</span>${sub ? `<em>${esc(sub)}</em>` : ''}</div>`;
+
+/* بلاطةُ المسار: لكلّ مسارٍ رمزُه، بدل دائرةٍ واحدةٍ عامّة تُشبه الستّةَ كلَّها */
+const TRACK_IC = { LIFE: 'heartbeat', PRIM: 'clinic', EMER: 'siren', PREV: 'shieldcheck', MATE: 'mother', EFFI: 'gauge' };
+const trackIc = (id, cls = '') => `<span class="tk ${cls}">${ic(TRACK_IC[id] || 'track')}</span>`;
 const empty = txt => `<div class="empty">${ic('flat')}<p>${esc(txt)}</p></div>`;
 const btn = (txt, attrs = '', tone = '') => `<button class="btn ${tone ? 'btn--' + tone : ''}" ${attrs}>${txt}</button>`;
 const link = (txt, href, tone = '') => `<a class="btn ${tone ? 'btn--' + tone : ''}" href="${href}">${txt}</a>`;
@@ -2116,7 +2206,7 @@ const table = (cols, rows, cls = '') =>
 
 /* وحدة المؤشّر تُكتب بعد الرقم بمسافةٍ رفيعة */
 const unit = (v, k, d = 1) => v === null || v === undefined ? '—' :
-  `${fmt(v, k.unit === 'يوم' ? 2 : d)}<span class="u">${k.unit === '٪' ? '٪' : ' ' + k.unit}</span>`;
+  `${fmt(v, k.unit === 'يوم' ? 2 : d)}<span class="u">${k.unit === '%' ? '%' : ' ' + k.unit}</span>`;
 
 /* ============ وسمُ المسار والفئة ============
    الفئةُ تُذكَر فقط حين يكون للمسار أكثرُ من فئة — وإلّا كان الوسمُ حشواً. */
@@ -2147,7 +2237,7 @@ function viewHome() {
     const tt = trackTotals(t.id);
     const wins = tt.winners.map(id => E(CASE(id).entity).name);
     return `<a class="card" href="#/track/${t.id}" style="text-decoration:none;color:inherit">
-      <div class="row" style="gap:8px;margin-block-end:6px">${ic('track')}<h3 style="font-size:14px">${esc(t.short)}</h3>
+      <div class="row" style="gap:10px;margin-block-end:8px">${trackIc(t.id, 'tk--lg')}<h3 style="font-size:14px">${esc(t.short)}</h3>
         ${t.cats.length > 1 ? pill(ar(t.cats.length) + ' فئات', 'i') : ''}</div>
       <p class="sm mut" style="min-block-size:52px">${esc(t.aim)}</p>
       <div class="row sm" style="gap:var(--s-4)">
@@ -2172,19 +2262,19 @@ function viewHome() {
           والكفاءة حول المريض. وتعتمد <b>${CYCLE.name}</b> منهجيّةَ التفكير المنظوميّ المبنيّة على
           إطار <b>مالكولم بالدريج</b> للتميّز المؤسّسيّ المستدام، مع الحفاظ على مسارات تميّز الأداء الستّة.</p>
         <div class="row">
-          ${pill('٦ مسارات', 'g')} ${pill('٣ مراحل للتقييم', 'i')}
-          ${pill('مواءمةٌ كاملة مع رؤية ٢٠٣٠', 'g')} ${pill('١٠٠ عام على أوّل مديريّة للصحة', 'au')}
+          ${pill('6 مسارات', 'g')} ${pill('3 مراحل للتقييم', 'i')}
+          ${pill('مواءمةٌ كاملة مع رؤية 2030', 'g')} ${pill('100 عام على أوّل مديريّة للصحة', 'au')}
         </div>
       </div>
       <div class="grid g-4" style="flex:1 1 300px;min-inline-size:280px">
         ${stat(ar(st.cases), 'ملفّ مشاركة', 'من ' + nEnt(st.entities))}
         ${stat(ar(st.eligible), 'اجتاز الأهليّة', 'من ' + ar(st.cases), 'ink')}
-        ${stat(ar(st.finalists), 'بلغ التحكيم', 'أفضل ٥ لكلّ فئة', 'gold')}
+        ${stat(ar(st.finalists), 'بلغ التحكيم', 'أفضل 5 لكلّ فئة', 'gold')}
         ${stat(ar(st.diverging), 'تباعُدٌ مفتوح', 'يلزمه حوارُ توحيد', st.diverging ? 'red' : '')}
       </div>
     </div>`)}
 
-  ${card(head('المسارات الستّة', 'يتواءم كل مسارٍ مع رؤية السعودية ٢٠٣٠ وبرنامج تحوّل القطاع الصحي، بما يدعم نموذج الرعاية الصحية، ورفع الكفاءة، والتصدّي للعبء المتزايد من الأمراض.')
+  ${card(head('المسارات الستّة', 'يتواءم كل مسارٍ مع رؤية السعودية 2030 وبرنامج تحوّل القطاع الصحي، بما يدعم نموذج الرعاية الصحية، ورفع الكفاءة، والتصدّي للعبء المتزايد من الأمراض.')
     + `<div class="grid g-3">${trackCards}</div>`)}
 
   ${card(head('المراحل الثلاث', 'مسارٌ عادلٌ قائمٌ على الأدلّة، يعمل على نحوٍ تدريجيّ لتأهيل الجهات الأعلى أداءً في كل مسار.')
@@ -2276,7 +2366,7 @@ function viewMethod() {
 
   ${card(head('الأوزان والعتبات', 'هذه أرقامٌ تحكم الحساب. المكتوب بالأخضر منصوصٌ عليه في الدليل، والمكتوب بالكهرمانيّ افتراضُ المنصّة.')
     + table([['البند'], ['القيمة', 'c'], ['المصدر'], ['ماذا يعني تغييرُها']], [
-      ['نصيب المرحلة الأولى', pc(CFG.w1 * 100, 0), 'assume', 'الدليل لا يذكر وزناً للمراحل. أُخِذ ٥٠٪ لأنه الوزن المُعلَن في الأدبيات السابقة للجائزة.'],
+      ['نصيب المرحلة الأولى', pc(CFG.w1 * 100, 0), 'assume', 'الدليل لا يذكر وزناً للمراحل. أُخِذ 50% لأنه الوزن المُعلَن في الأدبيات السابقة للجائزة.'],
       ['نصيب المرحلة الثانية', pc(CFG.w2 * 100, 0), 'assume', 'رفعُه يُعلي منظومةَ العمل على النتيجة الرقمية، وخفضُه يعكس ذلك.'],
       ['المرحلة الثالثة', 'قرارٌ لا درجة', 'text', '«مراجعةٌ نهائية من لجنة التحكيم لتأكيد الجهات الفائزة» — قرارٌ يعتمد الترتيب أو يعدّله بمبرَّر، لا درجةٌ تُضاف.'],
       ['أوزان LeTCI', `${pc(w.Le * 100, 0)}، ${pc(w.T * 100, 0)}، ${pc(w.C * 100, 0)}، ${pc(w.I * 100, 0)}`, 'assume', 'المستويات ثم الاتجاهات: الجائزةُ تكافئ الأداء المستدام لا القفزة الواحدة.'],
@@ -2285,15 +2375,15 @@ function viewMethod() {
       ['عتبة تباعُد البُعد المفرد', ar(CFG.dimGap) + ' نقطة', 'assume', 'أوسعُ من خطوةِ مرسًى واحدة — أي أن المقيّمَيْن لم يختارا مرسيين متجاورين. ذاك خلافٌ في قراءة البند، وما دونه شدّةُ مُقيِّم.'],
       ['نسبة بلوغ المستهدفات', pc(CFG.metRatio * 100, 0), 'assume', 'الدليل يشترط «أداءً يحقّق المستهدفات الوطنية أو يتجاوزها» دون نسبة. رفعُها يُضيّق البوّابة.'],
       ['طول الاتجاه', ar(CFG.cycles) + ' دورات', 'text', '«اتجاهٌ إيجابيّ لثلاث دوراتٍ متتالية» — نصٌّ صريح.'],
-      ['موضعُ التصفية', 'داخل الفئة', 'assume', 'الدليل يقول «أفضل ١٠ لكلّ مسار»، ونتيجةُ الدورة الثامنة توّجت في مسار إنقاذ الأرواح خمسَ جهاتٍ في ثلاث فئات — أي أن التتويج يقع في الفئة. ولمّا كان آخرُ الغربال في الفئة وجب أن يكون أوّلُه فيها، وإلّا خلَت فئةٌ من مرشَّحين.'],
-      ['حجمُ التتويج', 'حتى ٣ لكلّ فئة', 'assume', 'رعايةُ الأمومة توّجت جهتين لا ثلاثاً في الدورة الثامنة — فالعتبةُ سقفٌ لا حصّةٌ تُملأ.'],
+      ['موضعُ التصفية', 'داخل الفئة', 'assume', 'الدليل يقول «أفضل 10 لكلّ مسار»، ونتيجةُ الدورة الثامنة توّجت في مسار إنقاذ الأرواح خمسَ جهاتٍ في ثلاث فئات — أي أن التتويج يقع في الفئة. ولمّا كان آخرُ الغربال في الفئة وجب أن يكون أوّلُه فيها، وإلّا خلَت فئةٌ من مرشَّحين.'],
+      ['حجمُ التتويج', 'حتى 3 لكلّ فئة', 'assume', 'رعايةُ الأمومة توّجت جهتين لا ثلاثاً في الدورة الثامنة — فالعتبةُ سقفٌ لا حصّةٌ تُملأ.'],
       ['نافذة التظلّم', ar(CYCLE.appealWeeks) + ' أسابيع', 'text', 'من تاريخ حفل الجائزة وإعلان النتائج.']
     ].map(([a, b_, src, why]) => `<tr>
         <td><b>${esc(a)}</b></td>
         <td class="c n"><b>${b_}</b></td>
         <td>${src === 'text' ? pill('نصُّ الدليل', 'g') : pill('افتراضُ المنصّة', 'a')}</td>
         <td class="mut">${esc(why)}</td></tr>`))
-    + note('<b>لماذا تُعرَض الأوزان بدل أن تُخفى؟</b> لأن أوّل ما يُطعَن فيه في أيّ جائزةٍ هو الوزن، لا الدرجة. جهةٌ تعرف أن العمليات ٦٠٪ من المرحلة الثانية تعرف أين تستثمر، وجهةٌ تُفاجَأ بالوزن بعد النتيجة تملك حُجّةَ تظلُّمٍ صحيحة.', 'i', 'verdict')
+    + note('<b>لماذا تُعرَض الأوزان بدل أن تُخفى؟</b> لأن أوّل ما يُطعَن فيه في أيّ جائزةٍ هو الوزن، لا الدرجة. جهةٌ تعرف أن العمليات 60% من المرحلة الثانية تعرف أين تستثمر، وجهةٌ تُفاجَأ بالوزن بعد النتيجة تملك حُجّةَ تظلُّمٍ صحيحة.', 'i', 'verdict')
   )}
 
   ${card(head('لماذا مقيّمان وخبير — لا مقيّمٌ واحد؟')
@@ -2366,7 +2456,7 @@ function viewTrack(tid) {
     ${stat(ar(t.cats.length), single ? 'فئةٌ واحدة' : 'فئاتٌ للتنافس', single ? 'لا تقسيمَ داخليّ' : 'لكلٍّ ترتيبُها وفائزُها', 'ink')}
     ${stat(ar(tt.all), 'ملفّ مشاركة')}
     ${stat(ar(tt.eligible), 'اجتاز الأهليّة', pc(tt.all ? tt.eligible / tt.all * 100 : 0, 0))}
-    ${stat(ar(tt.finalists), 'بلغ التحكيم', 'أفضل ٥ لكلّ فئة', 'gold')}
+    ${stat(ar(tt.finalists), 'بلغ التحكيم', 'أفضل 5 لكلّ فئة', 'gold')}
   </div>
 
   ${card(head(single ? 'الفئة' : 'فئات المسار',
@@ -2527,7 +2617,7 @@ function regStep3() {
     const list = pool.filter(c => c.track === t.id);
     if (!list.length) return '';
     return `<div style="margin-block-end:var(--s-4)">
-      <div class="row" style="gap:6px;margin-block-end:6px">${ic('track')}<b>${esc(t.name)}</b>
+      <div class="row" style="gap:8px;margin-block-end:8px">${trackIc(t.id)}<b>${esc(t.name)}</b>
         ${t.cats.length > 1 ? pill(num(t.cats.length, 'فئةٌ واحدة', 'فئتان', 'فئاتٍ', 'فئةً'), 'i') : ''}</div>
       <div class="opts">${list.map(c => {
         const has = taken.includes(c.key);
@@ -2585,7 +2675,7 @@ function regDone() {
       el.pass ? stateBadge(r.state) : stateBadge('ineligible'))
     + gatesHtml(el)
     + (el.pass
-      ? note(`<b>اجتزتَ البوّابة.</b> درجتك في المرحلة الأولى <b class="num">${fmt(s1.score, 1)}</b> من ١٠٠، وترتيبك ${r.rank1 ? '<b class="num">' + ar(r.rank1) + '</b> في المسار' : 'قيد الاحتساب'}. أفضلُ ${ar(STAGES[0].cut)} جهاتٍ في الفئة يُفتَح لهم نموذجُ المشاركة.`, 'g', 'check')
+      ? note(`<b>اجتزتَ البوّابة.</b> درجتك في المرحلة الأولى <b class="num">${fmt(s1.score, 1)}</b> من 100، وترتيبك ${r.rank1 ? '<b class="num">' + ar(r.rank1) + '</b> في المسار' : 'قيد الاحتساب'}. أفضلُ ${ar(STAGES[0].cut)} جهاتٍ في الفئة يُفتَح لهم نموذجُ المشاركة.`, 'g', 'check')
       : note('<b>لم تجتز البوّابة — وهذا ليس رفضاً إدارياً.</b> الشروطُ الثلاثة منصوصٌ عليها في دليل الجائزة، وكلٌّ منها قاطع. اقرأ أعلاه أيَّها سقط: بعضُها يُعالَج بربط بياناتٍ قبل إقفال التسجيل، وبعضُها يحتاج دورةً كاملةً من التحسين.', 'r', 'x'))
   )}
   ${card(head('ماذا يحدث بعد اليوم') + timelineHtml())}
@@ -2629,15 +2719,15 @@ function viewEntity(cid) {
   ${card(head('المسار الشخصيّ للملفّ', 'أين أنت الآن، وما الذي يفتح الخطوةَ التالية.')
     + journeyHtml(r))}
 
-  ${card(head('١ — بوّابة الأهليّة', 'ثلاثةُ شروطٍ من دليل الجائزة. سقوطُ واحدٍ يُسقِط الملفّ.',
+  ${card(head('1 — بوّابة الأهليّة', 'ثلاثةُ شروطٍ من دليل الجائزة. سقوطُ واحدٍ يُسقِط الملفّ.',
       el.pass ? pill('مستوفاة', 'g') : pill('غيرُ مستوفاة', 'r'))
     + gatesHtml(el))}
 
-  ${card(head('٢ — لوحة المؤشّرات', 'قيمُ الدورات الثلاث كما وردت من المصادر الرسمية. الخطُّ الذهبيّ هو المستهدَف الوطنيّ.',
-      `<span class="tag"><i>درجة المرحلة ١</i><b class="num">${fmt(r.s1s, 1)}</b></span>`)
+  ${card(head('2 — لوحة المؤشّرات', 'قيمُ الدورات الثلاث كما وردت من المصادر الرسمية. الخطُّ الذهبيّ هو المستهدَف الوطنيّ.',
+      `<span class="tag"><i>درجة المرحلة 1</i><b class="num">${fmt(r.s1s, 1)}</b></span>`)
     + kpiTable(c, el))}
 
-  ${card(head('٣ — استمارة المشاركة',
+  ${card(head('3 — استمارة المشاركة',
       openForm ? 'مفتوحةٌ لك: أنت ضمن أفضل ' + ar(STAGES[0].cut) + ' في الفئة.'
                : 'تُفتَح في المرحلة الثانية لأفضل ' + ar(STAGES[0].cut) + ' جهاتٍ في كلّ فئةٍ وحدهم.',
       openForm ? (sub ? pill('مُرسَلة · ' + dt(sub.at), 'g') : pill('لم تُرسَل بعد', 'a')) : pill('مُقفَلة', ''))
@@ -2646,10 +2736,10 @@ function viewEntity(cid) {
          المرحلةُ الأولى تُحسَب من بياناتك الرسمية وحدها — ولا يُقدَّم فيها ملفٌّ ولا تُكتَب فيها كلمة.</p>
          ${r.state === 'ineligible' ? '' : link('اقرأ المنهجية', '#/method')}</div>`))}
 
-  ${openForm ? card(head('٤ — الزيارة الميدانية', 'للتحقّق من المعلومات والأدلّة — لا لعرضٍ تقديميّ.')
+  ${openForm ? card(head('4 — الزيارة الميدانية', 'للتحقّق من المعلومات والأدلّة — لا لعرضٍ تقديميّ.')
     + visitHtml(cid, r)) : ''}
 
-  ${card(head('٥ — التظلّم', `يُقدَّم خلال ${ar(CYCLE.appealWeeks)} أسابيع من تاريخ حفل الجائزة وإعلان النتائج، عبر البريد المخصّص.`)
+  ${card(head('5 — التظلّم', `يُقدَّم خلال ${ar(CYCLE.appealWeeks)} أسابيع من تاريخ حفل الجائزة وإعلان النتائج، عبر البريد المخصّص.`)
     + appealBox(cid, r))}
   `;
 }
@@ -2661,9 +2751,9 @@ function journeyHtml(r) {
   const nodes = [
     ['التسجيل', 'تمّ', true],
     ['الأهليّة', r.eligible ? 'اجتاز' : 'لم يجتز', r.eligible],
-    ['المرحلة ١ — المؤشّرات', r.rank1 ? 'المرتبة ' + ar(r.rank1) : '—', idx >= 2],
-    ['المرحلة ٢ — الأنظمة', r.s2s === null ? 'قيد التقييم' : 'الدرجة ' + fmt(r.s2s, 1), idx >= 3],
-    ['المرحلة ٣ — التحكيم', r.finalPos === 0 ? 'فائز' : r.finalPos > 0 ? 'مُكرَّم' : '—', idx >= 4]
+    ['المرحلة 1 — المؤشّرات', r.rank1 ? 'المرتبة ' + ar(r.rank1) : '—', idx >= 2],
+    ['المرحلة 2 — الأنظمة', r.s2s === null ? 'قيد التقييم' : 'الدرجة ' + fmt(r.s2s, 1), idx >= 3],
+    ['المرحلة 3 — التحكيم', r.finalPos === 0 ? 'فائز' : r.finalPos > 0 ? 'مُكرَّم' : '—', idx >= 4]
   ];
   return `<div class="funnel">${nodes.map(([n, v, ok], i) => `
     <div class="fn fn--j fn--${ok ? (i === 4 ? 4 : 2) : 0}">
@@ -2677,23 +2767,23 @@ function journeyHtml(r) {
 /* جدول المؤشّرات */
 /** مؤشّرٌ نسبيّ بلغ أعلى المدى: مجالُ تحسُّنه ضاق، فيُعاقَب في شرط الاتجاه بلا ذنب */
 function atCeiling(k, r) {
-  return k.unit === '٪' && k.better === 'up' && r.official && r.last >= 95 && r.trend < 2;
+  return k.unit === '%' && k.better === 'up' && r.official && r.last >= 95 && r.trend < 2;
 }
 
 function kpiTable(c, el) {
   const ceil = el.rows.filter(r => atCeiling(r.k, r));
-  return table([['المؤشّر'], ['د٦', 'c'], ['د٧', 'c'], ['د٨', 'c'], ['المستهدَف', 'c'], ['الاتجاه', 'c'], ['بلغ؟', 'c'], ['الحُجّية']],
+  return table([['المؤشّر'], ['د6', 'c'], ['د7', 'c'], ['د8', 'c'], ['المستهدَف', 'c'], ['الاتجاه', 'c'], ['بلغ؟', 'c'], ['الحُجّية']],
     el.rows.map(r => {
       const k = r.k;
       return `<tr class="${r.official ? '' : 'is-out'}">
-        <td><b>${esc(k.name)}</b>${SHARED.some(s => s.id === k.id) ? ' ' + pill('مشترك', 'i') : ''}${atCeiling(k, r) ? ' ' + pill('قُربَ السقف', 'a', 'بلغ ٩٥٪ فأكثر، ولم يُسجَّل له اتجاهٌ موجبٌ متّصل — لأنه لم يبقَ ما يصعده') : ''}</td>
+        <td><b>${esc(k.name)}</b>${SHARED.some(s => s.id === k.id) ? ' ' + pill('مشترك', 'i') : ''}${atCeiling(k, r) ? ' ' + pill('قُربَ السقف', 'a', 'بلغ 95% فأكثر، ولم يُسجَّل له اتجاهٌ موجبٌ متّصل — لأنه لم يبقَ ما يصعده') : ''}</td>
         ${[0, 1, 2].map(i => `<td class="c n">${r.s ? unit(r.s[i], k) : '—'}</td>`).join('')}
         <td class="c n mut">${k.better === 'band' ? ar(k.band[0]) + '–' + ar(k.band[1]) : unit(k.target, k, 0)}</td>
         <td class="c">${spark(k, r.s)}</td>
         <td class="c">${r.official ? yn(r.met, 'نعم', 'لا') : '<span class="mut">—</span>'}</td>
         <td>${r.official ? pill('مصدرٌ رسميّ', 'g') : pill('غيرُ متوفّر رسمياً', 'r')}</td></tr>`;
     }))
-    + (ceil.length ? note(`<b>أثرُ السقف — ${num(ceil.length, 'مؤشّرٌ واحد', 'مؤشّران', 'مؤشّراتٍ', 'مؤشّراً')} في هذه الحزمة.</b> بلغ ٩٥٪ فأكثر، ولم يُسجَّل له اتجاهٌ موجبٌ متّصل — <b>لا لتراجُع، بل لأنه لم يبقَ ما يصعده</b>. وشرطُ «الاتجاه الموجب لثلاث دورات» يعاقبه كما يعاقب المتراجع، فيتأهّل المتوسّطُ الصاعد ويسقط المتفوّقُ الثابت. هذه ثغرةٌ في المعيار لا في أداء الجهة، ومقترَحُ معالجتها — قراءةُ ما تجاوز ٩٥٪ «مستقرّاً عند التميّز» — مرفوعٌ إلى اللجنة العلمية ولم يُطبَّق في الحساب لأنه ليس في الدليل.`, 'a', 'warn') : '');
+    + (ceil.length ? note(`<b>أثرُ السقف — ${num(ceil.length, 'مؤشّرٌ واحد', 'مؤشّران', 'مؤشّراتٍ', 'مؤشّراً')} في هذه الحزمة.</b> بلغ 95% فأكثر، ولم يُسجَّل له اتجاهٌ موجبٌ متّصل — <b>لا لتراجُع، بل لأنه لم يبقَ ما يصعده</b>. وشرطُ «الاتجاه الموجب لثلاث دورات» يعاقبه كما يعاقب المتراجع، فيتأهّل المتوسّطُ الصاعد ويسقط المتفوّقُ الثابت. هذه ثغرةٌ في المعيار لا في أداء الجهة، ومقترَحُ معالجتها — قراءةُ ما تجاوز 95% «مستقرّاً عند التميّز» — مرفوعٌ إلى اللجنة العلمية ولم يُطبَّق في الحساب لأنه ليس في الدليل.`, 'a', 'warn') : '');
 }
 
 /* الاستمارة */
@@ -2741,7 +2831,7 @@ function visitHtml(cid, r) {
       <p class="sm mut" style="margin:0">${esc(v.q)}</p>
       ${done ? `<div class="row sm" style="margin-block-start:6px">
         <b class="num">${ar(Math.round(Object.values(r.reviews).reduce((a, x) => a + x.visit[v.k], 0) / Object.keys(r.reviews).length))}</b>
-        <span class="mut">متوسّط الفريق من ١٠٠</span></div>` : ''}
+        <span class="mut">متوسّط الفريق من 100</span></div>` : ''}
     </div>`).join('')}
   </div>
   ${note('<b>الزيارةُ تحقُّقٌ لا استقبال.</b> بندُ «تتبُّع الرقم إلى مصدره» وحده يكشف أكثرَ ممّا يكشفه عرضٌ تقديميٌّ كامل: يُختار رقمٌ من الاستمارة عشوائياً، ويُطلَب سجلُّه الأصليّ. عدمُ القدرة على تتبّعه ليس نقصاً إدارياً — بل شكٌّ في النتيجة كلّها.', 'a', 'warn')}`;
@@ -2798,7 +2888,7 @@ function viewDesk() {
   if (role === 'entity') {
     const cs = CASES.filter(c => c.entity === me().entity);
     return `${pageHead('ملفّات جهتي', esc(E(me().entity).name))}
-      ${card(head('المشاركات') + (cs.length ? table([['المسار'], ['الحالة'], ['المرحلة ١', 'c'], ['المرحلة ٢', 'c'], ['المركّبة', 'c'], ['', 'c']],
+      ${card(head('المشاركات') + (cs.length ? table([['المسار'], ['الحالة'], ['المرحلة 1', 'c'], ['المرحلة 2', 'c'], ['المركّبة', 'c'], ['', 'c']],
         cs.map(c => { const r = rowOf(c.id); return `<tr>
           <td><b>${esc(caseLabel(c))}</b></td><td>${stateBadge(r.state)}</td>
           <td class="c n">${fmt(r.s1s, 1)}</td><td class="c n">${fmt(r.s2s, 1)}</td><td class="c n"><b>${fmt(r.comp, 1)}</b></td>
@@ -2825,7 +2915,7 @@ function viewDesk() {
   </div>
 
   ${div.length ? card(head('يلزمه حوارُ توحيد', 'الدرجةُ لا تُعتمَد ما دام التباعُد مفتوحاً — والاعتمادُ فوقه ثغرةُ تظلّمٍ جاهزة.', pill('عاجل', 'r'))
-    + table([['الجهة'], ['المسار'], ['مقيّم ١', 'c'], ['مقيّم ٢', 'c'], ['الفارق', 'c'], ['', 'c']],
+    + table([['الجهة'], ['المسار'], ['مقيّم 1', 'c'], ['مقيّم 2', 'c'], ['الفارق', 'c'], ['', 'c']],
       div.map(({ r }) => {
         const evs = Object.values(r.reviews).filter(x => x.by.startsWith('U-EV'));
         return `<tr><td><span class="ent">${esc(E(r.c.entity).name)}</span></td>
@@ -2921,11 +3011,11 @@ function viewCase(cid) {
 
       ${card(head('الدرجات')
         + `<div class="row" style="gap:var(--s-5);justify-content:space-around;padding-block:var(--s-3)">
-            ${dial(r.s1s, 68, 'المرحلة ١')}${dial(r.s2s, 68, 'المرحلة ٢')}${dial(r.comp, 78, 'المركّبة')}</div>
+            ${dial(r.s1s, 68, 'المرحلة 1')}${dial(r.s2s, 68, 'المرحلة 2')}${dial(r.comp, 78, 'المركّبة')}</div>
           <div class="hr"></div>
-          ${kv([['مصدر درجة المرحلة ٢', esc(r.s2source)],
+          ${kv([['مصدر درجة المرحلة 2', esc(r.s2source)],
                 ['التباعُد', r.divergence === null ? '<span class="mut">لم تكتمل درجتا المقيّمَيْن</span>' : `<b class="num" style="color:${r.divergence > CFG.divergence ? 'var(--r-500)' : 'inherit'}">${fmt(r.divergence, 1)}</b> نقطة · العتبة ${ar(CFG.divergence)}`],
-                ['المرتبة في الفئة', r.rank2 ? ar(r.rank2) : r.rank1 ? ar(r.rank1) + ' (بالمرحلة ١)' : '—'],
+                ['المرتبة في الفئة', r.rank2 ? ar(r.rank2) : r.rank1 ? ar(r.rank1) + ' (بالمرحلة 1)' : '—'],
                 ['الوزن', `${pc(CFG.w1 * 100, 0)} + ${pc(CFG.w2 * 100, 0)}`]])}
           ${r.needsConsensus ? `<div class="hr"></div>${link('افتح حوار التوحيد', '#/consensus/' + cid, 'red')}` : ''}`)}
 
@@ -3041,8 +3131,8 @@ function viewConsensus(cid) {
               <div class="dv__n" style="color:${x.gap > CFG.dimGap ? 'var(--r-500)' : 'inherit'}">${ar(x.gap)}</div>
             </div>`;
           }).join('')}
-          <div class="dv__lg"><span><i style="background:var(--ink-500)"></i>مقيّم ١</span>
-            <span><i style="background:var(--au-500)"></i>مقيّم ٢</span>
+          <div class="dv__lg"><span><i style="background:var(--ink-500)"></i>مقيّم 1</span>
+            <span><i style="background:var(--au-500)"></i>مقيّم 2</span>
             <span><i style="background:var(--g-600)"></i>خبير اللجنة العلمية</span>
             <span><i style="background:var(--r-200)"></i>مدى التباعُد</span></div>
         </div>`)}
@@ -3065,7 +3155,7 @@ function viewConsensus(cid) {
             <div class="row" style="justify-content:center;padding-block:var(--s-3)">${dial((reviewScore(evs[0]) + reviewScore(evs[1])) / 2, 84, 'المقترَحة')}</div>
             <div class="fld"><label for="cs-r">مبرَّرُ التوحيد <span>*</span></label>
               <em>ما الذي حسم الخلاف: دليلٌ جديد، أم قراءةٌ مصحّحة للمرسى، أم نقصٌ في الاستمارة؟</em>
-              <textarea id="cs-r" placeholder="مثال: اتّفق المقيّمان بعد مراجعة المحضر رقم ٤ على أن التطبيق يشمل ثلاث وحداتٍ لا خمساً، فاستقرّ البُعد D عند ٦٠."></textarea></div>
+              <textarea id="cs-r" placeholder="مثال: اتّفق المقيّمان بعد مراجعة المحضر رقم 4 على أن التطبيق يشمل ثلاث وحداتٍ لا خمساً، فاستقرّ البُعد D عند 60."></textarea></div>
             <div class="row" style="justify-content:flex-end">${btn('اعتمادُ الدرجة الموحَّدة', `data-cons="${cid}"`, 'p')}</div>`
           : note('هذه الصفحة للاطّلاع فقط بدورك الحاليّ. تسجيلُ التوحيد صلاحيةُ خبير اللجنة العلمية ورئيسها.', 'n', 'lock')))}
 
@@ -3111,7 +3201,7 @@ function boardTable(b, full = false) {
   });
   if (!rows.length) return empty('لا مشاركات في هذا المسار.');
 
-  return table([['#', 'c'], ['الجهة'], ['القطاع'], ['الحالة'], ['م١', 'c'], ['م٢', 'c'], ['المركّبة', 'c'], ['التباعُد', 'c'], ['', 'c']],
+  return table([['#', 'c'], ['الجهة'], ['القطاع'], ['الحالة'], ['م1', 'c'], ['م2', 'c'], ['المركّبة', 'c'], ['التباعُد', 'c'], ['', 'c']],
     rows.map((r, i) => {
       const ent = E(r.c.entity);
       const cut = full && b.qualified.length && r.c.id === b.qualified[b.qualified.length - 1].c.id;
@@ -3143,8 +3233,8 @@ function viewBoard() {
     ${stat(ar(st.entities), 'جهةٌ مُسجَّلة')}
     ${stat(ar(st.cases), 'ملفّ مشاركة', ar(st.cats) + ' فئات')}
     ${stat(ar(st.eligible), 'اجتاز الأهليّة', pc(st.eligible / st.cases * 100, 0), 'ink')}
-    ${stat(ar(st.qualified), 'متأهّلٌ للمرحلة ٢', 'أفضل ١٠/فئة', 'ink')}
-    ${stat(ar(st.finalists), 'بلغ التحكيم', 'أفضل ٥/فئة', 'gold')}
+    ${stat(ar(st.qualified), 'متأهّلٌ للمرحلة 2', 'أفضل 10/فئة', 'ink')}
+    ${stat(ar(st.finalists), 'بلغ التحكيم', 'أفضل 5/فئة', 'gold')}
     ${stat(ar(st.diverging), 'تباعُدٌ مفتوح', st.diverging ? 'يوقف الاعتماد' : 'لا شيء', st.diverging ? 'red' : '')}
   </div>
 
@@ -3153,7 +3243,7 @@ function viewBoard() {
         const tt = trackTotals(t.id);
         return `<div style="margin-block-end:var(--s-4)">
           <div class="rowj" style="margin-block-end:6px">
-            <a href="#/track/${t.id}" style="font-weight:600;font-size:13px;color:inherit;text-decoration:none">${ic('track')} ${esc(t.name)}</a>
+            <a href="#/track/${t.id}" style="display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:13px;color:inherit;text-decoration:none">${trackIc(t.id)}${esc(t.name)}</a>
             <span class="sm mut">${ar(tt.all)} مُسجَّلاً · ${ar(tt.eligible)} مؤهَّلاً${t.cats.length > 1 ? ' · ' + num(t.cats.length, '', 'فئتان', 'فئاتٍ', 'فئةً') : ''}</span>
           </div>
           <div class="funnel">${t.cats.map(cat => {
@@ -3163,7 +3253,7 @@ function viewBoard() {
               <div class="fn__l"><a href="#/cat/${cat.key}" style="color:inherit;text-decoration:none">${esc(t.cats.length > 1 ? cat.short : 'الفئة العامة')}</a>
                 <em>${esc(cat.unit === 'cluster' ? 'تجمّعات' : cat.unit === 'hospital' ? 'منشآت مفردة' : 'تجمّعاتٌ ومنشآت')} · ${ar(c.all)} مُسجَّلاً</em></div>
               <div class="fn__t">
-                ${seg.map(([n, i]) => n > 0 ? `<i style="flex:${n};background:${['var(--n-300)', 'var(--ink-200)', 'var(--ink-400)', 'var(--ink-700)', 'linear-gradient(90deg,var(--au-500),var(--au-300))'][i]}" title="${['خارج الأهليّة', 'خرج بعد م١', 'خرج بعد م٢', 'بلغ التحكيم', 'مُكرَّم'][i]}: ${n}"></i>` : '').join('')}
+                ${seg.map(([n, i]) => n > 0 ? `<i style="flex:${n};background:${['var(--n-300)', 'var(--ink-200)', 'var(--ink-400)', 'var(--ink-700)', 'linear-gradient(90deg,var(--au-500),var(--au-300))'][i]}" title="${['خارج الأهليّة', 'خرج بعد م1', 'خرج بعد م2', 'بلغ التحكيم', 'مُكرَّم'][i]}: ${n}"></i>` : '').join('')}
                 <i style="flex:${Math.max(0, maxAll - c.all)};background:transparent"></i>
               </div>
               <div class="fn__n">${bb.confirmed ? `<span style="color:var(--au-600)">${ar(3)}</span>` : `<span class="mut">${ar(c.finalists)}</span>`}</div>
@@ -3173,8 +3263,8 @@ function viewBoard() {
     + `<div class="dv__lg" style="margin-block-start:var(--s-3)">
       <span><i style="background:var(--au-400)"></i>مُكرَّم</span>
       <span><i style="background:var(--ink-700)"></i>بلغ التحكيم</span>
-      <span><i style="background:var(--ink-400)"></i>خرج بعد المرحلة ٢</span>
-      <span><i style="background:var(--ink-200)"></i>خرج بعد المرحلة ١</span>
+      <span><i style="background:var(--ink-400)"></i>خرج بعد المرحلة 2</span>
+      <span><i style="background:var(--ink-200)"></i>خرج بعد المرحلة 1</span>
       <span><i style="background:var(--n-300)"></i>لم يجتز الأهليّة</span>
     </div>`)}
 
@@ -3242,7 +3332,7 @@ function allTable() {
   CATS.forEach(c => boards()[c.key].rows.forEach(r => rows.push(r)));
   const o = { winner: 0, honored: 1, finalist: 2, qualified: 3, out2: 4, out1: 5, ineligible: 6, blocked: 7 };
   rows.sort((x, y) => (o[x.state] - o[y.state]) || ((y.comp ?? y.s1s) - (x.comp ?? x.s1s)));
-  return table([['الجهة'], ['المسار · الفئة'], ['الحالة'], ['م١', 'c'], ['م٢', 'c'], ['المركّبة', 'c'], ['', 'c']],
+  return table([['الجهة'], ['المسار · الفئة'], ['الحالة'], ['م1', 'c'], ['م2', 'c'], ['المركّبة', 'c'], ['', 'c']],
     rows.slice(0, 60).map(r => {
       const ent = E(r.c.entity), win = ['winner', 'honored'].includes(r.state);
       return `<tr class="${win ? 'is-win' : ''} ${['out1', 'out2', 'ineligible'].includes(r.state) ? 'is-out' : ''}">
@@ -3252,7 +3342,7 @@ function allTable() {
         <td class="c n">${fmt(r.s1s, 1)}</td><td class="c n">${fmt(r.s2s, 1)}</td>
         <td class="c n"><b>${fmt(r.comp, 1)}</b></td>
         <td class="c"><a href="#/case/${r.c.id}">افتح</a></td></tr>`;
-    })) + `<p class="sm mut" style="margin-block-start:var(--s-3)">تُعرَض أوّلُ ٦٠ صفّاً — اختر فئةً لترى ترتيبَها كاملاً.</p>`;
+    })) + `<p class="sm mut" style="margin-block-start:var(--s-3)">تُعرَض أوّلُ 60 صفّاً — اختر فئةً لترى ترتيبَها كاملاً.</p>`;
 }
 
 /* ============ قاعة التحكيم ============ */
@@ -3336,7 +3426,7 @@ function judgeCat(t, cat, b, isChair) {
     </div>`, conf ? 'card--gold' : '');
 }
 
-/* حالةُ النافذة تُحسَب من تاريخ اليوم — «مفتوحة الآن» نصّاً ثابتاً كذبةٌ بعد ٢١ أكتوبر */
+/* حالةُ النافذة تُحسَب من تاريخ اليوم — «مفتوحة الآن» نصّاً ثابتاً كذبةٌ بعد 21 أكتوبر */
 function appealNote() {
   const w = appealWindow();
   if (w.st === 'open') {
@@ -3490,7 +3580,7 @@ function viewResults() {
         const multi = rt.cats.length > 1;
         return `<div style="margin-block-end:var(--s-5)">
           <div class="rowj" style="margin-block-end:var(--s-3)">
-            <div class="row" style="gap:8px">${ic('track')}<b style="font-size:14px">${esc(t.name)}</b></div>
+            <div class="row" style="gap:10px">${trackIc(t.id)}<b style="font-size:14px">${esc(t.name)}</b></div>
             <div class="row sm">${pill(num(rt.cats.reduce((a, c) => a + c.winners.length, 0), '', 'جهتان', 'جهاتٍ', 'جهةً'), 'au')}
               ${multi ? pill(ar(rt.cats.length) + ' فئات', 'i') : ''}
               <a class="btn btn--sm" href="#/track/${t.id}">في المنصّة</a></div>
@@ -3560,7 +3650,7 @@ function viewResults() {
     + `<div class="stack">
       ${[['مستوى الفئة لم يكن موجوداً',
           'كان النموذج: جهة × <b>مسار</b>. والنتيجة تُظهر أن مسار إنقاذ الأرواح توّج خمساً في ثلاث فئات — ولو كانت التصفيةُ على مستوى المسار لتوّج ثلاثاً فقط.',
-          'صار النموذج: جهة × <b>فئة</b>، والعتبات ١٠←٥←٣ تُطبَّق داخل الفئة، ولكلّ فئةٍ حزمةُ مؤشّراتها ومقيّموها وقاعةُ تحكيمها.'],
+          'صار النموذج: جهة × <b>فئة</b>، والعتبات 10←5←3 تُطبَّق داخل الفئة، ولكلّ فئةٍ حزمةُ مؤشّراتها ومقيّموها وقاعةُ تحكيمها.'],
          ['وحدةُ التنافس كانت واحدة',
           'كان كلُّ مشاركٍ «جهةً». والنتيجة تُظهر أن التجمّعات تتنافس في الرعاية الأولية، والمستشفياتِ المفردة في إنقاذ الأرواح والطوارئ والأمومة.',
           'صار لكلّ جهةٍ نوعٌ (تجمّع · منشأة مفردة · جهةٌ أمّ)، ولكلّ فئةٍ وحدةُ تنافسٍ تقبل نوعاً بعينه. والجهةُ الأمّ لا تدخل مساراً — تُمنَح وساماً.'],
@@ -3588,12 +3678,12 @@ function viewVerdict() {
   const rows = [
     ['التسجيل ورفع المشاركة',
      'بوّابةٌ مفتوحة: كلُّ جهةٍ تسجّل، تختار مساراً، وترفع ملفَّ مشاركتها.',
-     'المرحلة الأولى «مراجعةٌ قائمة على البيانات» مصدرُها «المصادر الرسمية لوزارة الصحة وشركائها». والاستمارةُ والزيارةُ في <b>المرحلة الثانية</b> — أي لأفضل ١٠ في كلّ مسار.',
+     'المرحلة الأولى «مراجعةٌ قائمة على البيانات» مصدرُها «المصادر الرسمية لوزارة الصحة وشركائها». والاستمارةُ والزيارةُ في <b>المرحلة الثانية</b> — أي لأفضل 10 في كلّ مسار.',
      'فصلَتِ المنصّةُ ثلاثةَ أشياء كانت واحداً: <b>التسجيل</b> (هويّةٌ وتفويض)، و<b>الأهليّة</b> (حكمٌ فوريّ من البيانات الرسمية)، و<b>الاستمارة</b> (تُفتَح للعشرة الأوائل وحدهم).'],
     ['عدد المراحل',
-     'مرحلتان، ٥٠٪ لكلٍّ منهما.',
-     'ثلاثُ مراحل: مؤشّرات → أنظمة → تحكيم، بتصفيةٍ ١٠ ← ٥ ← ٣.',
-     'الثالثةُ <b>قرارٌ لا درجة</b> («مراجعةٌ نهائية لتأكيد الفائزين»). فبقي وزنُ الدرجة ٥٠+٥٠ كما في نصّك، وأُضيفت مرحلةُ قرارٍ فوقهما. النصّان يتّفقان بعد هذا التمييز.'],
+     'مرحلتان، 50% لكلٍّ منهما.',
+     'ثلاثُ مراحل: مؤشّرات → أنظمة → تحكيم، بتصفيةٍ 10 ← 5 ← 3.',
+     'الثالثةُ <b>قرارٌ لا درجة</b> («مراجعةٌ نهائية لتأكيد الفائزين»). فبقي وزنُ الدرجة 50+50 كما في نصّك، وأُضيفت مرحلةُ قرارٍ فوقهما. النصّان يتّفقان بعد هذا التمييز.'],
     ['إطار التقييم',
      'غيرُ مذكور.',
      'إطارُ مالكولم بالدريج، ونموذجا ADLI للعمليات وLeTCI للنتائج.',
@@ -3632,7 +3722,7 @@ function viewVerdict() {
 
   ${note(`<b>هذه الصفحةُ رُوجِعت بعد الحفل.</b> أُعلِنت نتائجُ الدورة الثامنة في ${dt(RESULTS.day)}، فنقضت ثلاثةً من افتراضاتي البنيوية وواحداً من أحكامي. القسمُ السادس أدناه يعرضها، ولم أحذف ما كتبتُه قبلها — الحكمُ الذي يُمحى أثرُه لا يُقاس.`, 'au', 'medal')}
 
-  ${card(head('١ — الفرقُ بين ما طُلِب وما يقوله الدليل', 'خمسةُ فروقٍ غيّرت المعمار — لا الألوان.')
+  ${card(head('1 — الفرقُ بين ما طُلِب وما يقوله الدليل', 'خمسةُ فروقٍ غيّرت المعمار — لا الألوان.')
     + table([['البند'], ['في التصوُّر المُرسَل'], ['في دليل الدورة الثامنة'], ['ما فعلته المنصّة']],
       rows.map(([a, b, c, d]) => `<tr>
         <td><b>${esc(a)}</b></td>
@@ -3640,7 +3730,7 @@ function viewVerdict() {
         <td class="sm">${c}</td>
         <td class="sm" style="color:var(--g-700)">${d}</td></tr>`)))}
 
-  ${card(head('٢ — المغالطة المركزية', 'واحدةٌ تستحقّ أن تُفرَد.')
+  ${card(head('2 — المغالطة المركزية', 'واحدةٌ تستحقّ أن تُفرَد.')
     + `<p class="lead">طُلِب أن «تدخل كلُّ القطاعات المنصّة، وتسجّل عبر نموذج، وتختار الفئة، وترفع مشاركتها».
        الشقُّ الأول صحيحٌ ومطلوب. والشقُّ الأخير — <b>رفعُ المشاركة عند التسجيل</b> — يقلب منهجيّة الجائزة رأساً على عقب.</p>
     <div class="grid g-2">
@@ -3663,7 +3753,7 @@ function viewVerdict() {
     </div>
     ${note('<b>والنتيجةُ المهمّة:</b> الجهةُ التي لا تُؤهَّل تعرف السببَ بالمؤشّر والرقم في اليوم الأول، لا في يوم الإعلان. هذا وحده يُسقِط أكثرَ التظلّمات قبل أن تُكتَب.', 'g', 'check')}`)}
 
-  ${card(head('٣ — خمسُ ثغراتٍ في الدليل نفسه', 'ليست أخطاءً — مواضعُ صمتٍ تُملؤها المنصّةُ باجتهادٍ معلَن، وتنتظر حسماً من اللجنة العلمية.')
+  ${card(head('3 — خمسُ ثغراتٍ في الدليل نفسه', 'ليست أخطاءً — مواضعُ صمتٍ تُملؤها المنصّةُ باجتهادٍ معلَن، وتنتظر حسماً من اللجنة العلمية.')
     + `<div class="stack">${gaps.map(([g, why, fix], i) => `
       <div class="card card--flat">
         <div class="row" style="gap:var(--s-3);align-items:flex-start">
@@ -3676,15 +3766,15 @@ function viewVerdict() {
         </div>
       </div>`).join('')}</div>`)}
 
-  ${card(head('٤ — خطرٌ منهجيّ لا تحلّه المنصّة — ويجب أن يُقال', 'حكمُ خبيرٍ في مؤشّرات الصحة، لا ملاحظةُ مطوِّر.')
+  ${card(head('4 — خطرٌ منهجيّ لا تحلّه المنصّة — ويجب أن يُقال', 'حكمُ خبيرٍ في مؤشّرات الصحة، لا ملاحظةُ مطوِّر.')
     + `<div class="grid g-2">
       <div>
         <b>أثرُ السقف</b>
         <p class="sm mut">شرطُ «اتجاهٍ إيجابيّ لثلاث دوراتٍ متتالية» يُعاقِب مَن بلغ القمّة.
-          جهةٌ عند ٩٧٪ في التغطية التطعيميّة لا تستطيع إظهار اتجاهٍ موجب — لا لتراجُعٍ، بل لأنه لم يبقَ ما تصعده.
+          جهةٌ عند 97% في التغطية التطعيميّة لا تستطيع إظهار اتجاهٍ موجب — لا لتراجُعٍ، بل لأنه لم يبقَ ما تصعده.
           والنتيجة: يتأهّل المتوسّطُ الصاعد ويسقط المتفوّقُ الثابت.</p>
         <p class="sm" style="color:var(--g-700)">${ic('check')} <b>العلاج المقترَح:</b> استثناءُ سقفٍ معلَن —
-          مَن تجاوز ٩٥٪ من المستهدَف يُقرأ اتجاهُه «مستقرّاً عند التميّز» لا «سالباً».
+          مَن تجاوز 95% من المستهدَف يُقرأ اتجاهُه «مستقرّاً عند التميّز» لا «سالباً».
           لم أُطبِّقه في الحساب لأنه ليس في الدليل — لكنّه أوّلُ ما أرفعه إلى اللجنة العلمية.</p>
       </div>
       <div>
@@ -3698,12 +3788,12 @@ function viewVerdict() {
       </div>
     </div>`)}
 
-  ${card(head('٥ — ما نقضته النتيجةُ المعلنة من حكمي', 'أُعلِنت في ' + dt(RESULTS.day) + '. ثلاثةُ نقوضٍ بنيوية، وواحدٌ في الحكم لا في البناء.',
+  ${card(head('5 — ما نقضته النتيجةُ المعلنة من حكمي', 'أُعلِنت في ' + dt(RESULTS.day) + '. ثلاثةُ نقوضٍ بنيوية، وواحدٌ في الحكم لا في البناء.',
       link('النتائج كاملةً', '#/results'))
     + `<div class="stack">
       ${[['بنيويّ · مستوى الفئة',
           'بنيتُ النموذج على «جهة × مسار». والنتيجة توّجت في مسار إنقاذ الأرواح <b>خمسَ</b> جهاتٍ موزَّعةً على ثلاث فئات — ولو كان التتويجُ على مستوى المسار لتوّج ثلاثاً.',
-          'أُعيد بناءُ النموذج على «جهة × <b>فئة</b>»: عشرُ فئاتٍ داخل ستّة مسارات، والعتبات ١٠←٥←٣ تُطبَّق داخل الفئة، ولكلٍّ حزمتُها ومقيّموها وقاعةُ تحكيمها.'],
+          'أُعيد بناءُ النموذج على «جهة × <b>فئة</b>»: عشرُ فئاتٍ داخل ستّة مسارات، والعتبات 10←5←3 تُطبَّق داخل الفئة، ولكلٍّ حزمتُها ومقيّموها وقاعةُ تحكيمها.'],
          ['بنيويّ · وحدةُ التنافس',
           'عاملتُ كلَّ مشاركٍ «جهةً» واحدةَ النوع. والنتيجة تُظهر أن <b>التجمّعات</b> تفوز في الرعاية الأولية والإقلاع عن التبغ، و<b>المستشفيات المفردة</b> في إنقاذ الأرواح والطوارئ والأمومة والكفاءة.',
           'صار لكلّ جهةٍ نوعٌ يحكم أين تُقبَل: تجمّعٌ صحيّ · منشأةٌ مفردة · جهةٌ أمّ. والجهةُ الأمّ لا تدخل مساراً أصلاً — تُمنَح وساماً. وهذا يظهر في التسجيل: تُعرَض على الجهة فئاتُها هي لا الفئاتُ كلُّها.'],
@@ -3724,9 +3814,9 @@ function viewVerdict() {
     </div>
     ${note('<b>ولماذا يُعرَض النقضُ بدل أن يُطوى؟</b> لأن المنصّة كلَّها مبنيّةٌ على أن الحكمَ يُسجَّل ويُقرأ لاحقاً: مبرَّرُ المقيّم، ومحضرُ التوحيد، وقرارُ التظلّم. جائزةٌ تُلزِم غيرَها بتسجيل مبرَّراته ثم تمحو مبرَّراتها هي جائزةٌ بمعيارين.', 'i', 'verdict')}`)}
 
-  ${card(head('٦ — ما هذه النسخة، وما ليست', '')
+  ${card(head('6 — ما هذه النسخة، وما ليست', '')
     + `<div class="grid g-2">
-      ${[['حقيقيّ ومأخوذٌ من الدليل', 'g', ['المسارات الستّة ومسمّياتها', 'المراحل الثلاث وعتبات التصفية ١٠←٥←٣', 'شروط الأهليّة الثلاثة', 'اللجان الستّ وأدوارها', 'مقيّمان وخبير ثم توحيدٌ بالتوافق', 'إطار بالدريج ونموذجا ADLI وLeTCI', 'أوجه التكريم ونافذة التظلّم ستةَ أسابيع']],
+      ${[['حقيقيّ ومأخوذٌ من الدليل', 'g', ['المسارات الستّة ومسمّياتها', 'المراحل الثلاث وعتبات التصفية 10←5←3', 'شروط الأهليّة الثلاثة', 'اللجان الستّ وأدوارها', 'مقيّمان وخبير ثم توحيدٌ بالتوافق', 'إطار بالدريج ونموذجا ADLI وLeTCI', 'أوجه التكريم ونافذة التظلّم ستةَ أسابيع']],
         ['محاكاةٌ لا يُبنى عليها قرار', 'a', ['قيمُ المؤشّرات لكلّ جهة', 'أسماءُ أعضاء اللجان في هذه النسخة', 'درجاتُ المقيّمين المولَّدة', 'المستهدفاتُ الوطنية الرقمية — أُخِذت تقريبيّةً للتشغيل', 'الجدولُ الزمنيّ للدورة']]]
         .map(([t, tone, list]) => `<div class="card card--flat" style="border-color:var(--${tone === 'g' ? 'g' : 'am'}-200)">
           <b>${esc(t)}</b>
@@ -3749,11 +3839,11 @@ function viewVerdict() {
 (function () {
   'use strict';
 
-  /* القراراتُ التي لا يحسمها النظام — تُعرَض في الشريحة ٧ وتُعدّ في الخلاصة */
+  /* القراراتُ التي لا يحسمها النظام — تُعرَض في الشريحة 7 وتُعدّ في الخلاصة */
   const DECISIONS = [
     { d: 'وزن المرحلتين والعتبات', why: 'أول ما يُطعَن فيه هو الوزن لا الدرجة.',
       who: 'اللجنة العلمية', now: 'افتراض معلَن في شاشة المنهجية', tone: 'a' },
-    { d: 'أثر السقف', why: () => `من بلغ ${ar(95)}٪ لا يُظهر اتجاهاً موجباً، فيسقط المتفوّق ويتأهل الصاعد.`,
+    { d: 'أثر السقف', why: () => `من بلغ ${ar(95)}% لا يُظهر اتجاهاً موجباً، فيسقط المتفوّق ويتأهل الصاعد.`,
       who: 'اللجنة العلمية', now: 'يُعلَّم بشارة «قُربَ السقف» ولا يُعالَج في الحساب', tone: 'r' },
     { d: 'اسم المسار السادس', why: 'ثلاثة مسمّيات في ثلاثة مصادر.',
       who: 'اللجنة التوجيهية', now: 'اعتُمد نص الدليل', tone: '' },
@@ -3777,7 +3867,7 @@ function viewVerdict() {
   /* ============ الشرائح ============ */
   const SLIDES = [
 
-    /* ١ · الغلاف */
+    /* 1 · الغلاف */
     () => `
     <section class="sl sl--cover" data-i="0" aria-label="الغلاف">
       <div class="sl__top"><span class="cv__mk">أداء</span><b>جائزة أداء الصحة</b><span class="sp">عرض تنفيذي</span></div>
@@ -3793,7 +3883,7 @@ function viewVerdict() {
       <div class="cv__num" aria-hidden="true">${ar(STAGES[0].cut)} ← ${ar(STAGES[1].cut)} ← ${ar(STAGES[2].cut)}</div>
     </section>`,
 
-    /* ٢ · الخلاصة */
+    /* 2 · الخلاصة */
     () => {
       const st = cycleStats(), roles = Object.keys(ROLES).length;
       return frame(1, 'الخلاصة', `
@@ -3807,7 +3897,7 @@ function viewVerdict() {
       <p class="sl__fn">الأرقام والدرجات داخل النموذج محاكاة. صفحة النتائج وحدها بيانات حقيقية.</p>`);
     },
 
-    /* ٣ · الفكرة */
+    /* 3 · الفكرة */
     () => {
       const st = cycleStats();
       return frame(2, 'الفكرة', `
@@ -3823,7 +3913,7 @@ function viewVerdict() {
       </div>`);
     },
 
-    /* ٤ · المسار */
+    /* 4 · المسار */
     () => {
       const nodes = [
         ['التسجيل', 'الجهة', 'مفتوح لكل القطاعات', 'هوية وتفويض'],
@@ -3843,7 +3933,7 @@ function viewVerdict() {
       </div>`);
     },
 
-    /* ٥ · العدالة */
+    /* 5 · العدالة */
     () => frame(4, 'العدالة', `
       <h2>العدالة تُفرض بالشاشة، لا باللائحة وحدها</h2>
       <div class="sl__body">
@@ -3860,7 +3950,7 @@ function viewVerdict() {
         <p class="sl__fn">وكل فعل يُسجَّل: من فعل، ومتى، وبأي صلاحية. هذا هو السجلّ الذي تطلبه لجنة التظلّم.</p>
       </div>`),
 
-    /* ٦ · اختُبرت على النتيجة */
+    /* 6 · اختُبرت على النتيجة */
     () => frame(5, 'الاختبار', `
       <h2>اختُبرت على نتيجة الحفل، فعدّلت أربعة أشياء</h2>
       <div class="sl__body bw">
@@ -3874,7 +3964,7 @@ function viewVerdict() {
         </div>
       </div>`),
 
-    /* ٧ · القرارات */
+    /* 7 · القرارات */
     () => frame(6, 'القرارات', `
       <h2>ما لا يحلّه النظام يحتاج قراراً</h2>
       <div class="sl__body">
@@ -3888,7 +3978,7 @@ function viewVerdict() {
         <p class="sl__fn">الجهات المقترحة من اللجان الست في دليل الجائزة، والاقتراح لمن يملك الاعتماد.</p>
       </div>`),
 
-    /* ٨ · الحقيقي والمحاكاة */
+    /* 8 · الحقيقي والمحاكاة */
     () => frame(7, 'الحقيقي والمحاكاة', `
       <h2>الحقيقي والمحاكاة، بلا خلط</h2>
       <div class="sl__body">
@@ -3913,7 +4003,7 @@ function viewVerdict() {
         <p class="sl__fn">نموذج مستقل: لا يمثّل وزارة الصحة ولا يصدر عنها.</p>
       </div>`),
 
-    /* ٩ · الخطوة التالية */
+    /* 9 · الخطوة التالية */
     () => frame(8, 'الخطوة التالية', `
       <h2>الخطوة التالية: فئة واحدة ببيانات حقيقية</h2>
       <div class="sl__body">
@@ -4056,11 +4146,11 @@ function viewVerdict() {
    وتملأ الحقول وتضغط الأزرار الحقيقية، وتشرح ما يحدث.
 
    ثلاثةُ قراراتٍ تحكم هذا الملفّ:
-   ١) الجولةُ تعمل على لقطةٍ مؤقّتة وتُستعاد عند الخروج، فلا يبقى
+   1) الجولةُ تعمل على لقطةٍ مؤقّتة وتُستعاد عند الخروج، فلا يبقى
       في السجلّ ولا في الملفّات أثرٌ لها — السجلُّ المصنوع كذبة.
-   ٢) الرجوعُ إلى خطوةٍ سابقة يُعيد تشغيل ما قبلها بسرعةٍ من اللقطة،
+   2) الرجوعُ إلى خطوةٍ سابقة يُعيد تشغيل ما قبلها بسرعةٍ من اللقطة،
       فتكون الحالةُ دائماً هي الحالة الصحيحة لا تخميناً لها.
-   ٣) كلُّ خطوةٍ تضغط الأزرارَ نفسَها التي يضغطها المستخدم، فيُختبَر
+   3) كلُّ خطوةٍ تضغط الأزرارَ نفسَها التي يضغطها المستخدم، فيُختبَر
       مسارُ الشيفرة الحقيقيّ لا نسخةٌ منه.
    ============================================================ */
 (function () {
@@ -4141,7 +4231,7 @@ function viewVerdict() {
      role/route/look/title/body/note: نصٌّ أو دالّةٌ (mem, phase) → نصّ.
      act: الأفعالُ التي تضغطها الجولة. look: ما يُضاء — وسمُ data-tour أو دالّةٌ تُرجع عنصراً. */
   const STEPS = [
-    /* ١ · الصورة الكاملة */
+    /* 1 · الصورة الكاملة */
     { ch: 0, role: 'U-CH1', route: '#/', title: 'جولة المنصّة',
       body: 'ستشاهد المنصّة تعمل بنفسها: جهة تسجّل، ومقيّمان يقيّمان ويتباعدان، وخبير يوحّد، ولجنة تحكيم تعتمد، ثم تظلّم. تعمل الجولة على نسخة مؤقتة، وكل شيء يرجع كما كان حين تخرج.',
       note: 'توقّف أو تخطَّ أو ارجع في أي وقت من الأزرار تحت.',
@@ -4156,7 +4246,7 @@ function viewVerdict() {
       body: () => `وهذه نتائج حفل ${dt(CYCLE.ceremony)} الحقيقية: ${num(RESULT_COUNT, 'جهة', 'جهتان', 'جهات', 'جهةً')} وثلاثة أوسمة، بترتيبها داخل كل فئة. هي الصفحة الوحيدة غير المحاكاة، ولا فيها درجة لأي فائز لأن الدرجات لم تُعلن.`,
       look: 'res-medals' },
 
-    /* ٢ · الجهة تسجّل */
+    /* 2 · الجهة تسجّل */
     { ch: 1, role: 'U-EN2', date: '2026-01-20', route: '#/register', title: 'التسجيل مفتوح لكل القطاعات',
       body: 'ممثّل مستشفى خاص يبدأ باختيار القطاع. لاحظ التنبيه: ربط القطاع الخاص بالمنصّة الوطنية جزئي، والمنصّة تقول هذا قبل أن يكمل، لا بعد الإعلان.',
       act: async K => { await K.click('input[name="sector"][value="private"]'); },
@@ -4200,7 +4290,7 @@ function viewVerdict() {
       },
       look: 'gates' },
 
-    /* ٣ · التقييم المستقل */
+    /* 3 · التقييم المستقل */
     { ch: 2, role: m => m.X, date: '2026-05-25', route: '#/desk', title: 'مكتب المقيّم',
       body: 'يرى المقيّم الملفات المُسنَدة إليه فقط. ولا يُسنَد إليه ملف من جهته: تعارض المصالح يُستبعَد آلياً، ويُسجَّل سببه.',
       look: m => () => { const a = q(`a[href="#/case/${m.story}"]`); return a ? a.closest('tr') : q('[data-tour="desk-list"]'); } },
@@ -4225,7 +4315,7 @@ function viewVerdict() {
       },
       look: 'scorecard' },
 
-    /* ٤ · التباعُد والتوحيد */
+    /* 4 · التباعُد والتوحيد */
     { ch: 3, role: m => m.EX, date: '2026-06-05', route: m => '#/consensus/' + m.story, title: 'تباعُد يوقف الاعتماد',
       body: m => { const r = rowOf(m.story), dv = r && r.divergence; return `الفرق بين المقيّمين ${dv == null ? '' : fmt(dv, 1)} نقطة، والعتبة ${ar(CFG.divergence)}. الاعتماد متوقف حتى يُفتح حوار توحيد بحضور خبير اللجنة العلمية. الأبعاد المظلَّلة هي مواضع الخلاف.`; },
       look: 'dv' },
@@ -4238,7 +4328,7 @@ function viewVerdict() {
       },
       look: 'cons' },
 
-    /* ٥ · التحكيم والاعتماد */
+    /* 5 · التحكيم والاعتماد */
     { ch: 4, role: 'U-JD1', date: '2026-08-28', route: '#/judging', title: 'فئة فيها تباعُد مفتوح',
       body: 'هنا لا يظهر زر الاعتماد أصلاً. لجنة التحكيم تعتمد ترتيباً، والترتيب المبني على درجة لم تُوحَّد لا سند له. تُغلَق حوارات التوحيد أولاً.',
       look: m => m.blocked ? 'judge-' + m.blocked : null },
@@ -4264,7 +4354,7 @@ function viewVerdict() {
       },
       look: m => m.clean ? 'judge-' + m.clean : null },
 
-    /* ٦ · بعد الإعلان */
+    /* 6 · بعد الإعلان */
     { ch: 5, role: 'U-EN2', date: '2026-09-20', route: m => '#/entity/' + appealCid(m), title: 'التظلّم داخل المنصّة',
       body: () => `يقدّم ممثّل الجهة تظلّمه خلال ${ar(CYCLE.appealWeeks)} أسابيع من الحفل. والتظلّم إجرائي: يحدّد البند الذي لم تُطبَّق قاعدته كما نُشرت، لا الشعور بالنتيجة.`,
       note: () => `نافذة التظلّم من ${dt(CYCLE.ceremony)} إلى ${dt(CYCLE.appealEnds)}، وتاريخ العرض داخلها.`,
@@ -4286,7 +4376,7 @@ function viewVerdict() {
       body: 'كل ما جرى في الجولة مسجَّل: من فعل، ومتى، وبأي صلاحية. وهذا أول ما تطلبه لجنة التظلّم. وسيُمحى هذا السجل حين تخرج، لأن الجولة تعمل على نسخة مؤقتة.',
       look: 'log' },
 
-    /* ٧ · الخلاصة */
+    /* 7 · الخلاصة */
     { ch: 6, role: 'U-CH1', route: '#/verdict', title: 'هذا ما تفعله المنصّة', end: true,
       body: 'وما لا تفعله: الأرقام محاكاة، والأوزان افتراض معلن، والبيانات غير مربوطة بمصدرها. والقرارات التي تنتظر اللجان في العرض التنفيذي.',
       look: () => () => q('.ph') }
@@ -4664,8 +4754,8 @@ function buildRail() {
     ]],
     ['العمل', [
       ['desk',    'مكتبي',          '#/desk',     'desk',   mine || null],
-      ['judging', 'قاعة التحكيم',   '#/judging',  'judge',  null],
-      ['appeals', 'الحجب والتظلّم', '#/appeals',  'shield', null],
+      ['judging', 'قاعة التحكيم',   '#/judging',  'gavel',  null],
+      ['appeals', 'الحجب والتظلّم', '#/appeals',  'scale',  null],
       ['log',     'السجلّ',          '#/log',      'log',    null]
     ]],
     ['', [
@@ -4677,7 +4767,7 @@ function buildRail() {
     const vis = list.filter(([id]) => !CAN[id] || CAN[id].includes(role));
     if (!vis.length) return '';
     return `${g ? `<div class="nav__g">${esc(g)}</div>` : '<div style="block-size:8px"></div>'}
-      ${vis.map(([id, t, h, i, n]) => `<a href="${h}" data-nav="${id}">${ic(i)}<span>${esc(t)}</span>
+      ${vis.map(([id, t, h, i, n]) => `<a href="${h}" data-nav="${id}"><span class="nav__ic">${ic(i)}</span><span>${esc(t)}</span>
         ${id === 'desk' && n ? `<span class="nav__n nav__n--red">${ar(n)}</span>`
           : id === 'appeals' && openDiv ? `<span class="nav__n">${ar(openDiv)}</span>` : ''}</a>`).join('')}`;
   }).join('');
@@ -4751,9 +4841,21 @@ function render() {
   });
 
   bind();
+  centerRailNav();
   const h1 = (page.querySelector('h1')?.textContent || '').trim();
   document.title = !h1 ? 'جائزة أداء الصحة · ' + CYCLE.name
     : h1.startsWith('جائزة أداء الصحة') ? h1 : 'جائزة أداء الصحة · ' + h1;
+}
+
+/* يوسّط عنصر الشريط الحاليّ على الجوّال.
+   نُحرِّك الشريطَ بنفسه: scrollIntoView يُحرِّك كلَّ الأسلاف القابلة للتمرير فتنزاح الصفحةُ كلُّها أفقياً.
+   scrollLeft يزداد نحو اليمين في كلّ الاتّجاهات، فالفرقُ بين المركزين يصلح كما هو في RTL. */
+function centerRailNav() {
+  if (!(window.matchMedia && matchMedia('(max-width: 900px)').matches)) return;
+  const strip = document.querySelector('.rail .nav'), cur = strip && strip.querySelector('a[aria-current="page"]');
+  if (!cur) return;
+  const a = cur.getBoundingClientRect(), b = strip.getBoundingClientRect();
+  strip.scrollLeft += (a.left + a.width / 2) - (b.left + b.width / 2);
 }
 
 /* ============ إنشاء ملفٍّ جديد عند التسجيل ============ */
@@ -4876,7 +4978,7 @@ function bind() {
     const d = DB.submissions[cid] || { sec: {}, files: [], at: null };
     const filled = FORM.filter(f => (d.sec[f.id] || '').trim().length > 40).length;
     if (filled < FORM.length || !d.files.length) {
-      alert(`لا تُرسَل الاستمارةُ قبل اكتمالها:\n• الأقسام المكتملة ${filled} من ${FORM.length} (٤٠ حرفاً فأكثر لكلّ قسم)\n• الأدلّة المرفوعة ${d.files.length} — ودليلٌ واحدٌ على الأقلّ شرط.\n\nنصُّ الدليل: «أدلّةٌ داعمة لكلّ نتيجةٍ مُبلَّغٍ عنها».`);
+      alert(`لا تُرسَل الاستمارةُ قبل اكتمالها:\n• الأقسام المكتملة ${filled} من ${FORM.length} (40 حرفاً فأكثر لكلّ قسم)\n• الأدلّة المرفوعة ${d.files.length} — ودليلٌ واحدٌ على الأقلّ شرط.\n\nنصُّ الدليل: «أدلّةٌ داعمة لكلّ نتيجةٍ مُبلَّغٍ عنها».`);
       return;
     }
     d.at = todayISO();
@@ -4981,5 +5083,7 @@ document.documentElement.setAttribute('dir', 'rtl');
 document.documentElement.setAttribute('lang', 'ar');
 window.addEventListener('hashchange', render);
 render();
+/* الخطوط تأتي من الشبكة وتتبدّل بعد أول رسم فتتغيّر عروض الأقراص — نعيد التوسيط حين تستقرّ */
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(centerRailNav);
 
 </script>

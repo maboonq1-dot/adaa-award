@@ -21,7 +21,7 @@ const CFG = {
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-/* ============ ١ · قراءة مؤشّر ============ */
+/* ============ 1 · قراءة مؤشّر ============ */
 
 /** هل بلغت القيمةُ المستهدَف الوطنيّ؟ */
 function meets(k, v) {
@@ -39,7 +39,7 @@ function gain(k, a, b) {
   return k.better === 'down' ? a - b : b - a;
 }
 
-/** درجةُ المستوى ٠–١ : أين القيمةُ من المستهدَف */
+/** درجةُ المستوى 0–1 : أين القيمةُ من المستهدَف */
 function levelScore(k, v) {
   if (v === null || v === undefined) return null;
   if (k.better === 'band') {
@@ -49,7 +49,7 @@ function levelScore(k, v) {
   const ratio = k.better === 'down'
     ? (v <= 0 ? 1.25 : k.target / v)
     : v / k.target;
-  return clamp((ratio - 0.55) / 0.70, 0, 1);   // ‏٥٥٪ من المستهدَف = صفر، ١٢٥٪ = واحد
+  return clamp((ratio - 0.55) / 0.70, 0, 1);   // ‏55% من المستهدَف = صفر، 125% = واحد
 }
 
 /** حكمُ الاتجاه عبر ثلاث دورات: ‎2 موجبٌ لثلاث، 1 موجبٌ لدورتين، 0 غيرُ ذلك */
@@ -62,7 +62,7 @@ function trendGrade(k, s) {
   return 0;
 }
 
-/* ============ ٢ · بوابة الأهليّة ============
+/* ============ 2 · بوابة الأهليّة ============
    نصُّ الدليل — «ما الذي يؤهّل الجهة للمشاركة؟»:
      • بياناتٌ مستمدّة من المصادر الرسمية لوزارة الصحة وشركائها.
      • أداءٌ يحقّق المستهدفات الوطنية أو يتجاوزها.
@@ -93,12 +93,12 @@ function eligibility(c) {
       val: `${ks.length - c.missing.length}/${ks.length} مؤشّراً متوفّراً رسمياً`,
       miss: c.missing },
     { id: 'targets', name: 'بلوغ المستهدفات الوطنية',
-      req: `تحقيقُ ${Math.round(CFG.metRatio * 100)}٪ من مؤشّرات الحزمة للمستهدَف أو تجاوزُه`,
+      req: `تحقيقُ ${Math.round(CFG.metRatio * 100)}% من مؤشّرات الحزمة للمستهدَف أو تجاوزُه`,
       pass: withData.length > 0 && metN / ks.length >= CFG.metRatio,
       val: `${metN}/${ks.length} مؤشّراً بالغٌ المستهدَف`,
       ratio: metN / ks.length },
     { id: 'trend', name: 'اتجاهٌ موجبٌ لثلاث دورات',
-      req: `اتجاهٌ إيجابيّ متّصلٌ عبر ${CFG.cycles} دوراتٍ في ${Math.round(CFG.trendRatio * 100)}٪ من المؤشّرات`,
+      req: `اتجاهٌ إيجابيّ متّصلٌ عبر ${CFG.cycles} دوراتٍ في ${Math.round(CFG.trendRatio * 100)}% من المؤشّرات`,
       pass: withData.length > 0 && trendN / ks.length >= CFG.trendRatio,
       val: `${trendN}/${ks.length} مؤشّراً باتجاهٍ موجبٍ متّصل`,
       ratio: trendN / ks.length }
@@ -107,7 +107,7 @@ function eligibility(c) {
   return { rows, gates, pass: gates.every(g => g.pass) };
 }
 
-/* ============ ٣ · المرحلة الأولى — LeTCI على المؤشّرات ============
+/* ============ 3 · المرحلة الأولى — LeTCI على المؤشّرات ============
    نصُّ الدليل: «مراجعةٌ قائمة على البيانات لمؤشّرات الأداء الرئيسة،
    والاتجاهات، والمقارنات المرجعية» — وهي أبعادُ LeTCI الأربعة. */
 function stage1Raw(c) {
@@ -158,7 +158,7 @@ function stage1(id) {
   return _S1[id];
 }
 
-/* ============ ٤ · المرحلة الثانية — ADLI + LeTCI + الزيارة ============
+/* ============ 4 · المرحلة الثانية — ADLI + LeTCI + الزيارة ============
    نصُّ الدليل: «يُقيَّم كل مسار بصورةٍ مستقلّة من قِبَل مقيّمَيْن اثنين،
    إلى جانب خبيرٍ عن اللجنة العلمية، ثم تُوحَّد النتائج بالتوافق،
    وتُعتمد نهائياً من لجنة التحكيم». */
@@ -197,15 +197,15 @@ function reviewScore(rv) {
   return +(avg(rv.adli) * CFG.s2.adli + avg(rv.letci) * CFG.s2.letci + avg(rv.visit) * CFG.s2.visit).toFixed(1);
 }
 
-/* ============ ٥ · الحالة والتصفية ============
-   القِمع: كل الجهات ← المؤهّلون ← أفضل ١٠ ← أفضل ٥ ← أفضل ٣ */
+/* ============ 5 · الحالة والتصفية ============
+   القِمع: كل الجهات ← المؤهّلون ← أفضل 10 ← أفضل 5 ← أفضل 3 */
 
 const STATE = {
   ineligible: { name: 'غير مؤهّل',          tone: 'off',  desc: 'لم تستوفِ شروط الأهليّة الثلاثة' },
-  out1:       { name: 'خرج بعد المرحلة ١',  tone: 'off',  desc: 'مؤهَّلٌ ولم يبلغ العشرة الأوائل في مساره' },
-  qualified:  { name: 'متأهّل للمرحلة ٢',   tone: 'ink',  desc: 'ضمن أفضل ١٠ في المسار — استمارةٌ وزيارةٌ ميدانية' },
-  out2:       { name: 'خرج بعد المرحلة ٢',  tone: 'off',  desc: 'لم يبلغ الخمسة الأوائل بعد تقييم الأنظمة' },
-  finalist:   { name: 'متأهّل للتحكيم',     tone: 'ink',  desc: 'ضمن أفضل ٥ — أمام لجنة التحكيم' },
+  out1:       { name: 'خرج بعد المرحلة 1',  tone: 'off',  desc: 'مؤهَّلٌ ولم يبلغ العشرة الأوائل في مساره' },
+  qualified:  { name: 'متأهّل للمرحلة 2',   tone: 'ink',  desc: 'ضمن أفضل 10 في المسار — استمارةٌ وزيارةٌ ميدانية' },
+  out2:       { name: 'خرج بعد المرحلة 2',  tone: 'off',  desc: 'لم يبلغ الخمسة الأوائل بعد تقييم الأنظمة' },
+  finalist:   { name: 'متأهّل للتحكيم',     tone: 'ink',  desc: 'ضمن أفضل 5 — أمام لجنة التحكيم' },
   honored:    { name: 'مُكرَّم',             tone: 'gold', desc: 'ضمن الثلاثة الأوائل — تكريمٌ ولوحةُ شرف' },
   winner:     { name: 'فائزٌ بالمسار',       tone: 'gold', desc: 'الأعلى أداءً في مساره باعتماد لجنة التحكيم' },
   blocked:    { name: 'محجوب',              tone: 'red',  desc: 'قرارُ حجبٍ من لجنة الحجب والتظلّم' }
@@ -289,11 +289,11 @@ function buildCase(entId, catKey) {
 }
 
 /* ---- بناء الترتيب الكامل للفئة ----
-   ‏**افتراضٌ فرضَته النتيجة المعلنة:** الدليل يقول «أفضل ١٠ لكل مسار»،
+   ‏**افتراضٌ فرضَته النتيجة المعلنة:** الدليل يقول «أفضل 10 لكل مسار»،
    والنتيجةُ المعلنة توّجت في مسار إنقاذ الأرواح خمسَ جهاتٍ موزَّعةً على
    ثلاث فئات — أي أن التتويج يقع في **الفئة**. ولمّا كان آخرُ الغربال
    في الفئة، وجب أن يكون أوّلُه فيها أيضاً، وإلّا خلَت فئةٌ من مرشَّحين.
-   فالعتباتُ ١٠ ← ٥ ← ٣ تُطبَّق هنا **لكلّ فئة**، وهذا مُعلَنٌ في المنهجية. */
+   فالعتباتُ 10 ← 5 ← 3 تُطبَّق هنا **لكلّ فئة**، وهذا مُعلَنٌ في المنهجية. */
 function catBoard(catKey) {
   const all = CASES.filter(c => c.key === catKey);
   const rows = all.map(c => {
@@ -306,7 +306,7 @@ function catBoard(catKey) {
   const cut1 = STAGES[0].cut;
   const q = elig.slice(0, cut1);
 
-  // المرحلة ٢: الدرجة الموحَّدة إن وُجدت، وإلا متوسّط المقيّمين
+  // المرحلة 2: الدرجة الموحَّدة إن وُجدت، وإلا متوسّط المقيّمين
   q.forEach(r => {
     const rev = reviewsOf(r.c.id);
     const cons = DB.consensus[r.c.id];
@@ -331,7 +331,7 @@ function catBoard(catKey) {
   const cut2 = STAGES[1].cut;
   const fin = scored.slice(0, cut2);
 
-  // المرحلة ٣: بطاقات المحكّمين (بوردا) ثم اعتمادُ رئيس اللجنة
+  // المرحلة 3: بطاقات المحكّمين (بوردا) ثم اعتمادُ رئيس اللجنة
   const conf = DB.confirmed[catKey];
   let order = null;
   if (conf) order = conf.order;
@@ -394,7 +394,7 @@ function reviewsOf(caseId) {
   const base = clamp(s1.score * 0.9 + 8, 25, 92);
   const r = mulberry32(seedOf(caseId + 'progress'));
   const out = {};
-  // نحو ١٥٪ من الملفّات ما تزال قيد التقييم — واقعُ دورةٍ جارية
+  // نحو 15% من الملفّات ما تزال قيد التقييم — واقعُ دورةٍ جارية
   const done = r() > 0.15;
   if (done) {
     a.evals.forEach(u => { out[u] = genReview(caseId, u, base); });

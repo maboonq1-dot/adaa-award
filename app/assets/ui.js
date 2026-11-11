@@ -1,11 +1,11 @@
 /* جائزة أداء الصحة — أدوات العرض المشتركة */
 
-const AR_D = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
-
-/** الأرقام عربية-هنديّة، والفاصلة العشرية «٫» وفاصلة الآلاف «٬» */
+/** الأرقام إنجليزيّة (0-9) في المنصّة كلّها، والعشريّة «.» والآلاف «,» والنسبة «%».
+    دليلُ الجائزة نفسه يكتب بها («2026» و«50%»)، فالمنصّةُ تطابق مصدرَها.
+    وبقي اسمُ الدالّة القديم ar() كي لا تُلمَس مئاتُ المواضع التي تستدعيها؛ وصارت تُعيد الرقمَ كما هو. */
 function ar(x) {
   if (x === null || x === undefined || x === '') return '—';
-  return String(x).replace(/[0-9]/g, d => AR_D[+d]).replace(/\./g, '٫').replace(/,/g, '٬');
+  return String(x);
 }
 function fmt(n, d = 0) {
   if (n === null || n === undefined || Number.isNaN(n)) return '—';
@@ -13,7 +13,7 @@ function fmt(n, d = 0) {
   const [i, f] = s.split('.');
   return ar(f ? i.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '.' + f : i.replace(/\B(?=(\d{3})+(?!\d))/g, ','));
 }
-const pc = (n, d = 1) => fmt(n, d) + '٪';
+const pc = (n, d = 1) => fmt(n, d) + '%';
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 
 /** تمييز العدد في العربية: مفرد ومثنّى وجمع قلّة وجمع كثرة */
@@ -35,44 +35,70 @@ function dt(s) {
   return `${ar(+d)} ${M[+m - 1]} ${ar(y)}`;
 }
 
-/* ============ الأيقونات ============ */
+/* ============ الأيقونات ============
+   كلُّ أيقونةٍ بطبقتين: خطٌّ رئيسيّ، وظلٌّ خافتٌ من اللون نفسه (class="s") يمنحها جسماً.
+   مرسومةٌ على شبكة 24، بسُمك 1.7 وأطرافٍ مدوَّرة، فتبدو مجموعةً واحدة لا قطعاً متفرّقة. */
 const I = {
-  home:    '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
-  track:   '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
-  stage:   '<path d="M4 18h4V9H4zM10 18h4V4h-4zM16 18h4v-6h-4z"/>',
-  gov:     '<path d="M3 21h18M5 21V10M19 21V10M12 3 3 8h18zM9 21v-6h6v6"/>',
-  reg:     '<path d="M15 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7z"/><path d="M14 3v5h5M8 13h8M8 17h5"/>',
-  board:   '<path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z"/>',
-  desk:    '<path d="M4 5h16v6H4zM4 13h16v6H4z"/><path d="M8 8h.01M8 16h.01"/>',
-  judge:   '<path d="m12 3 2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.4 6.7 19.2l1.1-5.9L3.5 9.2l5.9-.8z"/>',
-  shield:  '<path d="M12 3 5 6v6c0 4.4 3 8.1 7 9 4-.9 7-4.6 7-9V6z"/>',
-  method:  '<path d="M9 3v6l-5 9a2 2 0 0 0 1.8 3h12.4a2 2 0 0 0 1.8-3l-5-9V3z"/><path d="M8 3h8"/>',
-  verdict: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/>',
-  log:     '<path d="M8 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H8zM8 3 4 7v14h4"/><path d="M11 8h6M11 12h6M11 16h4"/>',
+  /* ---- التنقّل ---- */
+  home:    '<path class="s" d="M5.2 10.4V19a2 2 0 0 0 2 2h9.6a2 2 0 0 0 2-2v-8.6L12 4.6z"/><path d="M3.2 11.2 11.2 4.1a1.2 1.2 0 0 1 1.6 0l8 7.1"/><path d="M5.2 9.8V19a2 2 0 0 0 2 2h9.6a2 2 0 0 0 2-2V9.8"/><path d="M10 21v-5a2 2 0 0 1 4 0v5"/>',
+  board:   '<rect class="s" x="13.2" y="11.2" width="7.3" height="9.3" rx="2"/><rect x="3.5" y="3.5" width="7.3" height="9.3" rx="2"/><rect x="13.2" y="3.5" width="7.3" height="5.6" rx="2"/><rect x="13.2" y="11.2" width="7.3" height="9.3" rx="2"/><rect x="3.5" y="14.9" width="7.3" height="5.6" rx="2"/>',
+  method:  '<path class="s" d="M6.6 15.2h10.8l2.1 3.9a1.9 1.9 0 0 1-1.7 2.8H6.2a1.9 1.9 0 0 1-1.7-2.8z"/><path d="M9.2 3.5h5.6"/><path d="M10 3.5v6L4.6 19.2a1.9 1.9 0 0 0 1.7 2.8h11.4a1.9 1.9 0 0 0 1.7-2.8L14 9.5v-6"/><path d="M7.2 14.6h9.6"/>',
+  gov:     '<path class="s" d="M4.8 10h14.4v8.4H4.8z"/><path d="M3 9.4 11.2 4a1.4 1.4 0 0 1 1.6 0L21 9.4z"/><path d="M6.3 10v8.4M10.1 10v8.4M13.9 10v8.4M17.7 10v8.4"/><path d="M3.5 21h17M4.8 18.4h14.4"/>',
+  medal:   '<path d="M8.3 3.2 10.9 8.6M15.7 3.2 13.1 8.6"/><circle class="s" cx="12" cy="14.8" r="6"/><circle cx="12" cy="14.8" r="6"/><path d="m12 11.9.95 1.9 2.1.3-1.5 1.5.35 2.1-1.9-1-1.9 1 .35-2.1-1.5-1.5 2.1-.3z"/>',
+  reg:     '<path class="s" d="M6.2 3.5H14l4.8 4.8v10.2a2 2 0 0 1-2 2H6.2a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2z"/><path d="M6.2 3.5H14l4.8 4.8v10.2a2 2 0 0 1-2 2H6.2a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2z"/><path d="M14 3.5v3.8a1 1 0 0 0 1 1h3.8"/><path d="M11.5 11.8v5.4M8.8 14.5h5.4"/>',
+  desk:    '<path class="s" d="M3.5 13.4h4.9l1.3 2.2h4.6l1.3-2.2h4.9V18a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2z"/><path d="M3.5 13.4 5.9 5.9a2 2 0 0 1 1.9-1.4h8.4a2 2 0 0 1 1.9 1.4l2.4 7.5"/><path d="M3.5 13.4h4.9l1.3 2.2h4.6l1.3-2.2h4.9V18a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2z"/>',
+  gavel:   '<g transform="rotate(-40 12 12)"><rect class="s" x="6.5" y="3" width="11" height="5.8" rx="1.8"/><rect x="6.5" y="3" width="11" height="5.8" rx="1.8"/><path d="M12 8.8V20"/></g><path d="M11.2 21h9.3"/>',
+  scale:   '<path d="M12 4.6V20.5M7.5 20.5h9M5 7.8h14"/><circle cx="12" cy="4.4" r="1.2"/><path class="s" d="M5 7.8 2.5 14.6a2.9 2.9 0 0 0 5 0z"/><path d="M5 7.8 2.5 14.6a2.9 2.9 0 0 0 5 0z"/><path class="s" d="m19 7.8-2.5 6.8a2.9 2.9 0 0 0 5 0z"/><path d="m19 7.8-2.5 6.8a2.9 2.9 0 0 0 5 0z"/>',
+  log:     '<rect class="s" x="4.5" y="3.5" width="15" height="17" rx="2.5"/><rect x="4.5" y="3.5" width="15" height="17" rx="2.5"/><path d="M10.4 8.4h5.4M10.4 12h5.4M10.4 15.6h3.4"/><circle cx="7.7" cy="8.4" r=".9" fill="currentColor" stroke="none"/><circle cx="7.7" cy="12" r=".9" fill="currentColor" stroke="none"/><circle cx="7.7" cy="15.6" r=".9" fill="currentColor" stroke="none"/>',
+  verdict: '<circle class="s" cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="8.6"/><path d="m15.7 8.3-2 5.4-5.4 2 2-5.4z"/>',
+
+  /* ---- مساراتُ الجائزة الستّة ---- */
+  heartbeat: '<path class="s" d="M12 20.4s-7.9-4.6-7.9-10.4A4.5 4.5 0 0 1 8.6 5.5c1.4 0 2.6.7 3.4 1.8.8-1.1 2-1.8 3.4-1.8a4.5 4.5 0 0 1 4.5 4.5c0 5.8-7.9 10.4-7.9 10.4z"/><path d="M12 20.4s-7.9-4.6-7.9-10.4A4.5 4.5 0 0 1 8.6 5.5c1.4 0 2.6.7 3.4 1.8.8-1.1 2-1.8 3.4-1.8a4.5 4.5 0 0 1 4.5 4.5c0 5.8-7.9 10.4-7.9 10.4z"/><path d="M3.2 12.4h4.3l1.5-2.9 2.3 5.6 1.7-2.7h7.8"/>',
+  clinic:  '<path class="s" d="M5.2 10.2V19a1.6 1.6 0 0 0 1.6 1.6h10.4a1.6 1.6 0 0 0 1.6-1.6v-8.8L12 5z"/><path d="M3.2 11 11.2 4.2a1.2 1.2 0 0 1 1.6 0L20.8 11"/><path d="M5.2 9.8V19a1.6 1.6 0 0 0 1.6 1.6h10.4a1.6 1.6 0 0 0 1.6-1.6V9.8"/><path d="M12 11.6v5M9.5 14.1h5"/>',
+  siren:   '<path class="s" d="M7 17v-4.6a5 5 0 0 1 10 0V17z"/><path d="M7 17v-4.6a5 5 0 0 1 10 0V17"/><path d="M5.6 17h12.8a1 1 0 0 1 1 1v2.5H4.6V18a1 1 0 0 1 1-1z"/><path d="M12 3v1.7M4.7 6.2 6 7.4M19.3 6.2 18 7.4M2.8 12.2h1.7M21.2 12.2h-1.7"/>',
+  shieldcheck: '<path class="s" d="M12 3.2 4.8 6v5.5c0 4.4 3 7.9 7.2 9.3 4.2-1.4 7.2-4.9 7.2-9.3V6z"/><path d="M12 3.2 4.8 6v5.5c0 4.4 3 7.9 7.2 9.3 4.2-1.4 7.2-4.9 7.2-9.3V6z"/><path d="m8.9 12 2.2 2.2 4-4.3"/>',
+  mother:  '<circle class="s" cx="9" cy="7" r="2.9"/><circle cx="9" cy="7" r="2.9"/><path d="M3.4 20.5v-1.4a5.3 5.3 0 0 1 5.3-5.3h.6a5.3 5.3 0 0 1 3.4 1.2"/><circle class="s" cx="17.2" cy="13.6" r="2"/><circle cx="17.2" cy="13.6" r="2"/><path d="M13.9 20.5v-.7a3.3 3.3 0 0 1 3.3-3.3 3.3 3.3 0 0 1 3.3 3.3v.7"/>',
+  gauge:   '<path class="s" d="M4 16.6a8 8 0 0 1 16 0z"/><path d="M4 16.6a8 8 0 0 1 16 0"/><path d="M12 16.6 15.6 11.4"/><circle cx="12" cy="16.6" r="1.3"/><path d="M7.1 11.6l1 .9M12 8.7v1.3M16.9 11.6l-1 .9"/><path d="M6.5 20.4h11"/>',
+
+  /* ---- مربّعات الأرقام ---- */
+  files:   '<path d="M6.6 16.6V6.6a2 2 0 0 1 2-2H16"/><rect class="s" x="9.4" y="7.4" width="11.1" height="13.1" rx="2.1"/><rect x="9.4" y="7.4" width="11.1" height="13.1" rx="2.1"/><path d="M12.4 12.2h5.1M12.4 15.6h3.4"/>',
+  building:'<path class="s" d="M5 20.5V6.6A1.6 1.6 0 0 1 6.6 5h6.8A1.6 1.6 0 0 1 15 6.6v13.9z"/><path d="M5 20.5V6.6A1.6 1.6 0 0 1 6.6 5h6.8A1.6 1.6 0 0 1 15 6.6v13.9"/><path d="M15 10.5h2.4A1.6 1.6 0 0 1 19 12.1v8.4"/><path d="M3.4 20.5h17.2M8.4 9h3.2M8.4 12.6h3.2M8.4 16.2h3.2"/>',
+  verified:'<circle class="s" cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="8.6"/><path d="m8.3 12.3 2.6 2.6 4.9-5.3"/>',
+  funnel:  '<path class="s" d="M4 5.5h16l-6.1 7.1V18l-3.8 2.2v-7.6z"/><path d="M4 5.5h16l-6.1 7.1V18l-3.8 2.2v-7.6z"/>',
+  split:   '<path d="M12 20.5v-7"/><path d="M12 13.5 6.2 8M12 13.5 17.8 8"/><path d="M6.2 8v3.7M6.2 8h3.7M17.8 8v3.7M17.8 8h-3.7"/>',
+  layers:  '<path class="s" d="M12 3.6 21 8.3l-9 4.7-9-4.7z"/><path d="M12 3.6 21 8.3l-9 4.7-9-4.7z"/><path d="m3 12.3 9 4.7 9-4.7M3 16.3l9 4.7 9-4.7"/>',
+  trophy:  '<path class="s" d="M7.5 4h9v5.5a4.5 4.5 0 0 1-9 0z"/><path d="M7.5 4h9v5.5a4.5 4.5 0 0 1-9 0z"/><path d="M7.5 6H4.8v1.6a3.2 3.2 0 0 0 3 3.2M16.5 6h2.7v1.6a3.2 3.2 0 0 1-3 3.2"/><path d="M12 14v3.2M8.8 20.5h6.4M9.8 17.2h4.4"/>',
+  target:  '<circle class="s" cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="4.7"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>',
+  calendar:'<rect class="s" x="3.5" y="5" width="17" height="15.5" rx="2.5"/><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3.2v3.6M16 3.2v3.6"/>',
+  users:   '<circle class="s" cx="9" cy="8.4" r="3.3"/><circle cx="9" cy="8.4" r="3.3"/><path d="M2.8 20a6.2 6.2 0 0 1 12.4 0"/><path d="M15.6 5.4a3.2 3.2 0 0 1 0 6M17.6 14.4a6 6 0 0 1 3.6 5.4"/>',
+  chart:   '<rect x="3.8" y="12.4" width="4" height="8.1" rx="1.2"/><rect class="s" x="10" y="4.5" width="4" height="16" rx="1.2"/><rect x="10" y="4.5" width="4" height="16" rx="1.2"/><rect x="16.2" y="9" width="4" height="11.5" rx="1.2"/>',
+  clock:   '<circle class="s" cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="8.6"/><path d="M12 7.2V12l3.2 2"/>',
+
+  /* ---- أساسيّة ---- */
+  track:   '<circle class="s" cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
+  stage:   '<rect class="s" x="10" y="4" width="4" height="14" rx="1"/><path d="M4 18h4V9H4zM10 18h4V4h-4zM16 18h4v-6h-4z"/>',
+  judge:   '<g transform="rotate(-40 12 12)"><rect class="s" x="6.5" y="3" width="11" height="5.8" rx="1.8"/><rect x="6.5" y="3" width="11" height="5.8" rx="1.8"/><path d="M12 8.8V20"/></g><path d="M11.2 21h9.3"/>',
+  shield:  '<path class="s" d="M12 3.2 4.8 6v5.5c0 4.4 3 7.9 7.2 9.3 4.2-1.4 7.2-4.9 7.2-9.3V6z"/><path d="M12 3.2 4.8 6v5.5c0 4.4 3 7.9 7.2 9.3 4.2-1.4 7.2-4.9 7.2-9.3V6z"/>',
   check:   '<path d="m4 12.5 5 5L20 6.5"/>',
   x:       '<path d="M6 6 18 18M18 6 6 18"/>',
-  warn:    '<path d="M12 4 2.5 20h19z"/><path d="M12 10v4M12 17h.01"/>',
+  warn:    '<path class="s" d="M12 4.2 2.9 19.6h18.2z"/><path d="M12 4.2 2.9 19.6h18.2z"/><path d="M12 10.2v4M12 16.9h.01"/>',
   up:      '<path d="M12 19V5M5 12l7-7 7 7"/>',
   down:    '<path d="M12 5v14M19 12l-7 7-7-7"/>',
   flat:    '<path d="M5 12h14"/>',
-  user:    '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
-  building:'<path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16M15 10h4a1 1 0 0 1 1 1v10M4 21h17"/><path d="M8 8h3M8 12h3M8 16h3"/>',
-  file:    '<path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7z"/><path d="M13 3v5h5"/>',
+  user:    '<circle class="s" cx="12" cy="8.2" r="4"/><circle cx="12" cy="8.2" r="4"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/>',
+  file:    '<path class="s" d="M14 3.5H7.5a1.5 1.5 0 0 0-1.5 1.5v14a1.5 1.5 0 0 0 1.5 1.5h9a1.5 1.5 0 0 0 1.5-1.5V7.5z"/><path d="M14 3.5H7.5A1.5 1.5 0 0 0 6 5v14a1.5 1.5 0 0 0 1.5 1.5h9A1.5 1.5 0 0 0 18 19V7.5z"/><path d="M13.5 3.5v4h4.5"/>',
   clip:    '<path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7L10 17.9a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"/>',
-  eye:     '<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12"/><circle cx="12" cy="12" r="2.6"/>',
-  lock:    '<rect x="4" y="10" width="16" height="11" rx="1.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
-  split:   '<path d="M4 6h5l6 12h5M20 6h-5"/><path d="m17 3 3 3-3 3M17 15l3 3-3 3"/>',
+  eye:     '<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12"/><circle class="s" cx="12" cy="12" r="2.8"/><circle cx="12" cy="12" r="2.8"/>',
+  lock:    '<rect class="s" x="4.5" y="10.5" width="15" height="10" rx="2.2"/><rect x="4.5" y="10.5" width="15" height="10" rx="2.2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
   merge:   '<path d="M4 6h5l6 6 5 0M4 18h5l3-3"/><path d="m17 9 3 3-3 3"/>',
-  medal:   '<circle cx="12" cy="15" r="6"/><path d="m8 3 2.5 6M16 3l-2.5 6M12 12.5l.9 1.9 2 .3-1.5 1.4.4 2-1.8-1-1.8 1 .4-2L9.1 14.7l2-.3z"/>',
-  visit:   '<path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11"/><circle cx="12" cy="10" r="2.6"/>',
-  flask:   '<path d="M9 3v6l-5 9a2 2 0 0 0 1.8 3h12.4a2 2 0 0 0 1.8-3l-5-9V3z"/>',
-  grid:    '<path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/>',
-  star:    '<path d="m12 3 2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.4 6.7 19.2l1.1-5.9L3.5 9.2l5.9-.8z"/>',
-  gavel:   '<path d="m14 3 7 7-3 3-7-7zM3 21h10M10 10 3 17l3 3 7-7"/>',
+  visit:   '<path class="s" d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"/><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11"/><circle cx="12" cy="10" r="2.6"/>',
+  flask:   '<path class="s" d="M6.6 15.2h10.8l2.1 3.9a1.9 1.9 0 0 1-1.7 2.8H6.2a1.9 1.9 0 0 1-1.7-2.8z"/><path d="M10 3.5v6L4.6 19.2a1.9 1.9 0 0 0 1.7 2.8h11.4a1.9 1.9 0 0 0 1.7-2.8L14 9.5v-6M9.2 3.5h5.6"/>',
+  grid:    '<rect class="s" x="13" y="13" width="7.5" height="7.5" rx="1.6"/><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.6"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="1.6"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="1.6"/><rect x="13" y="13" width="7.5" height="7.5" rx="1.6"/>',
+  star:    '<path class="s" d="m12 3.4 2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.7 6.8 19.4l1-5.8-4.2-4.1 5.8-.8z"/><path d="m12 3.4 2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.7 6.8 19.4l1-5.8-4.2-4.1 5.8-.8z"/>',
   plus:    '<path d="M12 5v14M5 12h14"/>',
   arrow:   '<path d="M19 12H5M12 5l-7 7 7 7"/>',
-  deck:    '<rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M8 21h8M12 17v4"/>',
-  play:    '<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/>',
+  deck:    '<rect class="s" x="3" y="4" width="18" height="12.5" rx="2"/><rect x="3" y="4" width="18" height="12.5" rx="2"/><path d="M8 20.5h8M12 16.5v4"/>',
+  play:    '<circle class="s" cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="9"/><path d="M10 8.6v6.8l5.6-3.4z" fill="currentColor"/>',
   next:    '<path d="M15 6l-6 6 6 6"/>',
   prev:    '<path d="M9 6l6 6-6 6"/>',
   stop:    '<rect x="6" y="6" width="12" height="12" rx="2"/>',
@@ -158,7 +184,7 @@ const TOUR_HEADS = {
   'القِمع في الفئات العشر': 'board-funnel',
   'الأوسمة الثلاثة': 'res-medals',
   'حكمُ بوّابة الأهليّة — فوريّ': 'gates',
-  '١ — بوّابة الأهليّة': 'gates',
+  '1 — بوّابة الأهليّة': 'gates',
   'الملفّات المُسنَدة': 'desk-list',
   'نتائج المؤشّرات · المرحلة الأولى': 's1-break',
   'الإسناد': 'assign',
@@ -167,7 +193,7 @@ const TOUR_HEADS = {
   'الدرجة الموحَّدة': 'cons',
   'نافذة التظلّم': 'appeal-window',
   'التظلّمات': 'appeal-list',
-  '٥ — التظلّم': 'appeal',
+  '5 — التظلّم': 'appeal',
   'من يرى ماذا — مصفوفة الصلاحيات': 'matrix',
   'الأوزان والعتبات': 'weights'
 };
@@ -176,8 +202,26 @@ const head = (title, sub = '', right = '', tid = TOUR_HEADS[title]) =>
 const note = (txt, tone = 'n', icon = 'verdict') =>
   `<div class="note note--${tone}">${ic(icon)}<div>${txt}</div></div>`;
 const kv = rows => `<dl class="kv">${rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
-const stat = (v, l, sub = '', tone = '') =>
-  `<div class="stat ${tone ? 'stat--' + tone : ''}"><b class="num">${v}</b><span>${esc(l)}</span>${sub ? `<em>${esc(sub)}</em>` : ''}</div>`;
+/* رمزُ المربّع: يُمرَّر صراحةً (الوسيط الخامس) أو يُستنتَج من تسميته، فلا تُلمَس 23 نداءً.
+   التسميةُ تُطبَّع (بلا تشكيل ولا همزات) كي لا يكسرها حرفٌ مُشكَّل. */
+const STAT_ICON = [
+  [/جهه مسجله/, 'building'], [/ملف مشاركه|ملف مسند/, 'files'], [/اجتاز الاهليه/, 'verified'],
+  [/متاهل للمرحله/, 'funnel'], [/بلغ التحكيم/, 'gavel'], [/تباعد مفتوح/, 'split'],
+  [/ملف محجوب/, 'lock'], [/تظلم مقدم/, 'scale'], [/قيد النظر|بانتظار درجتي/, 'clock'],
+  [/اسابيع النافذه/, 'calendar'], [/فئات للتنافس|فئه واحده/, 'layers'], [/جهه توجت|جهه تتوج/, 'trophy'],
+  [/مسارات للتميز/, 'target'], [/اوسمه مسماه/, 'medal'], [/جهه مختلفه/, 'users'], [/فئه معتمده/, 'verified']
+];
+const normAr = t => String(t).replace(/[ً-ْٰـ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي');
+const statIcon = (l, tone) => {
+  const n = normAr(l); const hit = STAT_ICON.find(([re]) => re.test(n));
+  return hit ? hit[1] : ({ gold: 'trophy', red: 'warn', ink: 'chart' }[tone] || 'files');
+};
+const stat = (v, l, sub = '', tone = '', icon = '') =>
+  `<div class="stat ${tone ? 'stat--' + tone : ''}"><b class="num">${v}</b><i class="stat__i">${ic(icon || statIcon(l, tone))}</i><span>${esc(l)}</span>${sub ? `<em>${esc(sub)}</em>` : ''}</div>`;
+
+/* بلاطةُ المسار: لكلّ مسارٍ رمزُه، بدل دائرةٍ واحدةٍ عامّة تُشبه الستّةَ كلَّها */
+const TRACK_IC = { LIFE: 'heartbeat', PRIM: 'clinic', EMER: 'siren', PREV: 'shieldcheck', MATE: 'mother', EFFI: 'gauge' };
+const trackIc = (id, cls = '') => `<span class="tk ${cls}">${ic(TRACK_IC[id] || 'track')}</span>`;
 const empty = txt => `<div class="empty">${ic('flat')}<p>${esc(txt)}</p></div>`;
 const btn = (txt, attrs = '', tone = '') => `<button class="btn ${tone ? 'btn--' + tone : ''}" ${attrs}>${txt}</button>`;
 const link = (txt, href, tone = '') => `<a class="btn ${tone ? 'btn--' + tone : ''}" href="${href}">${txt}</a>`;
@@ -191,7 +235,7 @@ const table = (cols, rows, cls = '') =>
 
 /* وحدة المؤشّر تُكتب بعد الرقم بمسافةٍ رفيعة */
 const unit = (v, k, d = 1) => v === null || v === undefined ? '—' :
-  `${fmt(v, k.unit === 'يوم' ? 2 : d)}<span class="u">${k.unit === '٪' ? '٪' : ' ' + k.unit}</span>`;
+  `${fmt(v, k.unit === 'يوم' ? 2 : d)}<span class="u">${k.unit === '%' ? '%' : ' ' + k.unit}</span>`;
 
 /* ============ وسمُ المسار والفئة ============
    الفئةُ تُذكَر فقط حين يكون للمسار أكثرُ من فئة — وإلّا كان الوسمُ حشواً. */
