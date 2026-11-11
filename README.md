@@ -163,7 +163,8 @@
 
 ## ٩ · التشغيل والنشر
 
-**صفحات GitHub (عامّة):** `https://<USERNAME>.github.io/adaa-award/` — تُخدَم من `docs/`.
+**الرابط العام:** <https://maboonq1-dot.github.io/adaa-award/> — يُخدَم من `docs/`.
+**الريبو:** <https://github.com/maboonq1-dot/adaa-award>
 
 **نسخة Artifact:** <https://claude.ai/artifact/TKx2Y8vG4tZ4apwnsLXAgb>
 (المشاركة الآن «كلُّ من يملك الرابط» — تُضبَط من قائمة المشاركة في الصفحة نفسها.)
