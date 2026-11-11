@@ -227,8 +227,65 @@ const DB = {
   registry: []      // تسجيلاتٌ جديدة من النموذج
 };
 
+/* ============ الزمن ============
+   الصفحةُ تُقرأ بعد أشهرٍ من الحفل، فلا يصحّ أن يُكتب فيها «النافذةُ مفتوحةٌ الآن»
+   نصّاً ثابتاً: الحالةُ تُحسَب من تاريخ اليوم. والجولةُ وحدها تُقدّم الساعةَ
+   (DEMO_NOW) لتُري كلَّ مرحلةٍ في زمنها، وتُعيدها حين تنتهي. */
+let DEMO_NOW = null;
+const pad2 = n => String(n).padStart(2, '0');
+function todayISO() {
+  if (DEMO_NOW) return DEMO_NOW;
+  const d = new Date();
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+const utcOf = s => { const [y, m, d] = s.split('-').map(Number); return Date.UTC(y, m - 1, d); };
+const dayDiff = (a, b) => Math.round((utcOf(b) - utcOf(a)) / 864e5);
+
+/** نافذةُ التظلّم: قبل الحفل · مفتوحة · مُغلَقة */
+function appealWindow() {
+  const t = todayISO(), a = CYCLE.ceremony, b = CYCLE.appealEnds;
+  if (t < a)  return { st: 'before', days: dayDiff(t, a) };
+  if (t <= b) return { st: 'open',   days: dayDiff(t, b) };
+  return { st: 'closed', days: dayDiff(b, t) };
+}
+/** نافذةُ التسجيل: يناير ← فبراير */
+function regWindow() {
+  const t = todayISO();
+  if (t < CYCLE.regOpen)  return { st: 'before', days: dayDiff(t, CYCLE.regOpen) };
+  if (t <= CYCLE.regClose) return { st: 'open',   days: dayDiff(t, CYCLE.regClose) };
+  return { st: 'closed', days: dayDiff(CYCLE.regClose, t) };
+}
+/** حالةُ كلّ بندٍ في الجدول من تاريخ اليوم: ما سبق «تمّ»، وآخرُ ما بلغه التاريخ «جارٍ» إن كان بعده بند */
+function timelineView() {
+  const t = todayISO();
+  const last = TIMELINE.reduce((a, x, i) => x.d <= t ? i : a, -1);
+  return TIMELINE.map((x, i) => ({
+    ...x,
+    s: i < last ? 'done' : i === last ? (last === TIMELINE.length - 1 ? 'done' : 'now') : 'next'
+  }));
+}
+
 function logIt(who, act, on, detail) {
-  DB.log.unshift({ at: new Date().toISOString().slice(0, 16).replace('T', ' '), who, act, on, detail });
+  const d = new Date();
+  DB.log.unshift({ at: `${todayISO()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`, who, act, on, detail });
+}
+
+/* ============ بناءُ ملفّ مشاركة ============
+   يُستعمل عند التسجيل، وتستعمله الجولةُ لتعرف سلفاً: هل ستجتاز الجهةُ الأهليّة؟ */
+function buildCase(entId, catKey) {
+  const ent = E(entId), cat = C(catKey), ks = kpisOf(catKey);
+  const vals = {}; ks.forEach(k => { vals[k.id] = series(entId, catKey, k); });
+  const r2 = mulberry32(seedOf(entId + catKey + 'feed'));
+  const missing = [];
+  if (ent.feed === 'partial') {
+    cat.kpis.forEach(k => { if (r2() < 0.28) missing.push(k.id); });
+    if (r2() < 0.45) missing.push('ESAT');
+  }
+  return {
+    id: `${entId}-${catKey.replace(':', '-')}`,
+    entity: entId, track: cat.track, cat: cat.id, key: catKey,
+    vals, missing, registeredAt: todayISO()
+  };
 }
 
 /* ---- بناء الترتيب الكامل للفئة ----

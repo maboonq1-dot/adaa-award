@@ -25,6 +25,13 @@ const FORM = [
     hint: 'نصُّ الدليل: «أدلّةٌ داعمة لكلّ نتيجةٍ مُبلَّغٍ عنها». نتيجةٌ بلا دليلٍ لا تُحتسَب.' }
 ];
 
+/* نافذةُ التسجيل الفعليّة أُغلقت في فبراير: النموذجُ بعدها للتجربة، وهذا يُقال قبل الملء لا بعده */
+function regNote() {
+  const w = regWindow();
+  if (w.st !== 'closed') return '';
+  return note(`<b>التسجيل الفعلي أُغلق.</b> أُقفل في ${dt(CYCLE.regClose)}. هذا النموذج للتجربة فقط، ولا يُسجّل شيئاً خارج جلستك.`, 'a', 'warn');
+}
+
 /* ============ نموذج التسجيل ============ */
 function viewRegister() {
   if (REG.done) return regDone();
@@ -36,9 +43,11 @@ function viewRegister() {
 
   ${note('<b>اقرأ هذا قبل أن تملأ حقلاً.</b> في هذه الجائزة لا تُرشِّح الجهةُ نفسَها بملفٍّ تكتبه. المرحلةُ الأولى تُحسَب من <b>بياناتك الرسمية المُغذّاة أصلاً</b> إلى مصادر وزارة الصحة وشركائها. ما تفعله هنا: تُثبِت هويّتك، وتُفوِّض ممثّلاً، وتختار المسار. أمّا <b>استمارةُ المشاركة</b> فتُفتَح في المرحلة الثانية لأفضل ' + ar(STAGES[0].cut) + ' جهاتٍ في كلّ فئةٍ وحدهم.', 'i', 'verdict')}
 
+  ${regNote()}
+
   ${card(`<div class="steps">${steps.map((s, i) => `
       <div class="${REG.step === i + 1 ? 'on' : REG.step > i + 1 ? 'ok' : ''}">
-        <b>${ar(i + 1)} · ${esc(s)}</b>${REG.step > i + 1 ? 'تمّ' : REG.step === i + 1 ? 'الآن' : 'لاحقاً'}</div>`).join('')}</div>
+        <b>${ar(i + 1)} — ${esc(s)}</b>${REG.step > i + 1 ? 'تمّ' : REG.step === i + 1 ? 'الآن' : 'لاحقاً'}</div>`).join('')}</div>
     ${[regStep1, regStep2, regStep3, regStep4][REG.step - 1]()}`)}
   `;
 }
@@ -46,7 +55,7 @@ function viewRegister() {
 function regStep1() {
   const list = REG.sector ? ENTITIES.filter(e => e.sector === REG.sector) : [];
   return `<div class="form">
-    <div class="fld ${REG.err.sector ? 'fld--bad' : ''}">
+    <div class="fld ${REG.err.sector ? 'fld--bad' : ''}" data-tour="reg-sector">
       <label>القطاع <span>*</span></label>
       <div class="opts">${Object.entries(SECTORS).map(([k, v]) => `
         <label class="opt"><input type="radio" name="sector" value="${k}" data-reg="sector" ${REG.sector === k ? 'checked' : ''}>
@@ -56,7 +65,7 @@ function regStep1() {
       ${REG.err.sector ? `<div class="fld__err">${esc(REG.err.sector)}</div>` : ''}
     </div>
 
-    ${REG.sector ? `<div class="fld ${REG.err.entity ? 'fld--bad' : ''}">
+    ${REG.sector ? `<div class="fld ${REG.err.entity ? 'fld--bad' : ''}" data-tour="reg-entity">
       <label for="ent">اسم الجهة <span>*</span></label>
       <em>الاسمُ كما هو مسجَّلٌ في المصادر الرسمية — عليه يُطابَق ملفُّ البيانات.</em>
       <select id="ent" data-reg="entity">
@@ -82,7 +91,7 @@ function regStep2() {
 
   return `<div class="form">
     ${note('الممثّلُ المفوَّض هو <b>الشخص الوحيد</b> الذي يوقّع على ما يُقدَّم باسم الجهة، وإليه تُوجَّه المراسلات وقرارُ الأهليّة والزيارة الميدانية. تفويضٌ واحدٌ لكلّ جهةٍ في الدورة.', 'i', 'user')}
-    <div class="grid g-2">
+    <div class="grid g-2" data-tour="reg-rep">
       ${f('name', 'اسم الممثّل المفوَّض')}
       ${f('title', 'المسمّى الوظيفيّ', 'text', 'يجب أن يكون في مستوى اتّخاذ القرار — لا منسّقاً بلا صلاحية.')}
       ${f('email', 'البريد الإلكترونيّ الرسميّ', 'email', 'بريدُ جهةِ العمل لا بريدٌ شخصيّ.')}
@@ -123,7 +132,7 @@ function regStep3() {
   }).join('');
 
   return `<div class="form">
-    <div class="fld ${REG.err.cat ? 'fld--bad' : ''}">
+    <div class="fld ${REG.err.cat ? 'fld--bad' : ''}" data-tour="reg-cat">
       <label>الفئة <span>*</span></label>
       <em>التنافسُ يقع في <b>الفئة</b> لا في المسار: مسارُ إنقاذ الأرواح ثلاثُ فئاتٍ لكلٍّ ترتيبُها وفائزُها.
         وللجهة أن تسجّل في أكثر من فئة — ولكلٍّ ملفٌّ وتقييمٌ مستقلّ.</em>
@@ -145,7 +154,7 @@ function regStep4() {
   ];
   return `<div class="form">
     ${note('<b>لماذا إقرارٌ لا مجرّد زرّ موافقة؟</b> لأن أضعف نقطةٍ في أيّ جائزةٍ تقوم على البيانات هي الفجوةُ بين ما يُبلَّغ وما يُسجَّل. هذا الإقرار هو ما يُحتَجُّ به إن انكشف تعارضٌ في الزيارة الميدانية.', 'a', 'shield')}
-    <div class="opts">${acks.map(([k, t]) => `
+    <div class="opts" data-tour="reg-ack">${acks.map(([k, t]) => `
       <label class="opt"><input type="checkbox" data-ack="${k}" ${REG.ack[k] ? 'checked' : ''}>
         <div><b style="font-weight:400;font-size:12.5px;line-height:1.7">${esc(t)}</b></div></label>`).join('')}</div>
     ${REG.err.ack ? `<div class="fld__err">${esc(REG.err.ack)}</div>` : ''}
@@ -210,15 +219,15 @@ function viewEntity(cid) {
   ${card(head('المسار الشخصيّ للملفّ', 'أين أنت الآن، وما الذي يفتح الخطوةَ التالية.')
     + journeyHtml(r))}
 
-  ${card(head('١ · بوّابة الأهليّة', 'ثلاثةُ شروطٍ من دليل الجائزة. سقوطُ واحدٍ يُسقِط الملفّ.',
+  ${card(head('١ — بوّابة الأهليّة', 'ثلاثةُ شروطٍ من دليل الجائزة. سقوطُ واحدٍ يُسقِط الملفّ.',
       el.pass ? pill('مستوفاة', 'g') : pill('غيرُ مستوفاة', 'r'))
     + gatesHtml(el))}
 
-  ${card(head('٢ · لوحة المؤشّرات', 'قيمُ الدورات الثلاث كما وردت من المصادر الرسمية. الخطُّ الذهبيّ هو المستهدَف الوطنيّ.',
+  ${card(head('٢ — لوحة المؤشّرات', 'قيمُ الدورات الثلاث كما وردت من المصادر الرسمية. الخطُّ الذهبيّ هو المستهدَف الوطنيّ.',
       `<span class="tag"><i>درجة المرحلة ١</i><b class="num">${fmt(r.s1s, 1)}</b></span>`)
     + kpiTable(c, el))}
 
-  ${card(head('٣ · استمارة المشاركة',
+  ${card(head('٣ — استمارة المشاركة',
       openForm ? 'مفتوحةٌ لك: أنت ضمن أفضل ' + ar(STAGES[0].cut) + ' في الفئة.'
                : 'تُفتَح في المرحلة الثانية لأفضل ' + ar(STAGES[0].cut) + ' جهاتٍ في كلّ فئةٍ وحدهم.',
       openForm ? (sub ? pill('مُرسَلة · ' + dt(sub.at), 'g') : pill('لم تُرسَل بعد', 'a')) : pill('مُقفَلة', ''))
@@ -227,10 +236,10 @@ function viewEntity(cid) {
          المرحلةُ الأولى تُحسَب من بياناتك الرسمية وحدها — ولا يُقدَّم فيها ملفٌّ ولا تُكتَب فيها كلمة.</p>
          ${r.state === 'ineligible' ? '' : link('اقرأ المنهجية', '#/method')}</div>`))}
 
-  ${openForm ? card(head('٤ · الزيارة الميدانية', 'للتحقّق من المعلومات والأدلّة — لا لعرضٍ تقديميّ.')
+  ${openForm ? card(head('٤ — الزيارة الميدانية', 'للتحقّق من المعلومات والأدلّة — لا لعرضٍ تقديميّ.')
     + visitHtml(cid, r)) : ''}
 
-  ${card(head('٥ · التظلّم', `يُقدَّم خلال ${ar(CYCLE.appealWeeks)} أسابيع من تاريخ حفل الجائزة وإعلان النتائج، عبر البريد المخصّص.`)
+  ${card(head('٥ — التظلّم', `يُقدَّم خلال ${ar(CYCLE.appealWeeks)} أسابيع من تاريخ حفل الجائزة وإعلان النتائج، عبر البريد المخصّص.`)
     + appealBox(cid, r))}
   `;
 }
@@ -242,9 +251,9 @@ function journeyHtml(r) {
   const nodes = [
     ['التسجيل', 'تمّ', true],
     ['الأهليّة', r.eligible ? 'اجتاز' : 'لم يجتز', r.eligible],
-    ['المرحلة ١ · المؤشّرات', r.rank1 ? 'المرتبة ' + ar(r.rank1) : '—', idx >= 2],
-    ['المرحلة ٢ · الأنظمة', r.s2s === null ? 'قيد التقييم' : 'الدرجة ' + fmt(r.s2s, 1), idx >= 3],
-    ['المرحلة ٣ · التحكيم', r.finalPos === 0 ? 'فائز' : r.finalPos > 0 ? 'مُكرَّم' : '—', idx >= 4]
+    ['المرحلة ١ — المؤشّرات', r.rank1 ? 'المرتبة ' + ar(r.rank1) : '—', idx >= 2],
+    ['المرحلة ٢ — الأنظمة', r.s2s === null ? 'قيد التقييم' : 'الدرجة ' + fmt(r.s2s, 1), idx >= 3],
+    ['المرحلة ٣ — التحكيم', r.finalPos === 0 ? 'فائز' : r.finalPos > 0 ? 'مُكرَّم' : '—', idx >= 4]
   ];
   return `<div class="funnel">${nodes.map(([n, v, ok], i) => `
     <div class="fn fn--j fn--${ok ? (i === 4 ? 4 : 2) : 0}">
@@ -331,11 +340,16 @@ function visitHtml(cid, r) {
 /* التظلّم */
 function appealBox(cid, r) {
   const mine = DB.appeals.filter(a => a.case === cid);
-  const open = ['honored', 'winner', 'out2', 'out1', 'ineligible', 'blocked'].includes(r.state);
+  const decided = ['honored', 'winner', 'out2', 'out1', 'ineligible', 'blocked'].includes(r.state);
+  const w = appealWindow();
+  const open = decided && w.st === 'open';
+  const why = !decided ? 'لا يُتظلَّم على ملفٍّ لم يُبتّ فيه بعد.'
+    : w.st === 'before' ? `تُفتح نافذة التظلّم بإعلان النتائج في ${dt(CYCLE.ceremony)}.`
+    : `أُغلقت نافذة التظلّم في ${dt(CYCLE.appealEnds)}، ولا تُقبل تظلّمات جديدة.`;
   return `${mine.length ? mine.map(a => `<div class="card card--flat" style="border-color:var(--am-200)">
       <div class="rowj"><b>تظلُّمٌ مُسجَّل</b>${pill(a.status, a.status === 'مقبول' ? 'g' : a.status === 'مرفوض' ? 'r' : 'a')}</div>
       <p class="sm" style="margin-block:6px 0">${esc(a.text)}</p>
-      <div class="sm mut">${dt(a.at)} · ${esc(a.by)}</div>
+      <div class="sm mut">${dt(a.at)} — ${esc(a.by)}</div>
       ${a.decision ? `<div class="hr" style="margin-block:var(--s-3)"></div><div class="sm"><b>قرارُ اللجنة:</b> ${esc(a.decision)}</div>` : ''}
     </div>`).join('') : ''}
   ${open ? `<div class="form" style="margin-block-start:${mine.length ? 'var(--s-4)' : '0'}">
@@ -343,5 +357,5 @@ function appealBox(cid, r) {
       <em>حدِّد الإجراء المُعترَض عليه ورقم البند، لا الشعور بالنتيجة. التظلّم يُنظَر إجرائياً: هل طُبِّقت القاعدة كما نُشرَت؟</em>
       <textarea id="ap-${cid}" placeholder="مثال: الدرجة الموحَّدة في بند «التطبيق» اعتُمدت دون محضر توحيدٍ رغم تباعُدٍ يتجاوز العتبة المنشورة."></textarea></div>
     <div class="row" style="justify-content:flex-end">${btn('تقديم التظلّم', `data-appeal="${cid}"`)}</div>
-  </div>` : `<div class="empty">${ic('lock')}<p>نافذةُ التظلّم تُفتَح بعد إعلان النتائج — ${dt(CYCLE.ceremony)}.</p></div>`}`;
+  </div>` : `<div class="empty">${ic('lock')}<p>${why}</p></div>`}`;
 }

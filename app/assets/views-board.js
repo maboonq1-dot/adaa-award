@@ -187,7 +187,7 @@ function judgeCat(t, cat, b, isChair) {
 
   return card(head(catLabel(key, true),
       conf ? `اعتُمِد في ${dt(conf.at)} — ${esc(conf.rationale)}` : `${ar(cast)} من ${ar(judges)} محكّمين أدلَوا ببطاقاتهم.`,
-      conf ? pill('مُعتمَد', 'g') : cast === judges ? pill('جاهزٌ للاعتماد', 'a') : pill('بانتظار البطاقات', ''))
+      conf ? pill('مُعتمَد', 'g') : cast === judges ? pill('جاهزٌ للاعتماد', 'a') : pill('بانتظار البطاقات', ''), 'judge-' + key)
     + `<div class="split" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
       <div>
         <b class="sm">بطاقتي — رتِّب الخمسة</b>
@@ -221,7 +221,7 @@ function judgeCat(t, cat, b, isChair) {
               <td class="c n">${fmt(r.comp, 1)}</td>
               <td class="c">${conf && i < 3 ? `<span class="bdg bdg--gold">${ic('medal')}${esc(HONORS[i].name)}</span>` : '<span class="mut">—</span>'}</td></tr>`;
           })) : empty('لم تُودَع بطاقاتٌ بعد.')}
-        ${!conf && isChair && cast && b.counts.diverging ? note(`<b>الاعتمادُ موقوف.</b> في هذه الفئة ${ar(b.counts.diverging)} ملفّاً بتباعُدٍ مفتوحٍ بين المقيّمَيْن. لجنةُ التحكيم تعتمد <b>ترتيباً</b>، وترتيبٌ مبنيٌّ على درجةٍ لم تُوحَّد هو ترتيبٌ بلا سند. تُغلَق الحوارات من مكتب اللجنة العلمية أوّلاً.`, 'r', 'shield') : ''}
+        ${!conf && isChair && b.counts.diverging ? note(`<b>الاعتمادُ موقوف.</b> في هذه الفئة ${ar(b.counts.diverging)} ملفّاً بتباعُدٍ مفتوحٍ بين المقيّمَيْن. لجنةُ التحكيم تعتمد <b>ترتيباً</b>، وترتيبٌ مبنيٌّ على درجةٍ لم تُوحَّد هو ترتيبٌ بلا سند. تُغلَق الحوارات من مكتب اللجنة العلمية أوّلاً.`, 'r', 'shield') : ''}
         ${!conf && isChair && cast && !b.counts.diverging ? `
           <div class="fld" style="margin-block-start:var(--s-3)"><label for="cf-${key}">مبرَّرُ الاعتماد <span>*</span></label>
             <em>إن خالف الاعتمادُ محصّلةَ البطاقات فالمبرَّرُ شرطُ صحّة، لا صيغةٌ إنشائية.</em>
@@ -231,6 +231,19 @@ function judgeCat(t, cat, b, isChair) {
         ${conf ? note(`<b>اعتُمِد.</b> ${esc(conf.rationale)}`, 'g', 'check') : ''}
       </div>
     </div>`, conf ? 'card--gold' : '');
+}
+
+/* حالةُ النافذة تُحسَب من تاريخ اليوم — «مفتوحة الآن» نصّاً ثابتاً كذبةٌ بعد ٢١ أكتوبر */
+function appealNote() {
+  const w = appealWindow();
+  if (w.st === 'open') {
+    const left = w.days === 0 ? 'واليوم آخرُ يوم'
+      : 'وبقي ' + num(w.days, 'يومٌ واحد', 'يومان', 'أيام', 'يوماً');
+    return note(`<b>النافذة مفتوحة الآن.</b> أُعلنت النتائج في ${dt(CYCLE.ceremony)}، وتنتهي المدة في ${dt(CYCLE.appealEnds)}، ${left}.`, 'a', 'warn');
+  }
+  if (w.st === 'before')
+    return note(`<b>النافذة لم تُفتح بعد.</b> تبدأ بإعلان النتائج في ${dt(CYCLE.ceremony)}.`, 'n', 'lock');
+  return note(`<b>أُغلقت النافذة.</b> انتهت المدة في ${dt(CYCLE.appealEnds)}، قبل ${num(w.days, 'يومٍ واحد', 'يومين', 'أيام', 'يوماً')}. لا تُقبل تظلّمات جديدة، ويبقى للجنة أن تبتّ فيما قُدِّم قبل الإغلاق.`, 'n', 'lock');
 }
 
 /* ============ الحجب والتظلّم ============ */
@@ -249,7 +262,7 @@ function viewAppeals() {
     ${stat(ar(CYCLE.appealWeeks), 'أسابيع النافذة', 'من ' + dt(CYCLE.ceremony))}
   </div>
 
-  ${note(`<b>النافذةُ مفتوحةٌ الآن.</b> أُعلِنت نتائجُ الدورة الثامنة في ${dt(CYCLE.ceremony)}، فبدأت مدّةُ التظلّم ${ar(CYCLE.appealWeeks)} أسابيع وتنتهي ${dt(CYCLE.appealEnds)}. وما بقي من المدّة هو ما يملكه المتظلِّم — لا أكثر.`, 'a', 'warn')}
+  ${appealNote()}
 
   ${card(head('نافذة التظلّم', 'المدّةُ تبدأ من تاريخ حفل الجائزة وإعلان النتائج، لا من تاريخ التبليغ الفرديّ.')
     + kv([
@@ -275,7 +288,7 @@ function viewAppeals() {
           ${pill(a.status, a.status === 'مقبول' ? 'g' : a.status === 'مرفوض' ? 'r' : 'a')}
         </div>
         <p class="sm" style="margin-block:6px">${esc(a.text)}</p>
-        <div class="sm mut">${dt(a.at)} · ${esc(a.by)}</div>
+        <div class="sm mut">${dt(a.at)} — ${esc(a.by)}</div>
         ${a.decision ? `<div class="hr" style="margin-block:var(--s-3)"></div>
           <div class="sm"><b>قرارُ اللجنة:</b> ${esc(a.decision)}</div>` : can ? `
           <div class="hr" style="margin-block:var(--s-3)"></div>
@@ -293,7 +306,7 @@ function viewLog() {
   return `
   ${pageHead('السجلّ', 'كلُّ تغييرٍ في حالةِ ملفٍّ يحمل: مَن، ومتى، وبأيّ صلاحية، وعلى أيّ مستند. السجلُّ لا يُمحى، وهو أوّلُ ما تطلبه لجنةُ التظلّم.')}
   ${card(head(`${num(DB.log.length, 'حركةٌ واحدة', 'حركتان', 'حركاتٍ', 'حركةً')} في هذه الجلسة`,
-      'النموذجُ يبدأ بسجلٍّ فارغ: كلُّ ما تراه هنا فعلتَه أنت الآن — وهذا مقصود.')
+      'النموذجُ يبدأ بسجلٍّ فارغ: كلُّ ما تراه هنا فعلتَه أنت الآن — وهذا مقصود.', '', 'log')
     + logHtml(null, 100))}
   `;
 }

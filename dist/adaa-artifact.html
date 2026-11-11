@@ -247,8 +247,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .top {
   display: flex; align-items: center; gap: var(--s-4); flex-wrap: wrap;
   padding: var(--s-3) var(--s-7); background: var(--surface);
-  border-block-end: 1px solid var(--line); position: sticky; top: 0; z-index: 4;
+  border-block-end: 1px solid var(--line);
 }
+/* الغلافُ هو الذي يثبت لا الشريطُ داخله: sticky داخل عنصرٍ بارتفاعه نفسه لا يجد مجالاً فيثبت */
+#top { position: sticky; top: 0; z-index: 4; }
 .top__who { display: flex; align-items: center; gap: var(--s-2); font-size: 12.5px; color: var(--text-2); }
 .top__sel {
   appearance: none; background: var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' fill='none' stroke='%23555b50' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat left 10px center/11px;
@@ -615,6 +617,303 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 
 </style>
+<style>
+/* ============================================================
+   جائزة أداء الصحة — العرض التنفيذي والجولة
+   ------------------------------------------------------------
+   ثلاثُ قطع: أزرارُ الرأس، وشرائحُ العرض، ولوحةُ الجولة.
+   الشريحةُ تُقاس بوحدة --u (واحدٌ بالمئة من عرضها)، فتبدو واحدةً
+   على كلّ شاشة. وتحت ٧٦٠px تتحوّل إلى صفحةٍ تُقرأ لا شريحةٍ تُعرَض.
+   ============================================================ */
+
+/* ============ أزرار الرأس ============ */
+.tb {
+  display: inline-flex; align-items: center; gap: 7px; block-size: 34px; padding-inline: 12px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--text);
+  border-radius: var(--r-sm); font-size: 12.5px; font-weight: 500; cursor: pointer; white-space: nowrap;
+  transition: background .15s var(--ease), border-color .15s var(--ease);
+}
+.tb:hover { border-color: var(--g-400); background: var(--g-50); }
+.tb .i { inline-size: 16px; block-size: 16px; }
+.tb--play { background: var(--g-600); border-color: var(--g-600); color: #fff; }
+.tb--play:hover { background: var(--g-700); border-color: var(--g-700); }
+@keyframes tbRing { from { box-shadow: 0 0 0 0 rgba(4,106,56,.5); } to { box-shadow: 0 0 0 12px rgba(4,106,56,0); } }
+.tb--play { animation: tbRing 1.6s ease-out 1.4s 2; }
+@media (prefers-reduced-motion: reduce) { .tb--play { animation: none; } }
+@media (max-width: 680px) {
+  .tb { inline-size: 34px; padding: 0; justify-content: center; }
+  .tb span { display: none; }
+}
+
+/* ============================================================
+   العرض التنفيذي
+   ============================================================ */
+.dk {
+  position: fixed; inset: 0; z-index: 80; display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+  background: radial-gradient(120% 100% at 50% -10%, var(--g-800), var(--g-950) 70%); color: #fff; outline: 0;
+}
+.dk[hidden] { display: none; }
+
+.dk__bar { display: flex; align-items: center; gap: 12px; padding: 10px 18px; }
+.dk__brand { display: flex; align-items: center; gap: 10px; font-family: var(--f-title); font-weight: 600; font-size: 13.5px; }
+.dk__brand .mk {
+  inline-size: 26px; block-size: 26px; border-radius: 7px; display: grid; place-items: center;
+  background: linear-gradient(150deg, var(--au-300), var(--au-500)); color: var(--g-950); font-size: 10.5px; font-weight: 700;
+}
+.dk__brand small { color: var(--g-300); font-weight: 400; font-size: 12px; }
+.dk__ctl { margin-inline-start: auto; display: flex; gap: 6px; }
+.dk__btn {
+  inline-size: 34px; block-size: 34px; display: grid; place-items: center; border-radius: 8px; cursor: pointer;
+  border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: #fff;
+}
+.dk__btn:hover { background: rgba(255,255,255,.16); }
+.dk__btn .i { inline-size: 16px; block-size: 16px; }
+.dk :focus-visible { outline: 2px solid var(--au-300); outline-offset: 2px; }
+
+.dk__main { position: relative; display: grid; place-items: center; padding: 0 68px; min-block-size: 0; }
+.dk__stage {
+  --u: 1vw;
+  container-type: inline-size; position: relative; overflow: hidden;
+  inline-size: min(1180px, 100%, calc((100vh - 128px) * 16 / 9)); aspect-ratio: 16 / 9;
+  background: var(--n-25); color: var(--text); border-radius: 14px; box-shadow: 0 30px 80px rgba(0,0,0,.5);
+}
+@supports (width: 1cqw) { .dk__stage { --u: 1cqw; } }
+
+.dk__nav {
+  position: absolute; inset-block: 0; margin-block: auto; inline-size: 44px; block-size: 44px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.08); color: #fff; display: grid; place-items: center; cursor: pointer;
+}
+.dk__nav:hover:not(:disabled) { background: rgba(255,255,255,.2); }
+.dk__nav:disabled { opacity: .28; cursor: default; }
+.dk__nav .i { inline-size: 20px; block-size: 20px; }
+.dk__nav--prev { inset-inline-start: 12px; }
+.dk__nav--next { inset-inline-end: 12px; }
+
+.dk__foot { display: flex; align-items: center; gap: 14px; padding: 10px 18px 14px; color: var(--g-300); font-size: 12px; }
+.dk__prog { display: flex; gap: 5px; flex: 1; max-inline-size: 460px; }
+.dk__prog button { flex: 1; block-size: 5px; border: 0; padding: 0; border-radius: 3px; background: rgba(255,255,255,.2); cursor: pointer; }
+.dk__prog button:hover { background: rgba(255,255,255,.4); }
+.dk__prog button.past { background: var(--g-400); }
+.dk__prog button.on { background: var(--g-100); }
+.dk__cnt { font-family: var(--f-num); font-variant-numeric: tabular-nums; min-inline-size: 52px; }
+.dk__note { margin-inline-start: auto; }
+
+/* ---------- الشريحة ---------- */
+.sl {
+  position: absolute; inset: 0; display: none; flex-direction: column;
+  padding: calc(var(--u) * 2.7) calc(var(--u) * 4.2) calc(var(--u) * 2.3); gap: calc(var(--u) * 1.8);
+  font-size: calc(var(--u) * 1.7); line-height: 1.75; color: var(--text);
+}
+.sl.on { display: flex; animation: slIn .28s var(--ease) both; }
+@keyframes slIn { from { opacity: 0; transform: translateX(calc(var(--u) * -1.2)); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .sl.on { animation: none; } }
+
+.sl__top { display: flex; align-items: center; gap: calc(var(--u) * 1.2); font-size: calc(var(--u) * 1.1); color: var(--text-3); }
+.sl__top b { font-weight: 600; color: var(--g-700); }
+.sl__top .n { margin-inline-start: auto; font-family: var(--f-num); font-variant-numeric: tabular-nums; }
+.sl h2 { margin: 0; font-size: calc(var(--u) * 3.3); line-height: 1.4; font-weight: 600; color: var(--g-800); text-wrap: balance; max-inline-size: 30ch; }
+.sl__body { flex: 1; min-block-size: 0; display: flex; flex-direction: column; gap: calc(var(--u) * 2); margin: 0; }
+.sl__body.mid { justify-content: center; }
+.sl__fn { margin: 0; margin-block-start: auto; font-size: calc(var(--u) * 1.2); color: var(--text-3); }
+.nw { white-space: nowrap; }
+.sl__claim { margin: 0; font-size: calc(var(--u) * 2.2); font-weight: 600; color: var(--g-800); line-height: 1.6; text-wrap: balance; max-inline-size: 40ch; }
+.sl .pl { display: inline-block; font-size: .82em; padding: 0 .6em; border-radius: 999px; background: var(--am-50); color: var(--am-600); border: 1px solid var(--am-200); }
+
+/* صفوفُ الجملة: عنوانٌ ونصّ */
+.sd { display: grid; grid-template-columns: calc(var(--u) * 12) 1fr; gap: calc(var(--u) * 2); align-items: baseline;
+  padding-block: calc(var(--u) * 1.6); border-block-start: 1px solid var(--line); }
+.sd:last-child { border-block-end: 1px solid var(--line); }
+.sd dt { font-weight: 600; font-size: calc(var(--u) * 1.5); color: var(--g-700); }
+.sd dd { margin: 0; font-size: calc(var(--u) * 1.95); line-height: 1.7; }
+
+/* ثلاثةُ أعمدة */
+.sc3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--u) * 2.4); }
+.sc3 > div { display: flex; flex-direction: column; gap: calc(var(--u) * .7); padding-block-start: calc(var(--u) * 1.3); border-block-start: 1px solid var(--line); }
+.sc3 .k { font-family: var(--f-title); font-weight: 600; font-size: calc(var(--u) * 3); color: var(--ink-700); line-height: 1.3; }
+.sc3 p { margin: 0; font-size: calc(var(--u) * 1.65); color: var(--text-2); }
+.sc3 em { font-style: normal; font-size: calc(var(--u) * 1.35); font-weight: 600; color: var(--g-700); margin-block-start: auto; }
+
+/* المحطّات الخمس: تسلسلٌ حقيقيّ فالترقيمُ فيه معنى */
+.stp { display: grid; grid-template-columns: repeat(5, 1fr); gap: calc(var(--u) * 1.6); }
+.stp > div { position: relative; display: flex; flex-direction: column; gap: calc(var(--u) * .45); padding-block-start: calc(var(--u) * 4.8); }
+.stp .no {
+  position: absolute; inset-block-start: 0; inset-inline-start: 0; inline-size: calc(var(--u) * 3.4); block-size: calc(var(--u) * 3.4);
+  border-radius: 50%; display: grid; place-items: center; background: var(--ink-600); color: #fff;
+  font-family: var(--f-num); font-weight: 600; font-size: calc(var(--u) * 1.5);
+}
+.stp > div:not(:last-child)::before {
+  content: ''; position: absolute; inset-block-start: calc(var(--u) * 1.65); block-size: 2px; background: var(--ink-200);
+  inset-inline-start: calc(var(--u) * 3.8); inset-inline-end: calc(var(--u) * -1.2);
+}
+.stp .nm { font-family: var(--f-title); font-weight: 600; font-size: calc(var(--u) * 2.3); color: var(--g-800); line-height: 1.35; }
+.stp .ow { font-size: calc(var(--u) * 1.45); color: var(--text-2); }
+.stp .mt { font-size: calc(var(--u) * 1.3); color: var(--ink-700); font-weight: 600; }
+.stp .ou { margin-block-start: calc(var(--u) * .7); font-size: calc(var(--u) * 1.6); font-weight: 600; color: var(--text); padding-block-start: calc(var(--u) * .7); border-block-start: 1px solid var(--line-soft); }
+.stl { display: flex; flex-wrap: wrap; gap: calc(var(--u) * .7); }
+.stl .bdg { font-size: calc(var(--u) * 1.25); padding: .25em .8em; }
+.stl-h { margin: 0; font-size: calc(var(--u) * 1.35); font-weight: 600; color: var(--text-3); }
+
+/* جدولُ الشريحة */
+.st { inline-size: 100%; border-collapse: collapse; font-size: calc(var(--u) * 1.5); }
+.st th { text-align: start; font-weight: 600; font-size: calc(var(--u) * 1.2); color: var(--text-3);
+  padding: calc(var(--u) * .7) 0; padding-inline-end: calc(var(--u) * 1.4); border-block-end: 1px solid var(--line); white-space: nowrap; }
+.st td { padding: calc(var(--u) * 1.15) 0; padding-inline-end: calc(var(--u) * 1.6); border-block-end: 1px solid var(--line-soft); vertical-align: top; line-height: 1.6; }
+.st td:first-child { font-weight: 600; color: var(--g-800); white-space: nowrap; }
+.st td.mt { color: var(--text-2); }
+.st .tg { display: inline-block; font-size: .86em; padding: 0 .6em; border-radius: 999px; background: var(--n-100); color: var(--n-700); }
+.st .tg--a { background: var(--am-50); color: var(--am-600); }
+.st .tg--r { background: var(--r-50); color: var(--r-600); }
+
+/* قبل وبعد */
+.bw { display: grid; grid-template-columns: calc(var(--u) * 24) 1fr; gap: calc(var(--u) * 3); align-items: start; }
+.bn { display: flex; flex-direction: column; gap: calc(var(--u) * .3); padding-inline-end: calc(var(--u) * 2); }
+.bn b { font-family: var(--f-title); font-weight: 700; font-size: calc(var(--u) * 9); line-height: 1; color: var(--au-600); }
+.bn span { font-size: calc(var(--u) * 1.9); font-weight: 600; color: var(--g-800); }
+.bn em { font-style: normal; font-size: calc(var(--u) * 1.35); color: var(--text-2); }
+.cg { display: grid; gap: 0; }
+.cg > div { display: grid; grid-template-columns: calc(var(--u) * 9) 1fr 1fr; gap: calc(var(--u) * 1.6); padding-block: calc(var(--u) * 1.2); border-block-start: 1px solid var(--line); font-size: calc(var(--u) * 1.5); }
+.cg > div.th { padding-block: 0 calc(var(--u) * .6); border-block-start: 0; border-block-end: 1px solid var(--line); font-size: calc(var(--u) * 1.15); color: var(--text-3); font-weight: 600; }
+.cg > div:last-child { border-block-end: 1px solid var(--line); }
+.cg .h { font-weight: 600; color: var(--g-700); }
+.cg .was { color: var(--text-3); text-decoration: line-through; text-decoration-color: var(--n-300); }
+.cg .now { color: var(--text); }
+.cg .fix .was { text-decoration: none; }
+
+/* ثلاثةُ أعمدةٍ للحقيقيّ والمحاكاة */
+.rs { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--u) * 2.2); }
+.rs > div { padding: calc(var(--u) * 1.8) calc(var(--u) * 1.9); border-radius: calc(var(--u) * 1); background: var(--surface); border: 1px solid var(--line); }
+.rs .h { margin: 0 0 calc(var(--u) * 1); font-weight: 700; font-size: calc(var(--u) * 1.75); display: flex; align-items: center; gap: .5em; }
+.rs .h i { inline-size: calc(var(--u) * 1); block-size: calc(var(--u) * 1); border-radius: 50%; background: var(--g-500); }
+.rs .sim .h i { background: var(--am-400); }
+.rs ul { margin: 0; padding-inline-start: calc(var(--u) * 1.6); display: grid; gap: calc(var(--u) * .55); font-size: calc(var(--u) * 1.5); color: var(--text-2); line-height: 1.6; }
+.rs .sim { background: var(--am-50); border-color: var(--am-200); }
+.rs .sim ul { color: var(--am-600); }
+
+/* الخطوة التالية */
+.nx { display: grid; grid-template-columns: 1.5fr 1fr; gap: calc(var(--u) * 3.2); align-items: start; }
+.nx ol { list-style: none; counter-reset: s; margin: 0; padding: 0; display: grid; gap: calc(var(--u) * 1.3); }
+.nx ol > li { counter-increment: s; display: grid; grid-template-columns: calc(var(--u) * 3.4) 1fr; gap: calc(var(--u) * 1.5); align-items: start; font-size: calc(var(--u) * 1.8); line-height: 1.7; }
+.nx ol > li::before { content: counter(s, arabic-indic); inline-size: calc(var(--u) * 3.4); block-size: calc(var(--u) * 3.4); border-radius: 50%; display: grid; place-items: center; background: var(--ink-600); color: #fff; font-family: var(--f-num); font-weight: 600; font-size: calc(var(--u) * 1.5); }
+.nx ol > li b { color: var(--g-800); }
+.nx__n { padding-inline-start: calc(var(--u) * 2.4); border-inline-start: 1px solid var(--line); }
+.nx__n h3 { margin: 0 0 calc(var(--u) * 1); font-size: calc(var(--u) * 1.6); color: var(--text-3); font-weight: 600; }
+.nx__n ul { margin: 0; padding-inline-start: calc(var(--u) * 1.6); display: grid; gap: calc(var(--u) * .7); font-size: calc(var(--u) * 1.7); }
+.nx__cta { display: flex; align-items: center; gap: calc(var(--u) * 2); margin-block-start: auto; }
+.nx__cta span { margin-inline-start: auto; font-size: calc(var(--u) * 1.3); color: var(--text-3); }
+.dk__cta {
+  display: inline-flex; align-items: center; gap: .6em; padding: .7em 1.4em; border-radius: calc(var(--u) * .8); border: 0; cursor: pointer;
+  background: var(--g-600); color: #fff; font-family: var(--f-body); font-weight: 600; font-size: calc(var(--u) * 1.8);
+}
+.dk__cta:hover { background: var(--g-700); }
+.dk__cta .i { inline-size: 1.3em; block-size: 1.3em; }
+
+/* الغلاف */
+.sl--cover { background: linear-gradient(155deg, var(--g-900), var(--g-950)); color: #fff; justify-content: space-between; overflow: hidden; }
+.sl--cover .sl__top { color: var(--g-300); }
+.sl--cover .sl__top b { color: #fff; }
+.sl--cover .sp { margin-inline-start: auto; }
+.cv__mk { inline-size: calc(var(--u) * 3.4); block-size: calc(var(--u) * 3.4); border-radius: calc(var(--u) * .8); display: grid; place-items: center;
+  background: linear-gradient(150deg, var(--au-300), var(--au-500)); color: var(--g-950); font-family: var(--f-title); font-weight: 700; font-size: calc(var(--u) * 1.25); }
+.cv__mid { display: flex; flex-direction: column; gap: calc(var(--u) * 1.4); position: relative; z-index: 1; }
+.sl--cover h2 { color: #fff; font-size: calc(var(--u) * 5.4); line-height: 1.3; max-inline-size: 16ch; }
+.cv__s { margin: 0; font-size: calc(var(--u) * 1.9); color: var(--g-100); max-inline-size: 34ch; line-height: 1.7; }
+.cv__ft { position: relative; z-index: 1; display: grid; gap: calc(var(--u) * .2); font-size: calc(var(--u) * 1.3); color: var(--g-200); }
+.cv__ft p { margin: 0; }
+.cv__ft .c { margin-block-start: calc(var(--u) * .8); font-size: calc(var(--u) * 1.1); color: var(--g-300); max-inline-size: 52ch; }
+.cv__num { position: absolute; inset-inline-end: calc(var(--u) * 3); inset-block-end: calc(var(--u) * 1.2); font-family: var(--f-title); font-weight: 700;
+  font-size: calc(var(--u) * 14); line-height: 1; color: rgba(255,255,255,.055); white-space: nowrap; pointer-events: none; }
+
+/* ---------- الجوّال: صفحةٌ تُقرأ ---------- */
+@media (max-width: 760px) {
+  .dk__main { padding: 0 8px; align-items: stretch; }
+  .dk__stage { --u: 10px; container-type: normal; inline-size: 100%; aspect-ratio: auto; block-size: 100%; overflow: auto; border-radius: 10px; }
+  .sl { position: relative; inset: auto; min-block-size: 100%; padding: 18px 16px 26px; gap: 16px; }
+  .sl__body { overflow-x: auto; }
+  .sc3, .rs, .nx, .bw { grid-template-columns: 1fr; }
+  .stp { grid-template-columns: 1fr; }
+  .stp > div { padding-block-start: 0; padding-inline-start: 40px; }
+  .stp > div:not(:last-child)::before { display: none; }
+  .st { min-inline-size: 560px; }
+  .cg > div { grid-template-columns: 1fr; gap: 4px; }
+  .nx__n { padding-inline-start: 0; border-inline-start: 0; }
+  .dk__nav, .dk__note { display: none; }
+  .cv__num { font-size: 90px; }
+}
+
+/* ============================================================
+   الجولة
+   ============================================================ */
+body.touring .shell { pointer-events: none; }
+
+.tr-ring {
+  position: fixed; z-index: 70; pointer-events: none; border: 2px solid var(--ink-500); border-radius: 12px;
+  box-shadow: 0 0 0 6px rgba(67,97,159,.16); opacity: 0; transition: opacity .2s;
+}
+.tr-ring.on { opacity: 1; }
+.tr-ring.pop { animation: trPop .36s var(--ease); }
+@keyframes trPop { 0% { box-shadow: 0 0 0 0 rgba(67,97,159,.5); } 100% { box-shadow: 0 0 0 6px rgba(67,97,159,.16); } }
+
+.tr-cur {
+  position: fixed; z-index: 76; inline-size: 20px; block-size: 20px; margin: -10px 0 0 -10px; border-radius: 50%; pointer-events: none;
+  background: var(--ink-700); border: 2px solid #fff; box-shadow: 0 2px 10px rgba(0,0,0,.4); opacity: 0;
+  transition: left .5s var(--ease), top .5s var(--ease), transform .14s, opacity .2s;
+}
+.tr-cur.on { opacity: 1; }
+.tr-cur.tap { transform: scale(.6); }
+
+.tr-veil {
+  position: fixed; inset: 0; z-index: 65; pointer-events: none; opacity: 0; transition: opacity .15s;
+  background: color-mix(in srgb, var(--bg) 88%, transparent); display: grid; place-items: center; color: var(--text-3); font-size: 13px;
+}
+.tr-veil.on { opacity: 1; }
+
+.tr {
+  position: fixed; z-index: 72; inset-block-end: 16px; inset-inline-end: 16px; inline-size: min(420px, calc(100vw - 24px));
+  max-block-size: calc(100vh - 32px); overflow: auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 9px; padding: 14px 16px 12px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--sh-3);
+}
+.tr__hd { display: flex; align-items: center; gap: 8px; }
+.tr__ch { font-size: 11.5px; font-weight: 600; color: var(--g-700); background: var(--g-50); border: 1px solid var(--g-200); border-radius: 999px; padding: 2px 10px; }
+.tr__n { font-size: 11.5px; color: var(--text-3); font-family: var(--f-num); font-variant-numeric: tabular-nums; }
+.tr__x { margin-inline-start: auto; inline-size: 28px; block-size: 28px; display: grid; place-items: center; border: 0; background: none; color: var(--text-3); cursor: pointer; border-radius: 6px; }
+.tr__x:hover { background: var(--n-100); color: var(--text); }
+.tr__x .i { inline-size: 15px; block-size: 15px; }
+.tr__who { display: flex; flex-wrap: wrap; gap: 6px; }
+.tr__who span { font-size: 11.5px; color: var(--text-2); background: var(--n-50); border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px; }
+.tr__who .d { background: var(--am-50); border-color: var(--am-200); color: var(--am-600); }
+.tr__t { margin: 0; font-size: 16px; }
+.tr__b { margin: 0; font-size: 13.5px; line-height: 1.85; color: var(--text-2); }
+.tr__note { margin: 0; font-size: 12px; line-height: 1.7; color: var(--ink-700); background: var(--ink-50); border: 1px solid var(--ink-100); border-radius: 10px; padding: 6px 10px; }
+.tr__acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.tr__ctl { display: flex; align-items: center; gap: 8px; padding-block-start: 9px; border-block-start: 1px solid var(--line-soft); }
+.tr__c {
+  inline-size: 34px; block-size: 34px; display: grid; place-items: center; cursor: pointer; flex: none;
+  border: 1px solid var(--line); background: var(--surface); color: var(--text); border-radius: 50%;
+}
+.tr__c:hover { border-color: var(--g-400); background: var(--g-50); }
+.tr__c .i { inline-size: 16px; block-size: 16px; }
+.tr__c--play { inline-size: 40px; block-size: 40px; background: var(--g-600); border-color: var(--g-600); color: #fff; }
+.tr__c--play:hover { background: var(--g-700); border-color: var(--g-700); }
+.tr__tk { display: flex; gap: 7px; flex: 1; align-items: center; margin-inline-start: 4px; min-inline-size: 0; }
+.tr__tk .g { display: flex; gap: 2px; }
+.tr__tk button { inline-size: 7px; block-size: 7px; padding: 0; border: 0; border-radius: 50%; background: var(--n-300); cursor: pointer; }
+.tr__tk button:hover { background: var(--ink-300); }
+.tr__tk button.past { background: var(--ink-300); }
+.tr__tk button.on { background: var(--ink-600); inline-size: 16px; border-radius: 4px; }
+.tr--busy .tr__b, .tr--busy .tr__t { opacity: .55; }
+.tr :focus-visible { outline: 2px solid var(--ink-400); outline-offset: 2px; }
+
+@media (max-width: 680px) {
+  .tr { inset-inline: 8px; inset-block-end: 8px; inline-size: auto; max-block-size: 52vh; }
+  .tr__ctl { flex-wrap: wrap; justify-content: center; }
+  .tr__tk { order: 3; flex-basis: 100%; justify-content: center; flex-wrap: wrap; row-gap: 6px; margin-inline-start: 0; padding-block-start: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tr-ring.pop { animation: none; }
+  .tr-cur { transition: opacity .2s; }
+}
+
+</style>
 <a class="skip" href="#page">تخطَّ إلى المحتوى</a>
 
 <div class="shell">
@@ -642,6 +941,7 @@ const CYCLE = {
   centenary: 'إحياءً لمرور ١٠٠ عام على تأسيس أول مديرية للصحة عام ١٣٤٣هـ في مكة المكرمة',
   email: 'adaa-award@moh.gov.sa',
   appealWeeks: 6,
+  regOpen: '2026-01-12', regClose: '2026-02-25',
   ceremony: '2026-09-09',
   appealEnds: '2026-10-21'
 };
@@ -854,6 +1154,13 @@ const SECTORS = {
   other:    { name: 'جهاتٌ أخرى',            feed: 'partial', note: 'ربطٌ يعتمد على اتفاقيةٍ لكل جهة' }
 };
 
+/* مستشفىً تخصّصيّ لا يدخل إلا فئاتِ تخصّصه: مستشفى العيون في الطوارئ وإنقاذ الأرواح مشهدٌ
+   يكشف المحاكاةَ لأوّل من يعرف المستشفيات. (القلب مُدرَج في «كفاءة الخدمات» كما في النتيجة المعلنة.) */
+const SCOPE = {
+  A06: ['PREV:SCR', 'EFFI:ACC', 'EFFI:EFF'],
+  H10: ['LIFE:MI', 'PREV:SCR', 'EFFI:ACC', 'EFFI:EFF']
+};
+
 /* ============ الجهات ============
    ‏**تصحيحٌ فرضَته نتائجُ الحفل:** وحدةُ التنافس ليست «الجهة» دائماً.
    التجمّعُ الصحيّ يتنافس في الرعاية الأولية والإقلاع عن التبغ،
@@ -923,7 +1230,7 @@ const ENTITIES = [
   ['O01','الهلال الأحمر السعودي','other','الرياض','authority'],
   ['O02','مستشفى جونز هوبكنز أرامكو بالظهران','other','الشرقية','hospital'],
   ['O03','مجمع الملك عبدالله الطبي بجدة','other','جدة','hospital']
-].map(([id, name, sector, region, kind]) => ({ id, name, sector, region, kind, feed: SECTORS[sector].feed }));
+].map(([id, name, sector, region, kind]) => ({ id, name, sector, region, kind, feed: SECTORS[sector].feed, scope: SCOPE[id] }));
 
 const E = id => ENTITIES.find(e => e.id === id);
 
@@ -978,7 +1285,8 @@ const PEOPLE = [
   { id: 'U-JD3', name: 'عضو لجنة التحكيم ٢', role: 'judge', entity: null },
   { id: 'U-AP1', name: 'لجنة الحجب والتظلّم', role: 'appeals', entity: null },
   { id: 'U-SE1', name: 'أمانة الجائزة',    role: 'sec',    entity: null },
-  { id: 'U-EN1', name: 'ممثّل تجمّع الرياض الصحي الأول', role: 'entity', entity: 'C01' }
+  { id: 'U-EN1', name: 'ممثّل تجمّع الرياض الصحي الأول', role: 'entity', entity: 'C01' },
+  { id: 'U-EN2', name: 'ممثّل مستشفى د. سليمان فقيه', role: 'entity', entity: 'P05' }
 ];
 
 /* ============ مولِّدٌ ببذرةٍ ثابتة ============ */
@@ -1031,6 +1339,7 @@ function series(entId, catKey, kpi) {
 /** هل تُقبَل هذه الجهةُ في هذه الفئة؟ وحدةُ التنافس تحكم. */
 function fits(ent, cat) {
   if (ent.kind === 'authority') return false;      // الجهةُ الأمّ تُمنَح وساماً ولا تدخل مساراً
+  if (ent.scope && !ent.scope.includes(cat.key)) return false;   // التخصّصيّ لا يخرج عن تخصّصه
   return cat.unit === 'any' || cat.unit === ent.kind;
 }
 
@@ -1380,8 +1689,65 @@ const DB = {
   registry: []      // تسجيلاتٌ جديدة من النموذج
 };
 
+/* ============ الزمن ============
+   الصفحةُ تُقرأ بعد أشهرٍ من الحفل، فلا يصحّ أن يُكتب فيها «النافذةُ مفتوحةٌ الآن»
+   نصّاً ثابتاً: الحالةُ تُحسَب من تاريخ اليوم. والجولةُ وحدها تُقدّم الساعةَ
+   (DEMO_NOW) لتُري كلَّ مرحلةٍ في زمنها، وتُعيدها حين تنتهي. */
+let DEMO_NOW = null;
+const pad2 = n => String(n).padStart(2, '0');
+function todayISO() {
+  if (DEMO_NOW) return DEMO_NOW;
+  const d = new Date();
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+const utcOf = s => { const [y, m, d] = s.split('-').map(Number); return Date.UTC(y, m - 1, d); };
+const dayDiff = (a, b) => Math.round((utcOf(b) - utcOf(a)) / 864e5);
+
+/** نافذةُ التظلّم: قبل الحفل · مفتوحة · مُغلَقة */
+function appealWindow() {
+  const t = todayISO(), a = CYCLE.ceremony, b = CYCLE.appealEnds;
+  if (t < a)  return { st: 'before', days: dayDiff(t, a) };
+  if (t <= b) return { st: 'open',   days: dayDiff(t, b) };
+  return { st: 'closed', days: dayDiff(b, t) };
+}
+/** نافذةُ التسجيل: يناير ← فبراير */
+function regWindow() {
+  const t = todayISO();
+  if (t < CYCLE.regOpen)  return { st: 'before', days: dayDiff(t, CYCLE.regOpen) };
+  if (t <= CYCLE.regClose) return { st: 'open',   days: dayDiff(t, CYCLE.regClose) };
+  return { st: 'closed', days: dayDiff(CYCLE.regClose, t) };
+}
+/** حالةُ كلّ بندٍ في الجدول من تاريخ اليوم: ما سبق «تمّ»، وآخرُ ما بلغه التاريخ «جارٍ» إن كان بعده بند */
+function timelineView() {
+  const t = todayISO();
+  const last = TIMELINE.reduce((a, x, i) => x.d <= t ? i : a, -1);
+  return TIMELINE.map((x, i) => ({
+    ...x,
+    s: i < last ? 'done' : i === last ? (last === TIMELINE.length - 1 ? 'done' : 'now') : 'next'
+  }));
+}
+
 function logIt(who, act, on, detail) {
-  DB.log.unshift({ at: new Date().toISOString().slice(0, 16).replace('T', ' '), who, act, on, detail });
+  const d = new Date();
+  DB.log.unshift({ at: `${todayISO()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`, who, act, on, detail });
+}
+
+/* ============ بناءُ ملفّ مشاركة ============
+   يُستعمل عند التسجيل، وتستعمله الجولةُ لتعرف سلفاً: هل ستجتاز الجهةُ الأهليّة؟ */
+function buildCase(entId, catKey) {
+  const ent = E(entId), cat = C(catKey), ks = kpisOf(catKey);
+  const vals = {}; ks.forEach(k => { vals[k.id] = series(entId, catKey, k); });
+  const r2 = mulberry32(seedOf(entId + catKey + 'feed'));
+  const missing = [];
+  if (ent.feed === 'partial') {
+    cat.kpis.forEach(k => { if (r2() < 0.28) missing.push(k.id); });
+    if (r2() < 0.45) missing.push('ESAT');
+  }
+  return {
+    id: `${entId}-${catKey.replace(':', '-')}`,
+    entity: entId, track: cat.track, cat: cat.id, key: catKey,
+    vals, missing, registeredAt: todayISO()
+  };
 }
 
 /* ---- بناء الترتيب الكامل للفئة ----
@@ -1616,7 +1982,15 @@ const I = {
   star:    '<path d="m12 3 2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.4 6.7 19.2l1.1-5.9L3.5 9.2l5.9-.8z"/>',
   gavel:   '<path d="m14 3 7 7-3 3-7-7zM3 21h10M10 10 3 17l3 3 7-7"/>',
   plus:    '<path d="M12 5v14M5 12h14"/>',
-  arrow:   '<path d="M19 12H5M12 5l-7 7 7 7"/>'
+  arrow:   '<path d="M19 12H5M12 5l-7 7 7 7"/>',
+  deck:    '<rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M8 21h8M12 17v4"/>',
+  play:    '<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/>',
+  next:    '<path d="M15 6l-6 6 6 6"/>',
+  prev:    '<path d="M9 6l6 6-6 6"/>',
+  stop:    '<rect x="6" y="6" width="12" height="12" rx="2"/>',
+  pause:   '<path d="M9 6v12M15 6v12"/>',
+  replay:  '<path d="M4 12a8 8 0 1 0 2.6-5.9M4 4v4h4"/>',
+  full:    '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'
 };
 const ic = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
   stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n] || I.file}</svg>`;
@@ -1689,9 +2063,28 @@ function chip(person, sub = '') {
 }
 
 /* ============ لبنات التخطيط ============ */
-const card = (inner, cls = '') => `<section class="card ${cls}">${inner}</section>`;
-const head = (title, sub = '', right = '') =>
-  `<div class="hd"><div><h2>${esc(title)}</h2>${sub ? `<p class="hd__s">${sub}</p>` : ''}</div>${right ? `<div class="hd__r">${right}</div>` : ''}</div>`;
+const card = (inner, cls = '', attrs = '') => `<section class="card ${cls}"${attrs ? ' ' + attrs : ''}>${inner}</section>`;
+/* مواضعُ الجولة: كلُّ بطاقةٍ تُعرَف بعنوانها، فيجدها المُرشِد دون أن تُلوَّث القوالبُ بسمات.
+   عنوانٌ تغيّر ولم يتغيّر هنا يُسقِط الإطارَ المُضيء فقط، ولا يكسر شيئاً — ويكشفه فحصُ الجولة. */
+const TOUR_HEADS = {
+  'القِمع في الفئات العشر': 'board-funnel',
+  'الأوسمة الثلاثة': 'res-medals',
+  'حكمُ بوّابة الأهليّة — فوريّ': 'gates',
+  '١ — بوّابة الأهليّة': 'gates',
+  'الملفّات المُسنَدة': 'desk-list',
+  'نتائج المؤشّرات · المرحلة الأولى': 's1-break',
+  'الإسناد': 'assign',
+  'بطاقة التسجيل — درجتي': 'scorecard',
+  'الأبعاد المتباعدة': 'dv',
+  'الدرجة الموحَّدة': 'cons',
+  'نافذة التظلّم': 'appeal-window',
+  'التظلّمات': 'appeal-list',
+  '٥ — التظلّم': 'appeal',
+  'من يرى ماذا — مصفوفة الصلاحيات': 'matrix',
+  'الأوزان والعتبات': 'weights'
+};
+const head = (title, sub = '', right = '', tid = TOUR_HEADS[title]) =>
+  `<div class="hd"${tid ? ` data-tour="${tid}"` : ''}><div><h2>${esc(title)}</h2>${sub ? `<p class="hd__s">${sub}</p>` : ''}</div>${right ? `<div class="hd__r">${right}</div>` : ''}</div>`;
 const note = (txt, tone = 'n', icon = 'verdict') =>
   `<div class="note note--${tone}">${ic(icon)}<div>${txt}</div></div>`;
 const kv = rows => `<dl class="kv">${rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
@@ -1828,10 +2221,11 @@ function viewHome() {
 }
 
 function timelineHtml() {
-  return `<div class="tl">${TIMELINE.map((x, i) => `
+  const tl = timelineView();
+  return `<div class="tl">${tl.map((x, i) => `
     <div class="tl__i tl__i--${x.s}">
       <div class="tl__d">${dt(x.d)}</div>
-      <div class="tl__m"><i></i>${i < TIMELINE.length - 1 ? '<s></s>' : ''}</div>
+      <div class="tl__m"><i></i>${i < tl.length - 1 ? '<s></s>' : ''}</div>
       <div class="tl__t">${esc(x.t)}<em>${esc(x.who)}${x.s === 'now' ? ' · جارٍ الآن' : ''}</em></div>
     </div>`).join('')}</div>`;
 }
@@ -1872,8 +2266,8 @@ function viewMethod() {
       ['نصيب المرحلة الأولى', pc(CFG.w1 * 100, 0), 'assume', 'الدليل لا يذكر وزناً للمراحل. أُخِذ ٥٠٪ لأنه الوزن المُعلَن في الأدبيات السابقة للجائزة.'],
       ['نصيب المرحلة الثانية', pc(CFG.w2 * 100, 0), 'assume', 'رفعُه يُعلي منظومةَ العمل على النتيجة الرقمية، وخفضُه يعكس ذلك.'],
       ['المرحلة الثالثة', 'قرارٌ لا درجة', 'text', '«مراجعةٌ نهائية من لجنة التحكيم لتأكيد الجهات الفائزة» — قرارٌ يعتمد الترتيب أو يعدّله بمبرَّر، لا درجةٌ تُضاف.'],
-      ['أوزان LeTCI', `${pc(w.Le * 100, 0)} · ${pc(w.T * 100, 0)} · ${pc(w.C * 100, 0)} · ${pc(w.I * 100, 0)}`, 'assume', 'المستويات ثم الاتجاهات: الجائزةُ تكافئ الأداء المستدام لا القفزة الواحدة.'],
-      ['أوزان المرحلة الثانية', `عمليات ${pc(CFG.s2.adli * 100, 0)} · نتائج ${pc(CFG.s2.letci * 100, 0)} · زيارة ${pc(CFG.s2.visit * 100, 0)}`, 'assume', 'الزيارةُ تحقُّقٌ لا درجةُ تجميل: وزنُها يكفي لأن تُسقِط ملفّاً لا يصمد على الأرض.'],
+      ['أوزان LeTCI', `${pc(w.Le * 100, 0)}، ${pc(w.T * 100, 0)}، ${pc(w.C * 100, 0)}، ${pc(w.I * 100, 0)}`, 'assume', 'المستويات ثم الاتجاهات: الجائزةُ تكافئ الأداء المستدام لا القفزة الواحدة.'],
+      ['أوزان المرحلة الثانية', `عمليات ${pc(CFG.s2.adli * 100, 0)}، نتائج ${pc(CFG.s2.letci * 100, 0)}، زيارة ${pc(CFG.s2.visit * 100, 0)}`, 'assume', 'الزيارةُ تحقُّقٌ لا درجةُ تجميل: وزنُها يكفي لأن تُسقِط ملفّاً لا يصمد على الأرض.'],
       ['عتبة تباعُد المُحصّلة', ar(CFG.divergence) + ' نقطة', 'assume', 'فوقها يُلزَم حوارُ التوحيد بحضور خبير اللجنة العلمية، ويُوقَف اعتمادُ المسار.'],
       ['عتبة تباعُد البُعد المفرد', ar(CFG.dimGap) + ' نقطة', 'assume', 'أوسعُ من خطوةِ مرسًى واحدة — أي أن المقيّمَيْن لم يختارا مرسيين متجاورين. ذاك خلافٌ في قراءة البند، وما دونه شدّةُ مُقيِّم.'],
       ['نسبة بلوغ المستهدفات', pc(CFG.metRatio * 100, 0), 'assume', 'الدليل يشترط «أداءً يحقّق المستهدفات الوطنية أو يتجاوزها» دون نسبة. رفعُها يُضيّق البوّابة.'],
@@ -2028,6 +2422,13 @@ const FORM = [
     hint: 'نصُّ الدليل: «أدلّةٌ داعمة لكلّ نتيجةٍ مُبلَّغٍ عنها». نتيجةٌ بلا دليلٍ لا تُحتسَب.' }
 ];
 
+/* نافذةُ التسجيل الفعليّة أُغلقت في فبراير: النموذجُ بعدها للتجربة، وهذا يُقال قبل الملء لا بعده */
+function regNote() {
+  const w = regWindow();
+  if (w.st !== 'closed') return '';
+  return note(`<b>التسجيل الفعلي أُغلق.</b> أُقفل في ${dt(CYCLE.regClose)}. هذا النموذج للتجربة فقط، ولا يُسجّل شيئاً خارج جلستك.`, 'a', 'warn');
+}
+
 /* ============ نموذج التسجيل ============ */
 function viewRegister() {
   if (REG.done) return regDone();
@@ -2039,9 +2440,11 @@ function viewRegister() {
 
   ${note('<b>اقرأ هذا قبل أن تملأ حقلاً.</b> في هذه الجائزة لا تُرشِّح الجهةُ نفسَها بملفٍّ تكتبه. المرحلةُ الأولى تُحسَب من <b>بياناتك الرسمية المُغذّاة أصلاً</b> إلى مصادر وزارة الصحة وشركائها. ما تفعله هنا: تُثبِت هويّتك، وتُفوِّض ممثّلاً، وتختار المسار. أمّا <b>استمارةُ المشاركة</b> فتُفتَح في المرحلة الثانية لأفضل ' + ar(STAGES[0].cut) + ' جهاتٍ في كلّ فئةٍ وحدهم.', 'i', 'verdict')}
 
+  ${regNote()}
+
   ${card(`<div class="steps">${steps.map((s, i) => `
       <div class="${REG.step === i + 1 ? 'on' : REG.step > i + 1 ? 'ok' : ''}">
-        <b>${ar(i + 1)} · ${esc(s)}</b>${REG.step > i + 1 ? 'تمّ' : REG.step === i + 1 ? 'الآن' : 'لاحقاً'}</div>`).join('')}</div>
+        <b>${ar(i + 1)} — ${esc(s)}</b>${REG.step > i + 1 ? 'تمّ' : REG.step === i + 1 ? 'الآن' : 'لاحقاً'}</div>`).join('')}</div>
     ${[regStep1, regStep2, regStep3, regStep4][REG.step - 1]()}`)}
   `;
 }
@@ -2049,7 +2452,7 @@ function viewRegister() {
 function regStep1() {
   const list = REG.sector ? ENTITIES.filter(e => e.sector === REG.sector) : [];
   return `<div class="form">
-    <div class="fld ${REG.err.sector ? 'fld--bad' : ''}">
+    <div class="fld ${REG.err.sector ? 'fld--bad' : ''}" data-tour="reg-sector">
       <label>القطاع <span>*</span></label>
       <div class="opts">${Object.entries(SECTORS).map(([k, v]) => `
         <label class="opt"><input type="radio" name="sector" value="${k}" data-reg="sector" ${REG.sector === k ? 'checked' : ''}>
@@ -2059,7 +2462,7 @@ function regStep1() {
       ${REG.err.sector ? `<div class="fld__err">${esc(REG.err.sector)}</div>` : ''}
     </div>
 
-    ${REG.sector ? `<div class="fld ${REG.err.entity ? 'fld--bad' : ''}">
+    ${REG.sector ? `<div class="fld ${REG.err.entity ? 'fld--bad' : ''}" data-tour="reg-entity">
       <label for="ent">اسم الجهة <span>*</span></label>
       <em>الاسمُ كما هو مسجَّلٌ في المصادر الرسمية — عليه يُطابَق ملفُّ البيانات.</em>
       <select id="ent" data-reg="entity">
@@ -2085,7 +2488,7 @@ function regStep2() {
 
   return `<div class="form">
     ${note('الممثّلُ المفوَّض هو <b>الشخص الوحيد</b> الذي يوقّع على ما يُقدَّم باسم الجهة، وإليه تُوجَّه المراسلات وقرارُ الأهليّة والزيارة الميدانية. تفويضٌ واحدٌ لكلّ جهةٍ في الدورة.', 'i', 'user')}
-    <div class="grid g-2">
+    <div class="grid g-2" data-tour="reg-rep">
       ${f('name', 'اسم الممثّل المفوَّض')}
       ${f('title', 'المسمّى الوظيفيّ', 'text', 'يجب أن يكون في مستوى اتّخاذ القرار — لا منسّقاً بلا صلاحية.')}
       ${f('email', 'البريد الإلكترونيّ الرسميّ', 'email', 'بريدُ جهةِ العمل لا بريدٌ شخصيّ.')}
@@ -2126,7 +2529,7 @@ function regStep3() {
   }).join('');
 
   return `<div class="form">
-    <div class="fld ${REG.err.cat ? 'fld--bad' : ''}">
+    <div class="fld ${REG.err.cat ? 'fld--bad' : ''}" data-tour="reg-cat">
       <label>الفئة <span>*</span></label>
       <em>التنافسُ يقع في <b>الفئة</b> لا في المسار: مسارُ إنقاذ الأرواح ثلاثُ فئاتٍ لكلٍّ ترتيبُها وفائزُها.
         وللجهة أن تسجّل في أكثر من فئة — ولكلٍّ ملفٌّ وتقييمٌ مستقلّ.</em>
@@ -2148,7 +2551,7 @@ function regStep4() {
   ];
   return `<div class="form">
     ${note('<b>لماذا إقرارٌ لا مجرّد زرّ موافقة؟</b> لأن أضعف نقطةٍ في أيّ جائزةٍ تقوم على البيانات هي الفجوةُ بين ما يُبلَّغ وما يُسجَّل. هذا الإقرار هو ما يُحتَجُّ به إن انكشف تعارضٌ في الزيارة الميدانية.', 'a', 'shield')}
-    <div class="opts">${acks.map(([k, t]) => `
+    <div class="opts" data-tour="reg-ack">${acks.map(([k, t]) => `
       <label class="opt"><input type="checkbox" data-ack="${k}" ${REG.ack[k] ? 'checked' : ''}>
         <div><b style="font-weight:400;font-size:12.5px;line-height:1.7">${esc(t)}</b></div></label>`).join('')}</div>
     ${REG.err.ack ? `<div class="fld__err">${esc(REG.err.ack)}</div>` : ''}
@@ -2213,15 +2616,15 @@ function viewEntity(cid) {
   ${card(head('المسار الشخصيّ للملفّ', 'أين أنت الآن، وما الذي يفتح الخطوةَ التالية.')
     + journeyHtml(r))}
 
-  ${card(head('١ · بوّابة الأهليّة', 'ثلاثةُ شروطٍ من دليل الجائزة. سقوطُ واحدٍ يُسقِط الملفّ.',
+  ${card(head('١ — بوّابة الأهليّة', 'ثلاثةُ شروطٍ من دليل الجائزة. سقوطُ واحدٍ يُسقِط الملفّ.',
       el.pass ? pill('مستوفاة', 'g') : pill('غيرُ مستوفاة', 'r'))
     + gatesHtml(el))}
 
-  ${card(head('٢ · لوحة المؤشّرات', 'قيمُ الدورات الثلاث كما وردت من المصادر الرسمية. الخطُّ الذهبيّ هو المستهدَف الوطنيّ.',
+  ${card(head('٢ — لوحة المؤشّرات', 'قيمُ الدورات الثلاث كما وردت من المصادر الرسمية. الخطُّ الذهبيّ هو المستهدَف الوطنيّ.',
       `<span class="tag"><i>درجة المرحلة ١</i><b class="num">${fmt(r.s1s, 1)}</b></span>`)
     + kpiTable(c, el))}
 
-  ${card(head('٣ · استمارة المشاركة',
+  ${card(head('٣ — استمارة المشاركة',
       openForm ? 'مفتوحةٌ لك: أنت ضمن أفضل ' + ar(STAGES[0].cut) + ' في الفئة.'
                : 'تُفتَح في المرحلة الثانية لأفضل ' + ar(STAGES[0].cut) + ' جهاتٍ في كلّ فئةٍ وحدهم.',
       openForm ? (sub ? pill('مُرسَلة · ' + dt(sub.at), 'g') : pill('لم تُرسَل بعد', 'a')) : pill('مُقفَلة', ''))
@@ -2230,10 +2633,10 @@ function viewEntity(cid) {
          المرحلةُ الأولى تُحسَب من بياناتك الرسمية وحدها — ولا يُقدَّم فيها ملفٌّ ولا تُكتَب فيها كلمة.</p>
          ${r.state === 'ineligible' ? '' : link('اقرأ المنهجية', '#/method')}</div>`))}
 
-  ${openForm ? card(head('٤ · الزيارة الميدانية', 'للتحقّق من المعلومات والأدلّة — لا لعرضٍ تقديميّ.')
+  ${openForm ? card(head('٤ — الزيارة الميدانية', 'للتحقّق من المعلومات والأدلّة — لا لعرضٍ تقديميّ.')
     + visitHtml(cid, r)) : ''}
 
-  ${card(head('٥ · التظلّم', `يُقدَّم خلال ${ar(CYCLE.appealWeeks)} أسابيع من تاريخ حفل الجائزة وإعلان النتائج، عبر البريد المخصّص.`)
+  ${card(head('٥ — التظلّم', `يُقدَّم خلال ${ar(CYCLE.appealWeeks)} أسابيع من تاريخ حفل الجائزة وإعلان النتائج، عبر البريد المخصّص.`)
     + appealBox(cid, r))}
   `;
 }
@@ -2245,9 +2648,9 @@ function journeyHtml(r) {
   const nodes = [
     ['التسجيل', 'تمّ', true],
     ['الأهليّة', r.eligible ? 'اجتاز' : 'لم يجتز', r.eligible],
-    ['المرحلة ١ · المؤشّرات', r.rank1 ? 'المرتبة ' + ar(r.rank1) : '—', idx >= 2],
-    ['المرحلة ٢ · الأنظمة', r.s2s === null ? 'قيد التقييم' : 'الدرجة ' + fmt(r.s2s, 1), idx >= 3],
-    ['المرحلة ٣ · التحكيم', r.finalPos === 0 ? 'فائز' : r.finalPos > 0 ? 'مُكرَّم' : '—', idx >= 4]
+    ['المرحلة ١ — المؤشّرات', r.rank1 ? 'المرتبة ' + ar(r.rank1) : '—', idx >= 2],
+    ['المرحلة ٢ — الأنظمة', r.s2s === null ? 'قيد التقييم' : 'الدرجة ' + fmt(r.s2s, 1), idx >= 3],
+    ['المرحلة ٣ — التحكيم', r.finalPos === 0 ? 'فائز' : r.finalPos > 0 ? 'مُكرَّم' : '—', idx >= 4]
   ];
   return `<div class="funnel">${nodes.map(([n, v, ok], i) => `
     <div class="fn fn--j fn--${ok ? (i === 4 ? 4 : 2) : 0}">
@@ -2334,11 +2737,16 @@ function visitHtml(cid, r) {
 /* التظلّم */
 function appealBox(cid, r) {
   const mine = DB.appeals.filter(a => a.case === cid);
-  const open = ['honored', 'winner', 'out2', 'out1', 'ineligible', 'blocked'].includes(r.state);
+  const decided = ['honored', 'winner', 'out2', 'out1', 'ineligible', 'blocked'].includes(r.state);
+  const w = appealWindow();
+  const open = decided && w.st === 'open';
+  const why = !decided ? 'لا يُتظلَّم على ملفٍّ لم يُبتّ فيه بعد.'
+    : w.st === 'before' ? `تُفتح نافذة التظلّم بإعلان النتائج في ${dt(CYCLE.ceremony)}.`
+    : `أُغلقت نافذة التظلّم في ${dt(CYCLE.appealEnds)}، ولا تُقبل تظلّمات جديدة.`;
   return `${mine.length ? mine.map(a => `<div class="card card--flat" style="border-color:var(--am-200)">
       <div class="rowj"><b>تظلُّمٌ مُسجَّل</b>${pill(a.status, a.status === 'مقبول' ? 'g' : a.status === 'مرفوض' ? 'r' : 'a')}</div>
       <p class="sm" style="margin-block:6px 0">${esc(a.text)}</p>
-      <div class="sm mut">${dt(a.at)} · ${esc(a.by)}</div>
+      <div class="sm mut">${dt(a.at)} — ${esc(a.by)}</div>
       ${a.decision ? `<div class="hr" style="margin-block:var(--s-3)"></div><div class="sm"><b>قرارُ اللجنة:</b> ${esc(a.decision)}</div>` : ''}
     </div>`).join('') : ''}
   ${open ? `<div class="form" style="margin-block-start:${mine.length ? 'var(--s-4)' : '0'}">
@@ -2346,7 +2754,7 @@ function appealBox(cid, r) {
       <em>حدِّد الإجراء المُعترَض عليه ورقم البند، لا الشعور بالنتيجة. التظلّم يُنظَر إجرائياً: هل طُبِّقت القاعدة كما نُشرَت؟</em>
       <textarea id="ap-${cid}" placeholder="مثال: الدرجة الموحَّدة في بند «التطبيق» اعتُمدت دون محضر توحيدٍ رغم تباعُدٍ يتجاوز العتبة المنشورة."></textarea></div>
     <div class="row" style="justify-content:flex-end">${btn('تقديم التظلّم', `data-appeal="${cid}"`)}</div>
-  </div>` : `<div class="empty">${ic('lock')}<p>نافذةُ التظلّم تُفتَح بعد إعلان النتائج — ${dt(CYCLE.ceremony)}.</p></div>`}`;
+  </div>` : `<div class="empty">${ic('lock')}<p>${why}</p></div>`}`;
 }
 
 </script>
@@ -2551,8 +2959,10 @@ function scorecard(cid) {
       </div>`;
     }).join('')}</div>`;
 
-  const complete = [...ADLI, ...LETCI, ...VISIT].every(d =>
-    (d.k in rv.adli) || (d.k in rv.letci) || (d.k in rv.visit));
+  // لكلّ مجموعةٍ فحصُها: المفتاح I مشتركٌ بين ADLI وLeTCI، والفحصُ المختلط كان يقبل بُعداً ناقصاً
+  const complete = ADLI.every(d => d.k in rv.adli)
+    && LETCI.every(d => d.k in rv.letci)
+    && VISIT.every(d => d.k in rv.visit);
 
   return `
   ${group(ADLI, 'adli', 'العمليات · ADLI', CFG.s2.adli)}
@@ -2867,7 +3277,7 @@ function judgeCat(t, cat, b, isChair) {
 
   return card(head(catLabel(key, true),
       conf ? `اعتُمِد في ${dt(conf.at)} — ${esc(conf.rationale)}` : `${ar(cast)} من ${ar(judges)} محكّمين أدلَوا ببطاقاتهم.`,
-      conf ? pill('مُعتمَد', 'g') : cast === judges ? pill('جاهزٌ للاعتماد', 'a') : pill('بانتظار البطاقات', ''))
+      conf ? pill('مُعتمَد', 'g') : cast === judges ? pill('جاهزٌ للاعتماد', 'a') : pill('بانتظار البطاقات', ''), 'judge-' + key)
     + `<div class="split" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
       <div>
         <b class="sm">بطاقتي — رتِّب الخمسة</b>
@@ -2901,7 +3311,7 @@ function judgeCat(t, cat, b, isChair) {
               <td class="c n">${fmt(r.comp, 1)}</td>
               <td class="c">${conf && i < 3 ? `<span class="bdg bdg--gold">${ic('medal')}${esc(HONORS[i].name)}</span>` : '<span class="mut">—</span>'}</td></tr>`;
           })) : empty('لم تُودَع بطاقاتٌ بعد.')}
-        ${!conf && isChair && cast && b.counts.diverging ? note(`<b>الاعتمادُ موقوف.</b> في هذه الفئة ${ar(b.counts.diverging)} ملفّاً بتباعُدٍ مفتوحٍ بين المقيّمَيْن. لجنةُ التحكيم تعتمد <b>ترتيباً</b>، وترتيبٌ مبنيٌّ على درجةٍ لم تُوحَّد هو ترتيبٌ بلا سند. تُغلَق الحوارات من مكتب اللجنة العلمية أوّلاً.`, 'r', 'shield') : ''}
+        ${!conf && isChair && b.counts.diverging ? note(`<b>الاعتمادُ موقوف.</b> في هذه الفئة ${ar(b.counts.diverging)} ملفّاً بتباعُدٍ مفتوحٍ بين المقيّمَيْن. لجنةُ التحكيم تعتمد <b>ترتيباً</b>، وترتيبٌ مبنيٌّ على درجةٍ لم تُوحَّد هو ترتيبٌ بلا سند. تُغلَق الحوارات من مكتب اللجنة العلمية أوّلاً.`, 'r', 'shield') : ''}
         ${!conf && isChair && cast && !b.counts.diverging ? `
           <div class="fld" style="margin-block-start:var(--s-3)"><label for="cf-${key}">مبرَّرُ الاعتماد <span>*</span></label>
             <em>إن خالف الاعتمادُ محصّلةَ البطاقات فالمبرَّرُ شرطُ صحّة، لا صيغةٌ إنشائية.</em>
@@ -2911,6 +3321,19 @@ function judgeCat(t, cat, b, isChair) {
         ${conf ? note(`<b>اعتُمِد.</b> ${esc(conf.rationale)}`, 'g', 'check') : ''}
       </div>
     </div>`, conf ? 'card--gold' : '');
+}
+
+/* حالةُ النافذة تُحسَب من تاريخ اليوم — «مفتوحة الآن» نصّاً ثابتاً كذبةٌ بعد ٢١ أكتوبر */
+function appealNote() {
+  const w = appealWindow();
+  if (w.st === 'open') {
+    const left = w.days === 0 ? 'واليوم آخرُ يوم'
+      : 'وبقي ' + num(w.days, 'يومٌ واحد', 'يومان', 'أيام', 'يوماً');
+    return note(`<b>النافذة مفتوحة الآن.</b> أُعلنت النتائج في ${dt(CYCLE.ceremony)}، وتنتهي المدة في ${dt(CYCLE.appealEnds)}، ${left}.`, 'a', 'warn');
+  }
+  if (w.st === 'before')
+    return note(`<b>النافذة لم تُفتح بعد.</b> تبدأ بإعلان النتائج في ${dt(CYCLE.ceremony)}.`, 'n', 'lock');
+  return note(`<b>أُغلقت النافذة.</b> انتهت المدة في ${dt(CYCLE.appealEnds)}، قبل ${num(w.days, 'يومٍ واحد', 'يومين', 'أيام', 'يوماً')}. لا تُقبل تظلّمات جديدة، ويبقى للجنة أن تبتّ فيما قُدِّم قبل الإغلاق.`, 'n', 'lock');
 }
 
 /* ============ الحجب والتظلّم ============ */
@@ -2929,7 +3352,7 @@ function viewAppeals() {
     ${stat(ar(CYCLE.appealWeeks), 'أسابيع النافذة', 'من ' + dt(CYCLE.ceremony))}
   </div>
 
-  ${note(`<b>النافذةُ مفتوحةٌ الآن.</b> أُعلِنت نتائجُ الدورة الثامنة في ${dt(CYCLE.ceremony)}، فبدأت مدّةُ التظلّم ${ar(CYCLE.appealWeeks)} أسابيع وتنتهي ${dt(CYCLE.appealEnds)}. وما بقي من المدّة هو ما يملكه المتظلِّم — لا أكثر.`, 'a', 'warn')}
+  ${appealNote()}
 
   ${card(head('نافذة التظلّم', 'المدّةُ تبدأ من تاريخ حفل الجائزة وإعلان النتائج، لا من تاريخ التبليغ الفرديّ.')
     + kv([
@@ -2955,7 +3378,7 @@ function viewAppeals() {
           ${pill(a.status, a.status === 'مقبول' ? 'g' : a.status === 'مرفوض' ? 'r' : 'a')}
         </div>
         <p class="sm" style="margin-block:6px">${esc(a.text)}</p>
-        <div class="sm mut">${dt(a.at)} · ${esc(a.by)}</div>
+        <div class="sm mut">${dt(a.at)} — ${esc(a.by)}</div>
         ${a.decision ? `<div class="hr" style="margin-block:var(--s-3)"></div>
           <div class="sm"><b>قرارُ اللجنة:</b> ${esc(a.decision)}</div>` : can ? `
           <div class="hr" style="margin-block:var(--s-3)"></div>
@@ -2973,7 +3396,7 @@ function viewLog() {
   return `
   ${pageHead('السجلّ', 'كلُّ تغييرٍ في حالةِ ملفٍّ يحمل: مَن، ومتى، وبأيّ صلاحية، وعلى أيّ مستند. السجلُّ لا يُمحى، وهو أوّلُ ما تطلبه لجنةُ التظلّم.')}
   ${card(head(`${num(DB.log.length, 'حركةٌ واحدة', 'حركتان', 'حركاتٍ', 'حركةً')} في هذه الجلسة`,
-      'النموذجُ يبدأ بسجلٍّ فارغ: كلُّ ما تراه هنا فعلتَه أنت الآن — وهذا مقصود.')
+      'النموذجُ يبدأ بسجلٍّ فارغ: كلُّ ما تراه هنا فعلتَه أنت الآن — وهذا مقصود.', '', 'log')
     + logHtml(null, 100))}
   `;
 }
@@ -3196,7 +3619,7 @@ function viewVerdict() {
 
   ${note(`<b>هذه الصفحةُ رُوجِعت بعد الحفل.</b> أُعلِنت نتائجُ الدورة الثامنة في ${dt(RESULTS.day)}، فنقضت ثلاثةً من افتراضاتي البنيوية وواحداً من أحكامي. القسمُ السادس أدناه يعرضها، ولم أحذف ما كتبتُه قبلها — الحكمُ الذي يُمحى أثرُه لا يُقاس.`, 'au', 'medal')}
 
-  ${card(head('١ · الفرقُ بين ما طُلِب وما يقوله الدليل', 'خمسةُ فروقٍ غيّرت المعمار — لا الألوان.')
+  ${card(head('١ — الفرقُ بين ما طُلِب وما يقوله الدليل', 'خمسةُ فروقٍ غيّرت المعمار — لا الألوان.')
     + table([['البند'], ['في التصوُّر المُرسَل'], ['في دليل الدورة الثامنة'], ['ما فعلته المنصّة']],
       rows.map(([a, b, c, d]) => `<tr>
         <td><b>${esc(a)}</b></td>
@@ -3204,7 +3627,7 @@ function viewVerdict() {
         <td class="sm">${c}</td>
         <td class="sm" style="color:var(--g-700)">${d}</td></tr>`)))}
 
-  ${card(head('٢ · المغالطة المركزية', 'واحدةٌ تستحقّ أن تُفرَد.')
+  ${card(head('٢ — المغالطة المركزية', 'واحدةٌ تستحقّ أن تُفرَد.')
     + `<p class="lead">طُلِب أن «تدخل كلُّ القطاعات المنصّة، وتسجّل عبر نموذج، وتختار الفئة، وترفع مشاركتها».
        الشقُّ الأول صحيحٌ ومطلوب. والشقُّ الأخير — <b>رفعُ المشاركة عند التسجيل</b> — يقلب منهجيّة الجائزة رأساً على عقب.</p>
     <div class="grid g-2">
@@ -3227,7 +3650,7 @@ function viewVerdict() {
     </div>
     ${note('<b>والنتيجةُ المهمّة:</b> الجهةُ التي لا تُؤهَّل تعرف السببَ بالمؤشّر والرقم في اليوم الأول، لا في يوم الإعلان. هذا وحده يُسقِط أكثرَ التظلّمات قبل أن تُكتَب.', 'g', 'check')}`)}
 
-  ${card(head('٣ · خمسُ ثغراتٍ في الدليل نفسه', 'ليست أخطاءً — مواضعُ صمتٍ تُملؤها المنصّةُ باجتهادٍ معلَن، وتنتظر حسماً من اللجنة العلمية.')
+  ${card(head('٣ — خمسُ ثغراتٍ في الدليل نفسه', 'ليست أخطاءً — مواضعُ صمتٍ تُملؤها المنصّةُ باجتهادٍ معلَن، وتنتظر حسماً من اللجنة العلمية.')
     + `<div class="stack">${gaps.map(([g, why, fix], i) => `
       <div class="card card--flat">
         <div class="row" style="gap:var(--s-3);align-items:flex-start">
@@ -3240,7 +3663,7 @@ function viewVerdict() {
         </div>
       </div>`).join('')}</div>`)}
 
-  ${card(head('٤ · خطرٌ منهجيّ لا تحلّه المنصّة — ويجب أن يُقال', 'حكمُ خبيرٍ في مؤشّرات الصحة، لا ملاحظةُ مطوِّر.')
+  ${card(head('٤ — خطرٌ منهجيّ لا تحلّه المنصّة — ويجب أن يُقال', 'حكمُ خبيرٍ في مؤشّرات الصحة، لا ملاحظةُ مطوِّر.')
     + `<div class="grid g-2">
       <div>
         <b>أثرُ السقف</b>
@@ -3262,7 +3685,7 @@ function viewVerdict() {
       </div>
     </div>`)}
 
-  ${card(head('٦ · ما نقضته النتيجةُ المعلنة من حكمي', 'أُعلِنت في ' + dt(RESULTS.day) + '. ثلاثةُ نقوضٍ بنيوية، وواحدٌ في الحكم لا في البناء.',
+  ${card(head('٥ — ما نقضته النتيجةُ المعلنة من حكمي', 'أُعلِنت في ' + dt(RESULTS.day) + '. ثلاثةُ نقوضٍ بنيوية، وواحدٌ في الحكم لا في البناء.',
       link('النتائج كاملةً', '#/results'))
     + `<div class="stack">
       ${[['بنيويّ · مستوى الفئة',
@@ -3288,7 +3711,7 @@ function viewVerdict() {
     </div>
     ${note('<b>ولماذا يُعرَض النقضُ بدل أن يُطوى؟</b> لأن المنصّة كلَّها مبنيّةٌ على أن الحكمَ يُسجَّل ويُقرأ لاحقاً: مبرَّرُ المقيّم، ومحضرُ التوحيد، وقرارُ التظلّم. جائزةٌ تُلزِم غيرَها بتسجيل مبرَّراته ثم تمحو مبرَّراتها هي جائزةٌ بمعيارين.', 'i', 'verdict')}`)}
 
-  ${card(head('٥ · ما هذه النسخة، وما ليست', '')
+  ${card(head('٦ — ما هذه النسخة، وما ليست', '')
     + `<div class="grid g-2">
       ${[['حقيقيّ ومأخوذٌ من الدليل', 'g', ['المسارات الستّة ومسمّياتها', 'المراحل الثلاث وعتبات التصفية ١٠←٥←٣', 'شروط الأهليّة الثلاثة', 'اللجان الستّ وأدوارها', 'مقيّمان وخبير ثم توحيدٌ بالتوافق', 'إطار بالدريج ونموذجا ADLI وLeTCI', 'أوجه التكريم ونافذة التظلّم ستةَ أسابيع']],
         ['محاكاةٌ لا يُبنى عليها قرار', 'a', ['قيمُ المؤشّرات لكلّ جهة', 'أسماءُ أعضاء اللجان في هذه النسخة', 'درجاتُ المقيّمين المولَّدة', 'المستهدفاتُ الوطنية الرقمية — أُخِذت تقريبيّةً للتشغيل', 'الجدولُ الزمنيّ للدورة']]]
@@ -3300,6 +3723,869 @@ function viewVerdict() {
     ${note('<b>قبل أيّ استخدامٍ حقيقيّ:</b> تُستبدَل قيمُ المؤشّرات بربطٍ مباشرٍ بمصادر مركز أداء الصحة، وتُعتمَد الأوزانُ والعتبات من اللجنة العلمية، ويُراجَع نصُّ الإقرار والتعهّد من إدارةٍ قانونية. المنصّةُ جاهزةٌ للربط — والأرقامُ فيها اليوم للتشغيل لا للحكم.', 'a', 'warn')}`)}
   `;
 }
+
+</script>
+<script>
+/* ============================================================
+   جائزة أداء الصحة — العرض التنفيذي
+   ------------------------------------------------------------
+   تسعُ شرائح لمن يقرّر في عشر دقائق ولا يتصفّح. كلُّ رقمٍ فيها
+   يُحسَب من بيانات المنصّة نفسها فلا يخالف العرضُ الشاشات، وما كان
+   محاكاةً يحمل وسمه على الشريحة لا في هامشها.
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /* القراراتُ التي لا يحسمها النظام — تُعرَض في الشريحة ٧ وتُعدّ في الخلاصة */
+  const DECISIONS = [
+    { d: 'وزن المرحلتين والعتبات', why: 'أول ما يُطعَن فيه هو الوزن لا الدرجة.',
+      who: 'اللجنة العلمية', now: 'افتراض معلَن في شاشة المنهجية', tone: 'a' },
+    { d: 'أثر السقف', why: () => `من بلغ ${ar(95)}٪ لا يُظهر اتجاهاً موجباً، فيسقط المتفوّق ويتأهل الصاعد.`,
+      who: 'اللجنة العلمية', now: 'يُعلَّم بشارة «قُربَ السقف» ولا يُعالَج في الحساب', tone: 'r' },
+    { d: 'اسم المسار السادس', why: 'ثلاثة مسمّيات في ثلاثة مصادر.',
+      who: 'اللجنة التوجيهية', now: 'اعتُمد نص الدليل', tone: '' },
+    { d: 'ربط البيانات بمصادر الجائزة', why: 'بدونه تبقى الأرقام محاكاة.',
+      who: 'اللجنة التنفيذية', now: 'غير قائم', tone: 'r' },
+    { d: 'نص الإقرار والتعهّد', why: 'يُحتجّ به عند الخلاف في الزيارة الميدانية.',
+      who: 'إدارة قانونية', now: 'مسوّدة للمراجعة', tone: 'a' }
+  ];
+
+  const nFiles = n => num(n, 'ملفّ', 'ملفّان', 'ملفّات', 'ملفّاً');
+  const nCats  = n => num(n, 'فئة', 'فئتان', 'فئات', 'فئةً');
+  const nEnts  = n => num(n, 'جهة', 'جهتان', 'جهات', 'جهةً');
+
+  /* إطارٌ مشترك: شريط علويّ بالاسم والموضع والعدّاد */
+  const frame = (i, label, inner, cls = '') => `
+    <section class="sl ${cls}" data-i="${i}" aria-label="${esc(label)}">
+      <div class="sl__top"><b>جائزة أداء الصحة</b><span>${esc(label)}</span><span class="n">${ar(i + 1)} / ${ar(SLIDES.length)}</span></div>
+      ${inner}
+    </section>`;
+
+  /* ============ الشرائح ============ */
+  const SLIDES = [
+
+    /* ١ · الغلاف */
+    () => `
+    <section class="sl sl--cover" data-i="0" aria-label="الغلاف">
+      <div class="sl__top"><span class="cv__mk">أداء</span><b>جائزة أداء الصحة</b><span class="sp">عرض تنفيذي</span></div>
+      <div class="cv__mid">
+        <h2>منصّة إدارة جائزة أداء الصحة</h2>
+        <p class="cv__s">${esc(CYCLE.name)} ${ar(CYCLE.year)} — من التسجيل إلى الوسام في مسار واحد موثّق</p>
+      </div>
+      <div class="cv__ft">
+        <p>نموذج مستقل غير تابع لوزارة الصحة</p>
+        <p>فكرة وتنفيذ <span dir="ltr">MOAYAD ABOONQ</span></p>
+        <p class="c">تُقام الدورة إحياءً لمرور ${ar(100)} عام على تأسيس أول مديرية للصحة عام ${ar(1343)}هـ في مكة المكرمة</p>
+      </div>
+      <div class="cv__num" aria-hidden="true">${ar(STAGES[0].cut)} ← ${ar(STAGES[1].cut)} ← ${ar(STAGES[2].cut)}</div>
+    </section>`,
+
+    /* ٢ · الخلاصة */
+    () => {
+      const st = cycleStats(), roles = Object.keys(ROLES).length;
+      return frame(1, 'الخلاصة', `
+      <h2>جائزة تُدار بالأدلة، من أول ملف إلى آخر وسام</h2>
+      <dl class="sl__body">
+        <div class="sd"><dt>ما هي</dt><dd>منصّة تدير الجائزة كلها: تسجيل الجهات، وحكم الأهلية، وتقييم المرحلتين، والتحكيم، والتظلّم.</dd></div>
+        <div class="sd"><dt>ما الجديد فيها</dt><dd>تفصل التسجيل عن الأهلية عن الاستمارة. الجهة لا ترشّح نفسها بملف تكتبه، بل يُحسب أداؤها من بياناتها الرسمية.</dd></div>
+        <div class="sd"><dt>ما الذي اختُبر</dt><dd>${nCats(st.cats)} وسبعة أدوار، ومسار كامل جُرِّب على نتيجة الحفل المعلنة: ${nEnts(RESULT_COUNT)} وثلاثة أوسمة.</dd></div>
+        <div class="sd"><dt>ما المطلوب</dt><dd>${num(DECISIONS.length, 'قرار', 'قراران', 'قرارات', 'قراراً')} من اللجان، وفئة تجريبية واحدة ببيانات حقيقية.</dd></div>
+      </dl>
+      <p class="sl__fn">الأرقام والدرجات داخل النموذج محاكاة. صفحة النتائج وحدها بيانات حقيقية.</p>`);
+    },
+
+    /* ٣ · الفكرة */
+    () => {
+      const st = cycleStats();
+      return frame(2, 'الفكرة', `
+      <h2>ثلاثة أشياء كانت واحداً، والمنصّة تفصلها</h2>
+      <div class="sl__body">
+        <div class="sc3">
+          <div><span class="k">التسجيل</span><p>مفتوح لكل القطاعات. تثبت الجهة هويتها، وتفوّض ممثلاً، وتختار الفئة.</p><em>هوية وتفويض</em></div>
+          <div><span class="k">الأهلية</span><p>حكم فوري من البيانات الرسمية بثلاثة شروط قاطعة: مصدر رسمي، وبلوغ المستهدفات، واتجاه موجب لثلاث دورات.</p><em>تُحسَب ولا تُكتَب</em></div>
+          <div><span class="k">الاستمارة</span><p>تُفتح لأفضل ${ar(STAGES[0].cut)} في كل فئة فقط. بها يُقيَّم نظام العمل (ADLI) وتُجرى الزيارة الميدانية.</p><em>المرحلة الثانية</em></div>
+        </div>
+        <p class="sl__claim">لو رُفعت المشاركة عند التسجيل لفازت الجهة التي تُحسن الكتابة، لا التي تُحسن الأداء.</p>
+        <p class="sl__fn">في النموذج التجريبي: ${nFiles(st.cases)} كانت ستُقيَّم بشرياً بدل ${ar(st.qualified)} <span class="pl">محاكاة</span></p>
+      </div>`);
+    },
+
+    /* ٤ · المسار */
+    () => {
+      const nodes = [
+        ['التسجيل', 'الجهة', 'مفتوح لكل القطاعات', 'هوية وتفويض'],
+        ['الأهلية', 'المنصّة آلياً', 'ثلاثة شروط قاطعة', 'حكم فوري'],
+        ['المرحلة ' + ar(1), 'اللجنة العلمية', 'مؤشرات الأداء (LeTCI)', `أفضل ${ar(STAGES[0].cut)}`],
+        ['المرحلة ' + ar(2), 'مقيّمان وخبير', 'نظام العمل (ADLI) وزيارة', `أفضل ${ar(STAGES[1].cut)}`],
+        ['المرحلة ' + ar(3), 'لجنة التحكيم', 'قرار الاعتماد', `حتى ${ar(STAGES[2].cut)} في الفئة`]
+      ];
+      return frame(3, 'المسار', `
+      <h2>ملف واحد يمرّ بخمس محطات، ولكل محطة صاحبها</h2>
+      <div class="sl__body mid">
+        <div class="stp">${nodes.map(([n, who, how, out], i) => `
+          <div><span class="no">${ar(i + 1)}</span><span class="nm">${esc(n)}</span><span class="ow">${esc(who)}</span><span class="mt">${esc(how)}</span><span class="ou">${esc(out)}</span></div>`).join('')}
+        </div>
+        <p class="stl-h">حالات الملف الثماني — الذهب لا يُمنح إلا بعد اعتماد لجنة التحكيم</p>
+        <div class="stl">${['ineligible', 'out1', 'qualified', 'out2', 'finalist', 'honored', 'winner', 'blocked'].map(k => stateBadge(k)).join('')}</div>
+      </div>`);
+    },
+
+    /* ٥ · العدالة */
+    () => frame(4, 'العدالة', `
+      <h2>العدالة تُفرض بالشاشة، لا باللائحة وحدها</h2>
+      <div class="sl__body">
+        <table class="st">
+          <thead><tr><th>الحماية</th><th>ما تمنعه</th><th>ما يحدث على الشاشة</th></tr></thead>
+          <tbody>
+            <tr><td>الحجاب</td><td class="mt">أن يرى المقيّم الثاني حكم الأول</td><td>لا تظهر درجة الزميل قبل أن ترسل درجتك</td></tr>
+            <tr><td>عتبة التباعُد (${ar(CFG.divergence)} نقطة)</td><td class="mt">تحويل حكمين متباعدين إلى رقم واحد بصمت</td><td>يتوقف الاعتماد ويختفي زره حتى يُوحَّد</td></tr>
+            <tr><td>تعارض المصالح</td><td class="mt">أن يقيّم المقيّم جهته</td><td>يُستبعد من الإسناد ويُسجَّل السبب</td></tr>
+            <tr><td>فصل اللجان</td><td class="mt">انفراد جهة بالقرار النهائي</td><td>التحكيم لا يرى هوية المقيّم، والأمانة لا ترى درجة قبل الاعتماد</td></tr>
+            <tr><td>لا فائز قبل الاعتماد</td><td class="mt">إعلان فائز من حساب لم يُعتمد</td><td>المحصّلة تُعرض محصّلة، والحالة لا تتغيّر حتى يعتمد رئيس التحكيم بمبرَّر</td></tr>
+          </tbody>
+        </table>
+        <p class="sl__fn">وكل فعل يُسجَّل: من فعل، ومتى، وبأي صلاحية. هذا هو السجلّ الذي تطلبه لجنة التظلّم.</p>
+      </div>`),
+
+    /* ٦ · اختُبرت على النتيجة */
+    () => frame(5, 'الاختبار', `
+      <h2>اختُبرت على نتيجة الحفل، فعدّلت أربعة أشياء</h2>
+      <div class="sl__body bw">
+        <div class="bn"><b>${ar(RESULT_COUNT)}</b><span>${nEnts(RESULT_COUNT)} في ${nCats(CATS.length)}</span><em>من ${ar(CATS.length * 3)} مقعداً ممكناً. لم تُملأ المقاعد بمن لم يستحق.</em></div>
+        <div class="cg">
+          <div class="th"><span></span><span>كان</span><span>صار</span></div>
+          <div><span class="h">الفئة</span><span class="was">التصفية على مستوى المسار</span><span class="now">التصفية والتتويج داخل الفئة. إنقاذ الأرواح توّج ${ar(5)} جهات في ${ar(3)} فئات.</span></div>
+          <div><span class="h">وحدة التنافس</span><span class="was">كل مشارك جهة</span><span class="now">تجمّع أو منشأة مفردة أو جهة أم. الجهة الأم لا تدخل مساراً.</span></div>
+          <div><span class="h">الأوسمة</span><span class="was">أوسمة عامة</span><span class="now">ثلاثة مسمّاة: نضج إدارة الأداء، وتجربة الموظفين، وتجربة المريض.</span></div>
+          <div class="fix"><span class="h">القطاع الخاص</span><span class="was">الربط الجزئي يُسقط أغلب الملفات</span><span class="now">الربط الجزئي عقبة تُعالَج باتفاق بيانات، لا سقف. حكمٌ صُحِّح.</span></div>
+        </div>
+      </div>`),
+
+    /* ٧ · القرارات */
+    () => frame(6, 'القرارات', `
+      <h2>ما لا يحلّه النظام يحتاج قراراً</h2>
+      <div class="sl__body">
+        <table class="st">
+          <thead><tr><th>القرار</th><th>لماذا يهمّ</th><th>الجهة المقترحة</th><th>وضعه الآن</th></tr></thead>
+          <tbody>${DECISIONS.map(x => `
+            <tr><td>${esc(x.d)}</td><td class="mt">${esc(typeof x.why === 'function' ? x.why() : x.why)}</td><td>${esc(x.who)}</td>
+            <td><span class="tg ${x.tone ? 'tg--' + x.tone : ''}">${esc(x.now)}</span></td></tr>`).join('')}
+          </tbody>
+        </table>
+        <p class="sl__fn">الجهات المقترحة من اللجان الست في دليل الجائزة، والاقتراح لمن يملك الاعتماد.</p>
+      </div>`),
+
+    /* ٨ · الحقيقي والمحاكاة */
+    () => frame(7, 'الحقيقي والمحاكاة', `
+      <h2>الحقيقي والمحاكاة، بلا خلط</h2>
+      <div class="sl__body">
+        <div class="rs">
+          <div><p class="h"><i></i>من الدليل</p><ul>
+            <li>المسارات الستة والمراحل الثلاث وعتبات <span class="nw">${ar(STAGES[0].cut)} ← ${ar(STAGES[1].cut)} ← ${ar(STAGES[2].cut)}</span></li>
+            <li>شروط الأهلية الثلاثة واللجان الست</li>
+            <li>مقيّمان وخبير، ثم توحيد بالتوافق</li>
+            <li>إطار بالدريج، ونموذجا ADLI وLeTCI</li>
+            <li>نافذة التظلّم ${ar(CYCLE.appealWeeks)} أسابيع</li></ul></div>
+          <div><p class="h"><i></i>من الإعلان الرسمي</p><ul>
+            <li>أسماء الفائزين الـ${ar(RESULT_COUNT)}</li>
+            <li>الفئات داخل المسارات</li>
+            <li>الأوسمة الثلاثة وأصحابها</li>
+            <li>لا درجة منشورة لأي فائز، فلا درجة معروضة</li></ul></div>
+          <div class="sim"><p class="h"><i></i>محاكاة</p><ul>
+            <li>قيم المؤشرات لـ${nEnts(ENTITIES.length)} (${nFiles(CASES.length)})</li>
+            <li>درجات المقيّمين</li>
+            <li>المستهدفات الرقمية</li>
+            <li>أسماء أعضاء اللجان</li></ul></div>
+        </div>
+        <p class="sl__fn">نموذج مستقل: لا يمثّل وزارة الصحة ولا يصدر عنها.</p>
+      </div>`),
+
+    /* ٩ · الخطوة التالية */
+    () => frame(8, 'الخطوة التالية', `
+      <h2>الخطوة التالية: فئة واحدة ببيانات حقيقية</h2>
+      <div class="sl__body">
+        <div class="nx">
+          <ol>
+            <li><div><b>نختار فئة واحدة</b> محدودة العدد، لتبقى التجربة قابلة للمتابعة.</div></li>
+            <li><div><b>نربط مؤشراتها</b> بالمصدر الرسمي بدل القيم المولَّدة.</div></li>
+            <li><div><b>نشغّل عليها كل المراحل</b>: التقييم والتوحيد والتحكيم والتظلّم. ثم نقيس: كم يوماً وفّرنا؟ وكم تظلّماً سقط قبل أن يُكتب؟</div></li>
+          </ol>
+          <div class="nx__n"><h3>ما نحتاجه</h3><ul>
+            <li>اعتماد الأوزان من اللجنة العلمية</li>
+            <li>جهة تملك البيانات وتتيحها</li>
+            <li>مراجعة قانونية لنص الإقرار</li></ul></div>
+        </div>
+        <div class="nx__cta">
+          <button type="button" class="dk__cta" data-dk="tour">${ic('play')}شاهد المنصّة تعمل</button>
+          <span>فكرة وتنفيذ <span dir="ltr">MOAYAD ABOONQ</span></span>
+        </div>
+      </div>`)
+  ];
+
+  /* ============ المشغِّل ============ */
+  const D = { el: null, i: 0, opener: null, tx: 0 };
+  const N = SLIDES.length;
+
+  function build() {
+    if (D.el) D.el.remove();
+    const el = document.createElement('div');
+    el.className = 'dk'; el.id = 'deck'; el.tabIndex = -1; el.hidden = true;
+    el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'العرض التنفيذي');
+    el.innerHTML = `
+      <div class="dk__bar">
+        <div class="dk__brand"><span class="mk">أداء</span><span>جائزة أداء الصحة <small>عرض تنفيذي</small></span></div>
+        <div class="dk__ctl">
+          <button type="button" class="dk__btn" data-dk="full" title="ملء الشاشة (F)" aria-label="ملء الشاشة">${ic('full')}</button>
+          <button type="button" class="dk__btn" data-dk="close" title="إغلاق (Esc)" aria-label="إغلاق العرض">${ic('x')}</button>
+        </div>
+      </div>
+      <div class="dk__main">
+        <button type="button" class="dk__nav dk__nav--prev" data-dk="prev" aria-label="الشريحة السابقة">${ic('prev')}</button>
+        <div class="dk__stage" aria-live="polite">${SLIDES.map(f => f()).join('')}</div>
+        <button type="button" class="dk__nav dk__nav--next" data-dk="next" aria-label="الشريحة التالية">${ic('next')}</button>
+      </div>
+      <div class="dk__foot">
+        <span class="dk__cnt"></span>
+        <div class="dk__prog">${SLIDES.map((_, i) => `<button type="button" data-dk="go" data-i="${i}" aria-label="الشريحة ${ar(i + 1)}"></button>`).join('')}</div>
+        <span class="dk__note">نموذج مستقل غير تابع لوزارة الصحة — الأرقام محاكاة إلا صفحة النتائج</span>
+      </div>`;
+    el.addEventListener('click', onClick);
+    el.addEventListener('touchstart', e => { D.tx = e.changedTouches[0].clientX; }, { passive: true });
+    el.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - D.tx;
+      if (Math.abs(dx) > 60) go(D.i + (dx > 0 ? 1 : -1));   // القراءةُ من اليمين: السحبُ يميناً يُظهر التالي
+    }, { passive: true });
+    document.body.appendChild(el);
+    D.el = el;
+  }
+
+  function go(n) {
+    n = Math.max(0, Math.min(N - 1, n)); D.i = n;
+    D.el.querySelectorAll('.sl').forEach((s, i) => s.classList.toggle('on', i === n));
+    D.el.querySelectorAll('.dk__prog button').forEach((b, i) => {
+      b.classList.toggle('on', i === n); b.classList.toggle('past', i < n);
+      if (i === n) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
+    });
+    D.el.querySelector('.dk__cnt').textContent = `${ar(n + 1)} / ${ar(N)}`;
+    D.el.querySelector('[data-dk="prev"]').disabled = n === 0;
+    D.el.querySelector('[data-dk="next"]').disabled = n === N - 1;
+    const stage = D.el.querySelector('.dk__stage'); if (stage) stage.scrollTop = 0;
+  }
+
+  function onClick(e) {
+    const b = e.target.closest('[data-dk]'); if (!b) return;
+    const a = b.dataset.dk;
+    if (a === 'close') close();
+    else if (a === 'prev') go(D.i - 1);
+    else if (a === 'next') go(D.i + 1);
+    else if (a === 'go') go(+b.dataset.i);
+    else if (a === 'full') fullscreen();
+    else if (a === 'tour') { close(); if (window.startTour) window.startTour(); }
+  }
+
+  function fullscreen() {
+    try {
+      const d = document;
+      if (d.fullscreenElement || d.webkitFullscreenElement) { (d.exitFullscreen || d.webkitExitFullscreen).call(d); }
+      else { const el = D.el; (el.requestFullscreen || el.webkitRequestFullscreen).call(el); }
+    } catch (_) { /* بعضُ المضيفين يمنع ملء الشاشة — لا يضرّ */ }
+  }
+
+  function onKey(e) {
+    if (!D.el || D.el.hidden) return;
+    const k = e.key, onBtn = e.target.closest && e.target.closest('button');
+    if (k === 'Escape') { e.preventDefault(); close(); }
+    else if (k === 'ArrowLeft' || k === 'PageDown') { e.preventDefault(); go(D.i + 1); }
+    else if (k === 'ArrowRight' || k === 'PageUp') { e.preventDefault(); go(D.i - 1); }
+    else if ((k === ' ' || k === 'Enter') && !onBtn) { e.preventDefault(); go(D.i + 1); }
+    else if (k === 'Home') { e.preventDefault(); go(0); }
+    else if (k === 'End') { e.preventDefault(); go(N - 1); }
+    else if (k === 'f' || k === 'F') { fullscreen(); }
+    else if (/^[1-9]$/.test(k)) { go(+k - 1); }
+    else if (k === 'Tab') {                       // حبسُ التركيز داخل العرض
+      const f = [...D.el.querySelectorAll('button:not(:disabled)')];
+      if (!f.length) return;
+      if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+    }
+  }
+
+  function open(i = 0) {
+    if (window.tourActive && window.tourActive()) window.stopTour(true);
+    D.opener = document.activeElement;
+    build(); go(i);
+    D.el.hidden = false;
+    document.documentElement.style.overflow = 'hidden';
+    document.addEventListener('keydown', onKey, true);
+    D.el.focus();
+  }
+
+  function close() {
+    if (!D.el) return;
+    try { if (document.fullscreenElement) document.exitFullscreen(); } catch (_) {}
+    document.removeEventListener('keydown', onKey, true);
+    D.el.remove(); D.el = null;
+    document.documentElement.style.overflow = '';
+    const back = (D.opener && D.opener.isConnected) ? D.opener : document.querySelector('[data-open-deck]');
+    if (back && back.focus) back.focus();
+  }
+
+  window.openDeck = open;
+  window.closeDeck = close;
+})();
+
+</script>
+<script>
+/* ============================================================
+   جائزة أداء الصحة — جولة المنصّة
+   ------------------------------------------------------------
+   المنصّةُ تعمل أمام المشاهد بالخطوات: تبدّل الدور، وتفتح الشاشة،
+   وتملأ الحقول وتضغط الأزرار الحقيقية، وتشرح ما يحدث.
+
+   ثلاثةُ قراراتٍ تحكم هذا الملفّ:
+   ١) الجولةُ تعمل على لقطةٍ مؤقّتة وتُستعاد عند الخروج، فلا يبقى
+      في السجلّ ولا في الملفّات أثرٌ لها — السجلُّ المصنوع كذبة.
+   ٢) الرجوعُ إلى خطوةٍ سابقة يُعيد تشغيل ما قبلها بسرعةٍ من اللقطة،
+      فتكون الحالةُ دائماً هي الحالة الصحيحة لا تخميناً لها.
+   ٣) كلُّ خطوةٍ تضغط الأزرارَ نفسَها التي يضغطها المستخدم، فيُختبَر
+      مسارُ الشيفرة الحقيقيّ لا نسخةٌ منه.
+   ============================================================ */
+(function () {
+  'use strict';
+
+  const CANCEL = Symbol('cancel');
+  const CH = ['الصورة الكاملة', 'الجهة تسجّل', 'التقييم المستقل', 'التباعُد والتوحيد', 'التحكيم والاعتماد', 'بعد الإعلان', 'الخلاصة'];
+  const S = { on: false, i: 0, auto: true, tok: 0, snap: null, mem: {}, timer: 0, raf: 0, ui: null, lookFn: null, busy: false, check: null, cur: 0 };
+
+  const q = (s, r = document) => r.querySelector(s);
+  const clampN = (v, a, b) => Math.max(a, Math.min(b, v));
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const DECIDED = ['honored', 'winner', 'out2', 'out1', 'ineligible', 'blocked'];
+  const KPI_ALL = [...TRACKS.flatMap(t => t.kpis), ...SHARED];
+  const kpiName = id => (KPI_ALL.find(k => k.id === id) || { name: id }).name;
+
+  /* ============ لقطةُ الحالة واستعادتها ============ */
+  function snapshot() {
+    return { db: JSON.stringify(DB), reg: JSON.stringify(REG), n: CASES.length, me: ME, bf: BFILTER, hash: location.hash || '#/', y: window.scrollY };
+  }
+  function restore(s) {
+    const db = JSON.parse(s.db);   Object.keys(DB).forEach(k => delete DB[k]);   Object.assign(DB, db);
+    const rg = JSON.parse(s.reg);  Object.keys(REG).forEach(k => delete REG[k]); Object.assign(REG, rg);
+    CASES.length = s.n; DEMO_NOW = null; refresh();
+  }
+
+  /* ============ اختياراتٌ تُحسَب من الحالة، فتتكرّر هي نفسُها عند كلّ إعادة ============ */
+  function initMem() {
+    const m = { reg: {} };
+
+    // ملفُّ القصّة: أوّلُ ملفٍّ متأهّلٍ لم يبدأ تقييمُه. وإن لم يوجد نُفرِّغ أوّلَ ملفّ (وتُستعاد حالتُه عند الخروج)
+    // تجمّعٌ صحّيٌّ أوّلاً: قصّتُه أبسطُ على من يشاهد (الرعاية الأولية أو الوقاية)، ولا يُشكِل عليه تخصّصٌ
+    const qual = CATS.flatMap(c => boards()[c.key].qualified);
+    const pending = x => !Object.keys(reviewsOf(x.c.id)).length;
+    let r = qual.find(x => pending(x) && E(x.c.entity).kind === 'cluster') || qual.find(pending);
+    if (!r) { r = qual.find(x => E(x.c.entity).kind === 'cluster') || qual[0]; DB.reviews[r.c.id] = {}; delete DB.consensus[r.c.id]; refresh(); }
+    m.story = r.c.id;
+    m.storyKey = CASE(m.story).key;
+    const a = assignedTo(m.story); m.X = a.evals[0]; m.Y = a.evals[1]; m.EX = a.expert;
+
+    // فئةُ التسجيل: أوّلُ فئةٍ حرّةٍ تسقط فيها جهةٌ بعينها في الأهليّة — فالسقوطُ أوضحُ ما في المنصّة
+    m.reg.ent = 'P05';
+    const ent = E(m.reg.ent), taken = CASES.filter(c => c.entity === ent.id).map(c => c.key);
+    const free = CATS.filter(c => fits(ent, c) && !taken.includes(c.key));
+    const failing = free.find(c => !eligibility(buildCase(ent.id, c.key)).pass);
+    m.reg.cat = (failing || free[0] || CATS.find(c => fits(ent, c))).key;
+
+    // فئتا التحكيم: واحدةٌ موقوفةٌ بتباعُدٍ مفتوح، وواحدةٌ نظيفة
+    const bs = CATS.map(c => boards()[c.key]);
+    const blocked = bs.find(b => !b.confirmed && b.counts.diverging > 0 && b.finalists.length >= 1);
+    m.blocked = blocked ? blocked.key : null;
+    const clean = bs.filter(b => !b.confirmed && b.counts.diverging === 0 && b.finalists.length >= 3);
+    const pick = clean.find(b => b.key !== m.storyKey) || clean[0];
+    m.clean = pick ? pick.key : null;
+    return m;
+  }
+
+  function appealCid(m) {
+    const cands = [m.reg.cid, ...CASES.filter(c => c.entity === m.reg.ent).map(c => c.id), 'C17-PRIM-GEN'];
+    return cands.find(id => id && rowOf(id) && DECIDED.includes(rowOf(id).state)) || 'C17-PRIM-GEN';
+  }
+
+  /* تقييمٌ كامل بالمراسي: مرتفعٌ لمقيّمٍ ومنخفضٌ لآخر، فيتباعدان فوق عتبة التباعُد */
+  async function scoreAll(K, cid, mode, noteText) {
+    const pick = {
+      high: { adli: [3, 2, 2, 2], letci: [3, 2, 2, 2], visit: [2, 3, 2, 2] },
+      low:  { adli: [1, 1, 1, 1], letci: [1, 1, 0, 1], visit: [1, 1, 1, 1] }
+    }[mode];
+    for (const [key, dims] of [['adli', ADLI], ['letci', LETCI], ['visit', VISIT]]) {
+      for (let i = 0; i < dims.length; i++) {
+        await K.click(`[data-sc="${cid}|${key}|${dims[i].k}|${ANCHOR_MID[pick[key][i]]}"]`, true);
+      }
+    }
+    await K.type(`#nt-${cid}`, noteText);
+  }
+
+  /* ============ الخطوات ============
+     role/route/look/title/body/note: نصٌّ أو دالّةٌ (mem, phase) → نصّ.
+     act: الأفعالُ التي تضغطها الجولة. look: ما يُضاء — وسمُ data-tour أو دالّةٌ تُرجع عنصراً. */
+  const STEPS = [
+    /* ١ · الصورة الكاملة */
+    { ch: 0, role: 'U-CH1', route: '#/', title: 'جولة المنصّة',
+      body: 'ستشاهد المنصّة تعمل بنفسها: جهة تسجّل، ومقيّمان يقيّمان ويتباعدان، وخبير يوحّد، ولجنة تحكيم تعتمد، ثم تظلّم. تعمل الجولة على نسخة مؤقتة، وكل شيء يرجع كما كان حين تخرج.',
+      note: 'توقّف أو تخطَّ أو ارجع في أي وقت من الأزرار تحت.',
+      look: () => () => q('.ph') },
+
+    { ch: 0, role: 'U-CH1', route: '#/board', title: 'لوحة الجائزة',
+      body: () => { const s = cycleStats(); return `هذه حالة الدورة كلها: ${nEnt(s.entities)} و${nCase(s.cases)} في ${num(s.cats, 'فئة', 'فئتين', 'فئات', 'فئةً')}. لكل فئة قمعها: من سجّل، ومن اجتاز الأهلية، ومن تأهّل، ومن بلغ التحكيم.`; },
+      note: 'الأرقام هنا محاكاة. الحقيقي في صفحة النتائج.',
+      look: 'board-funnel' },
+
+    { ch: 0, role: 'U-CH1', route: '#/results', title: 'النتائج المعلنة',
+      body: () => `وهذه نتائج حفل ${dt(CYCLE.ceremony)} الحقيقية: ${num(RESULT_COUNT, 'جهة', 'جهتان', 'جهات', 'جهةً')} وثلاثة أوسمة، بترتيبها داخل كل فئة. هي الصفحة الوحيدة غير المحاكاة، ولا فيها درجة لأي فائز لأن الدرجات لم تُعلن.`,
+      look: 'res-medals' },
+
+    /* ٢ · الجهة تسجّل */
+    { ch: 1, role: 'U-EN2', date: '2026-01-20', route: '#/register', title: 'التسجيل مفتوح لكل القطاعات',
+      body: 'ممثّل مستشفى خاص يبدأ باختيار القطاع. لاحظ التنبيه: ربط القطاع الخاص بالمنصّة الوطنية جزئي، والمنصّة تقول هذا قبل أن يكمل، لا بعد الإعلان.',
+      act: async K => { await K.click('input[name="sector"][value="private"]'); },
+      look: () => () => q('.form .note--a') || q('[data-tour="reg-sector"]') },
+
+    { ch: 1, role: 'U-EN2', route: '#/register', title: 'الجهة وممثّلها',
+      body: 'يختار الاسم كما هو في السجل الرسمي، لأن بيانات الجهة تُطابَق عليه. ثم يفوّض ممثلاً واحداً هو الذي يوقّع باسم الجهة.',
+      act: async (K, m) => {
+        await K.set('select[data-reg="entity"]', m.reg.ent);
+        await K.click('[data-reg-next="1"]');
+        await K.type('input[data-rep="name"]', 'فهد المطيري');
+        await K.type('input[data-rep="title"]', 'مدير الجودة');
+        await K.type('input[data-rep="email"]', 'quality@example.com');
+        await K.type('input[data-rep="phone"]', '0500000000');
+      },
+      look: 'reg-rep' },
+
+    { ch: 1, role: 'U-EN2', route: '#/register', title: 'كل جهة ترى فئاتها هي',
+      body: 'تظهر للمستشفى الفئات التي تقبل المنشآت المفردة فقط. والتنافس داخل الفئة لا داخل المسار: إصابات المستشفيات لا تُقارَن بتجمّع صحي، لأن حزمة المؤشرات مختلفة.',
+      act: async (K, m) => {
+        await K.click('[data-reg-next="2"]');
+        await K.click(`input[name="cat"][value="${m.reg.cat}"]`);
+      },
+      look: 'reg-cat' },
+
+    { ch: 1, role: 'U-EN2', route: '#/register', title: 'حكم الأهلية فوري',
+      body: (m, ph) => {
+        const c = m.reg.cid && CASE(m.reg.cid);
+        if (ph === 'pre' || !c) return 'يوافق على أربعة إقرارات ثم يسجّل. والمنصّة تصدر حكم الأهلية في اللحظة نفسها من بياناته الرسمية.';
+        const g = eligibility(c).gates.find(x => !x.pass);
+        if (!g) return 'اجتازت الجهة البوّابة، فتدخل الترتيب مباشرة.';
+        const miss = g.miss && g.miss.length ? ` الناقص: ${esc(g.miss.map(kpiName).join('، '))}.` : '';
+        return `لم تجتز الجهة شرط «${esc(g.name)}»: ${esc(ar(g.val))}.${miss} السبب ظاهر بالرقم، لا برفض إداري.`;
+      },
+      note: 'ثلاثة شروط قاطعة من دليل الجائزة. سقوط واحد يُسقط الملف.',
+      act: async (K, m) => {
+        await K.click('[data-reg-next="3"]');
+        for (const k of ['data', 'evid', 'visit', 'rules']) await K.click(`input[data-ack="${k}"]`, true);
+        await K.click('[data-reg-submit]');
+        m.reg.cid = REG.done;
+      },
+      look: 'gates' },
+
+    /* ٣ · التقييم المستقل */
+    { ch: 2, role: m => m.X, date: '2026-05-25', route: '#/desk', title: 'مكتب المقيّم',
+      body: 'يرى المقيّم الملفات المُسنَدة إليه فقط. ولا يُسنَد إليه ملف من جهته: تعارض المصالح يُستبعَد آلياً، ويُسجَّل سببه.',
+      look: m => () => { const a = q(`a[href="#/case/${m.story}"]`); return a ? a.closest('tr') : q('[data-tour="desk-list"]'); } },
+
+    { ch: 2, role: m => m.X, route: '#/board', title: 'ولا يرى ترتيب الفئة',
+      body: 'حاول المقيّم فتح لوحة الترتيب فرُفض. من يعرف موقع الجهة قبل أن يضع درجته يقيّم الموقع لا الملف. الفصل بين الأدوار مفروض بالشاشة، لا بالتعليمات.',
+      look: 'denied' },
+
+    { ch: 2, role: m => m.X, route: m => '#/case/' + m.story, title: 'بطاقة التسجيل بالمراسي',
+      body: 'يختار المقيّم مرسىً وصفياً لكل بُعد: أربعة لنظام العمل (ADLI)، وأربعة للنتائج (LeTCI)، وأربعة للزيارة الميدانية. بدل رقم حر. ولا يرى درجة زميله قبل أن يرسل درجته: هذا هو الحجاب.',
+      act: async (K, m) => {
+        await scoreAll(K, m.story, 'high', 'الأدلة تدعم التطبيق في أغلب الوحدات، والزيارة أكّدت المحاضر.');
+        await K.click('[data-sc-send]');
+      },
+      look: 'scorecard' },
+
+    { ch: 2, role: m => m.Y, route: m => '#/case/' + m.story, title: 'المقيّم الثاني يقيّم باستقلال',
+      body: 'الملف نفسه، ومقيّم آخر لا يعرف ما وضعه الأول. هنا اختار مراسي أدنى في أغلب الأبعاد.',
+      act: async (K, m) => {
+        await scoreAll(K, m.story, 'low', 'التطبيق في وحدتين فقط من خمس، ولم أجد محضراً يثبت المتابعة.');
+        await K.click('[data-sc-send]');
+      },
+      look: 'scorecard' },
+
+    /* ٤ · التباعُد والتوحيد */
+    { ch: 3, role: m => m.EX, date: '2026-06-05', route: m => '#/consensus/' + m.story, title: 'تباعُد يوقف الاعتماد',
+      body: m => { const r = rowOf(m.story), dv = r && r.divergence; return `الفرق بين المقيّمين ${dv == null ? '' : fmt(dv, 1)} نقطة، والعتبة ${ar(CFG.divergence)}. الاعتماد متوقف حتى يُفتح حوار توحيد بحضور خبير اللجنة العلمية. الأبعاد المظلَّلة هي مواضع الخلاف.`; },
+      look: 'dv' },
+
+    { ch: 3, role: m => m.EX, route: m => '#/consensus/' + m.story, title: 'توحيد بمبرَّر مكتوب',
+      body: 'يسجّل الخبير الدرجة الموحَّدة، والمبرَّر إلزامي. هذا المبرَّر هو ما يُقرأ لاحقاً لو اعترضت الجهة.',
+      act: async K => {
+        await K.type('#cs-r', 'اتفق المقيّمان بعد مراجعة المحضر على أن التطبيق يشمل ثلاث وحدات لا خمساً، فاستقرّت الأبعاد قرب المتوسط.');
+        await K.click('[data-cons]');
+      },
+      look: 'cons' },
+
+    /* ٥ · التحكيم والاعتماد */
+    { ch: 4, role: 'U-JD1', date: '2026-08-28', route: '#/judging', title: 'فئة فيها تباعُد مفتوح',
+      body: 'هنا لا يظهر زر الاعتماد أصلاً. لجنة التحكيم تعتمد ترتيباً، والترتيب المبني على درجة لم تُوحَّد لا سند له. تُغلَق حوارات التوحيد أولاً.',
+      look: m => m.blocked ? 'judge-' + m.blocked : null },
+
+    { ch: 4, role: 'U-JD1', route: '#/judging', title: 'بطاقات المحكّمين',
+      body: 'كل محكّم يُودع بطاقته، وتُحسَب المحصّلة بنقاط بوردا. جرّبنا هنا أن يخالف أحدهم الترتيب الحسابي. ولاحظ: لا فائز بعد.',
+      note: 'الأسماء والدرجات هنا محاكاة. الفائزون الحقيقيون في صفحة النتائج.',
+      act: async (K, m) => {
+        const key = m.clean; if (!key) return;
+        await K.click(`[data-bal="${key}|1|-1"]`);
+        await K.click(`[data-bal-send="${key}"]`);
+        for (const j of ['U-JD2', 'U-JD3']) { ME = j; await K.nav('#/judging'); await K.click(`[data-bal-send="${key}"]`); }
+        ME = 'U-JD1'; await K.nav('#/judging');
+      },
+      look: m => m.clean ? 'judge-' + m.clean : null },
+
+    { ch: 4, role: 'U-JD1', route: '#/judging', title: 'اعتماد رئيس التحكيم',
+      body: 'الرئيس وحده يعتمد، بمبرَّر مسجَّل. الآن فقط يصير الأول «فائزاً» والثاني والثالث «مُكرَّمَين»، وتتحول الشارات إلى ذهبية. الذهب لا يُمنح إلا بعد الاعتماد.',
+      act: async (K, m) => {
+        if (!m.clean) return;
+        await K.type(`[id="cf-${m.clean}"]`, 'اعتُمدت المحصّلة بعد التحقق من اكتمال محاضر التوحيد والزيارات في الفئة.');
+        await K.click(`[data-confirm="${m.clean}"]`);
+      },
+      look: m => m.clean ? 'judge-' + m.clean : null },
+
+    /* ٦ · بعد الإعلان */
+    { ch: 5, role: 'U-EN2', date: '2026-09-20', route: m => '#/entity/' + appealCid(m), title: 'التظلّم داخل المنصّة',
+      body: () => `يقدّم ممثّل الجهة تظلّمه خلال ${ar(CYCLE.appealWeeks)} أسابيع من الحفل. والتظلّم إجرائي: يحدّد البند الذي لم تُطبَّق قاعدته كما نُشرت، لا الشعور بالنتيجة.`,
+      note: () => `نافذة التظلّم من ${dt(CYCLE.ceremony)} إلى ${dt(CYCLE.appealEnds)}، وتاريخ العرض داخلها.`,
+      act: async (K, m) => {
+        await K.type(`#ap-${appealCid(m)}`, 'لم يُطبَّق الشرط الأول كما نُشر: مؤشر واحد غير متاح رسمياً رغم وجود سجله الأصلي لدينا، ونطلب مراجعة الإجراء.');
+        await K.click('[data-appeal]');
+      },
+      look: 'appeal' },
+
+    { ch: 5, role: 'U-AP1', route: '#/appeals', title: 'قرار مُسبَّب',
+      body: 'لجنة الحجب والتظلّم تبتّ بقرار مكتوب يظهر للمتظلّم. تنظر في سلامة الإجراء، وليست فرصة تقييم ثانية.',
+      act: async K => {
+        await K.type('#dc-0', 'رُفض التظلّم: الإجراء طُبّق كما نُشر، والمؤشر الناقص غير مغذّى من المصدر الرسمي.');
+        await K.click('[data-apdec="0|مرفوض"]');
+      },
+      look: 'appeal-list' },
+
+    { ch: 5, role: 'U-CH1', route: '#/log', title: 'سجلّ لا يُمحى',
+      body: 'كل ما جرى في الجولة مسجَّل: من فعل، ومتى، وبأي صلاحية. وهذا أول ما تطلبه لجنة التظلّم. وسيُمحى هذا السجل حين تخرج، لأن الجولة تعمل على نسخة مؤقتة.',
+      look: 'log' },
+
+    /* ٧ · الخلاصة */
+    { ch: 6, role: 'U-CH1', route: '#/verdict', title: 'هذا ما تفعله المنصّة', end: true,
+      body: 'وما لا تفعله: الأرقام محاكاة، والأوزان افتراض معلن، والبيانات غير مربوطة بمصدرها. والقرارات التي تنتظر اللجان في العرض التنفيذي.',
+      look: () => () => q('.ph') }
+  ];
+
+  /* ============ أدواتُ الفعل: كلٌّ منها يعمل بسرعتين، بطيئةٍ للعرض وسريعةٍ للإعادة ============ */
+  function setVal(el, v) { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }
+
+  function makeKit(fast, guard) {
+    const miss = sel => { if (S.check) S.check.push({ j: S.cur, miss: typeof sel === 'string' ? sel : '(دالّة)' }); };
+    const K = {
+      fast,
+      async wait(ms) { await sleep(fast ? 0 : ms); guard(); },
+      async nav(route) {
+        const cur = location.hash || '#/';
+        const same = cur === route || (route === '#/' && (cur === '' || cur === '#' || cur === '#/'));
+        if (same) render(); else { location.hash = route; await sleep(fast ? 30 : 150); }
+        guard();
+      },
+      async find(sel, ms = 1800) {
+        const t0 = performance.now();
+        for (;;) {
+          guard();
+          const el = typeof sel === 'function' ? sel() : q(sel);
+          if (el) return el;
+          if (performance.now() - t0 > ms) { miss(sel); return null; }
+          await sleep(30);
+        }
+      },
+      async point(el, ms = 520) {
+        if (fast || !el) return;
+        ensureVisible(el);
+        const r = el.getBoundingClientRect();
+        cursorTo(r.left + r.width / 2, r.top + Math.min(r.height / 2, 26));
+        await sleep(ms); guard();
+      },
+      async click(sel, quick = false) {
+        const el0 = await K.find(sel); if (!el0) return false;
+        await K.point(el0.closest('label') || el0, quick ? 130 : 520);
+        if (!fast) { tap(); await sleep(quick ? 70 : 140); guard(); }
+        el0.click();
+        await K.wait(quick ? 40 : 160);
+        return true;
+      },
+      async type(sel, text) {
+        const el = await K.find(sel); if (!el) return false;
+        await K.point(el);
+        el.focus({ preventScroll: true });
+        if (fast) { setVal(el, text); return true; }
+        let cur = '';
+        for (const ch of text) { cur += ch; setVal(el, cur); await sleep(22); guard(); }
+        await sleep(220); guard();
+        return true;
+      },
+      async set(sel, value) {
+        const el = await K.find(sel); if (!el) return false;
+        await K.point(el);
+        el.value = value; el.dispatchEvent(new Event('change', { bubbles: true }));
+        await K.wait(200);
+        return true;
+      }
+    };
+    return K;
+  }
+
+  /* ============ المؤشّر والإطار المُضيء ============ */
+  function cursorTo(x, y) { const c = S.ui && S.ui.cur; if (!c) return; c.style.left = x + 'px'; c.style.top = y + 'px'; c.classList.add('on'); }
+  function tap() { const c = S.ui && S.ui.cur; if (!c) return; c.classList.add('tap'); setTimeout(() => c.classList.remove('tap'), 180); }
+  function hideCursor() { if (S.ui) S.ui.cur.classList.remove('on'); }
+
+  function ensureVisible(el) {
+    const r = el.getBoundingClientRect();
+    const pr = S.ui ? S.ui.panel.getBoundingClientRect() : { left: 0, right: 0, top: 9e9, bottom: 9e9 };
+    const hidden = r.bottom > pr.top && r.top < pr.bottom && r.right > pr.left && r.left < pr.right;
+    if (hidden || r.top < 96 || r.bottom > window.innerHeight - 20) window.scrollBy({ top: r.top - 150, behavior: 'auto' });
+  }
+
+  function resolveTarget(spec) {
+    if (!spec) return null;
+    let el = null;
+    try { el = typeof spec === 'function' ? spec() : (q(`[data-tour="${spec}"]`) || q(spec)); } catch (_) { el = null; }
+    if (!el) return null;
+    return el.matches && el.matches('.hd') ? (el.closest('.card') || el) : el;
+  }
+
+  function setLook(spec, scroll) {
+    S.lookFn = spec ? () => resolveTarget(spec) : null;
+    const u = S.ui; if (!u) return;
+    u.ring.classList.remove('pop'); void u.ring.offsetWidth; u.ring.classList.add('pop');
+    if (scroll && spec) {
+      const el = resolveTarget(spec);
+      if (el) { el.style.scrollMarginTop = '104px'; el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    }
+  }
+
+  function loop() {
+    if (!S.on) return;
+    const ring = S.ui && S.ui.ring;
+    if (ring) {
+      const el = S.lookFn ? S.lookFn() : null;
+      if (el && el.isConnected) {
+        const r = el.getBoundingClientRect();
+        const top = Math.max(r.top, 6), bot = Math.min(r.bottom, innerHeight - 6), lf = Math.max(r.left, 6), rt = Math.min(r.right, innerWidth - 6);
+        if (bot - top > 8 && rt - lf > 8) {
+          ring.style.left = (lf - 5) + 'px'; ring.style.top = (top - 5) + 'px';
+          ring.style.width = (rt - lf + 10) + 'px'; ring.style.height = (bot - top + 10) + 'px';
+          ring.classList.add('on');
+        } else ring.classList.remove('on');
+      } else ring.classList.remove('on');
+    }
+    S.raf = requestAnimationFrame(loop);
+  }
+
+  /* ============ اللوحة ============ */
+  function mountUI() {
+    const root = document.createElement('div'); root.id = 'tour-root';
+    const groups = CH.map((_, c) => `<div class="g" title="${esc(CH[c])}">${STEPS.map((s, j) => s.ch === c ? `<button type="button" data-tr="go" data-j="${j}" aria-label="الخطوة ${ar(j + 1)}"></button>` : '').join('')}</div>`).join('');
+    root.innerHTML = `
+      <div class="tr-veil" aria-hidden="true">نعيد تهيئة الخطوة…</div>
+      <div class="tr-ring" aria-hidden="true"></div>
+      <div class="tr-cur" aria-hidden="true"></div>
+      <div class="tr" role="region" aria-label="جولة المنصّة" aria-live="polite">
+        <div class="tr__hd"><span class="tr__ch"></span><span class="tr__n"></span>
+          <button type="button" class="tr__x" data-tr="exit" aria-label="إنهاء الجولة" title="إنهاء (Esc)">${ic('x')}</button></div>
+        <div class="tr__who"></div>
+        <h3 class="tr__t"></h3>
+        <p class="tr__b"></p>
+        <p class="tr__note" hidden></p>
+        <div class="tr__acts" hidden></div>
+        <div class="tr__ctl">
+          <button type="button" class="tr__c" data-tr="prev" aria-label="الخطوة السابقة" title="السابق">${ic('prev')}</button>
+          <button type="button" class="tr__c tr__c--play" data-tr="play" aria-label="إيقاف مؤقت" title="تشغيل أو إيقاف (مسافة)">${ic('pause')}</button>
+          <button type="button" class="tr__c" data-tr="next" aria-label="الخطوة التالية" title="التالي">${ic('next')}</button>
+          <div class="tr__tk">${groups}</div>
+        </div>
+      </div>`;
+    document.body.appendChild(root);
+    const $ = s => root.querySelector(s);
+    S.ui = { root, veil: $('.tr-veil'), ring: $('.tr-ring'), cur: $('.tr-cur'), panel: $('.tr'),
+      ch: $('.tr__ch'), n: $('.tr__n'), who: $('.tr__who'), t: $('.tr__t'), b: $('.tr__b'), note: $('.tr__note'), acts: $('.tr__acts'), play: $('[data-tr="play"]'), tk: $('.tr__tk') };
+    root.addEventListener('click', e => {
+      const b = e.target.closest('[data-tr]'); if (!b) return;
+      const a = b.dataset.tr;
+      if (a === 'exit') stop(true);
+      else if (a === 'prev') prev();
+      else if (a === 'next') next();
+      else if (a === 'play') setAuto(!S.auto);
+      else if (a === 'go') jump(+b.dataset.j);
+      else if (a === 'replay') jump(0);
+      else if (a === 'deck') { stop(true); if (window.openDeck) window.openDeck(0); }
+    });
+  }
+
+  const val = (x, ph) => { try { return typeof x === 'function' ? x(S.mem, ph) : x; } catch (e) { console.warn('جولة: نصّ الخطوة', e); return ''; } };
+
+  function paint(j, ph) {
+    const st = STEPS[j], u = S.ui; if (!u) return;
+    u.ch.textContent = `${ar(st.ch + 1)} — ${CH[st.ch]}`;
+    u.n.textContent = `${ar(j + 1)} من ${ar(STEPS.length)}`;
+    u.t.textContent = val(st.title, ph) || '';
+    u.b.innerHTML = val(st.body, ph) || '';
+    const note = val(st.note, ph);
+    u.note.hidden = !note; u.note.innerHTML = note || '';
+    const p = me();
+    u.who.innerHTML = `<span>${esc(p.name)} — ${esc(ROLES[p.role].name)}</span>${DEMO_NOW ? `<span class="d">تاريخ العرض: ${dt(DEMO_NOW)}</span>` : ''}`;
+    u.acts.hidden = !st.end;
+    u.acts.innerHTML = st.end
+      ? `<button type="button" class="btn btn--p" data-tr="deck">${ic('deck')}العرض التنفيذي</button><button type="button" class="btn" data-tr="replay">${ic('replay')}أعد الجولة</button><button type="button" class="btn" data-tr="exit">إنهاء الجولة</button>` : '';
+    u.tk.querySelectorAll('button').forEach(b => { const k = +b.dataset.j; b.classList.toggle('on', k === j); b.classList.toggle('past', k < j); });
+  }
+
+  function syncPlay() {
+    const u = S.ui; if (!u) return;
+    u.play.innerHTML = ic(S.auto ? 'pause' : 'play');
+    u.play.setAttribute('aria-label', S.auto ? 'إيقاف مؤقت' : 'متابعة');
+  }
+  function setBusy(on, veil) {
+    S.busy = on; const u = S.ui; if (!u) return;
+    u.panel.classList.toggle('tr--busy', on && !!veil);
+    u.veil.classList.toggle('on', !!veil);
+  }
+
+  /* ============ تشغيلُ خطوة ============ */
+  async function runStep(j, o) {
+    const st = STEPS[j], fast = !!o.fast, tok = o.tok;
+    const guard = () => { if (tok !== S.tok || !S.on) throw CANCEL; };
+    const K = makeKit(fast, guard);
+    S.cur = j; guard();
+    if (st.date) DEMO_NOW = st.date;
+    const role = typeof st.role === 'function' ? st.role(S.mem) : st.role;
+    if (role) ME = role;
+    if (!fast) { paint(j, 'pre'); hideCursor(); setLook(null); if (S.ui) S.ui.veil.classList.remove('on'); }
+
+    const route = typeof st.route === 'function' ? st.route(S.mem) : st.route;
+    if (route) await K.nav(route);
+    guard();
+
+    const spec = () => (typeof st.look === 'function' ? st.look(S.mem) : st.look);
+    if (!fast && st.look && !st.act) setLook(spec(), true);
+    if (st.act) await st.act(K, S.mem);
+    guard();
+
+    if (S.check && st.look && !resolveTarget(spec())) S.check.push({ j, miss: 'look' });
+    if (!fast) { hideCursor(); if (st.look) setLook(spec(), true); paint(j, 'post'); }
+  }
+
+  async function play(j) {
+    const tok = ++S.tok; clearTimeout(S.timer); S.i = j; setBusy(true);
+    try { await runStep(j, { fast: false, tok }); }
+    catch (e) { if (e === CANCEL) return; console.error('جولة: تعذّرت الخطوة', j + 1, e); }
+    if (tok !== S.tok) return;
+    setBusy(false); schedule(tok);
+  }
+
+  async function jump(n) {
+    n = clampN(n, 0, STEPS.length - 1);
+    const tok = ++S.tok; clearTimeout(S.timer); S.i = n; setBusy(true, true);
+    try {
+      restore(S.snap); S.mem = initMem();
+      for (let j = 0; j < n; j++) await runStep(j, { fast: true, tok });
+      await runStep(n, { fast: false, tok });
+    } catch (e) { if (e === CANCEL) return; console.error('جولة: تعذّرت إعادة التهيئة', n + 1, e); }
+    if (tok !== S.tok) return;
+    setBusy(false); schedule(tok);
+  }
+
+  function schedule(tok) {
+    clearTimeout(S.timer); syncPlay();
+    if (!S.auto || S.i >= STEPS.length - 1 || !S.ui) return;
+    const words = (S.ui.t.textContent + ' ' + S.ui.b.textContent).trim().split(/\s+/).length;
+    const dwell = clampN(3400 + words * 320, 5200, 13500);
+    S.timer = setTimeout(() => { if (tok === S.tok && S.auto) next(); }, dwell);
+  }
+  function setAuto(v) {
+    S.auto = v; syncPlay(); clearTimeout(S.timer);
+    if (v && !S.busy) S.timer = setTimeout(next, 900);
+  }
+  function next() { if (S.i < STEPS.length - 1) { if (S.busy) jump(S.i + 1); else play(S.i + 1); } }
+  function prev() { if (S.i > 0) jump(S.i - 1); }
+
+  function onKey(e) {
+    if (!S.on) return;
+    const k = e.key, onBtn = e.target.closest && e.target.closest('button, a');
+    if (k === 'Escape') { e.preventDefault(); stop(true); }
+    else if (k === 'ArrowLeft') { e.preventDefault(); next(); }
+    else if (k === 'ArrowRight') { e.preventDefault(); prev(); }
+    else if (k === ' ' && !onBtn) { e.preventDefault(); setAuto(!S.auto); }
+  }
+
+  /* ============ البدء والخروج ============ */
+  function start() {
+    if (S.on) return;
+    if (window.closeDeck) window.closeDeck();
+    S.on = true; S.auto = true; S.snap = snapshot(); S.mem = initMem();
+    mountUI(); syncPlay();
+    document.body.classList.add('touring');
+    document.addEventListener('keydown', onKey, true);
+    S.raf = requestAnimationFrame(loop);
+    play(0);
+  }
+
+  function stop(restoreState) {
+    if (!S.on) return;
+    S.tok++; clearTimeout(S.timer); cancelAnimationFrame(S.raf); S.on = false;
+    document.removeEventListener('keydown', onKey, true);
+    document.body.classList.remove('touring');
+    if (S.ui) S.ui.root.remove();
+    S.ui = null; S.lookFn = null;
+    if (restoreState && S.snap) {
+      restore(S.snap); ME = S.snap.me; BFILTER = S.snap.bf;
+      location.hash = S.snap.hash; render(); window.scrollTo({ top: S.snap.y });
+    }
+  }
+
+  /* ============ فحصٌ ذاتيّ: يُشغِّل الخطوات كلَّها سريعاً ويُبلِّغ بما لم يجده ============
+     يُستعمل بعد أيّ تعديلٍ في القوالب: عنوانُ بطاقةٍ تغيّر يُسقِط إطاراً مُضيئاً،
+     وزرٌّ أُعيدت تسميتُه يُسقِط فعلاً — وهذا الفحصُ يكشفهما قبل أن يراهما أحد. */
+  async function check() {
+    if (S.on) return { error: 'الجولة تعمل الآن' };
+    const snap = snapshot(), tok = ++S.tok;
+    S.on = true; S.snap = snap; S.check = []; S.mem = initMem();
+    const out = { steps: STEPS.length, misses: [], errors: [] };
+    try {
+      for (let j = 0; j < STEPS.length; j++) {
+        try { await runStep(j, { fast: true, tok }); } catch (e) { out.errors.push({ j: j + 1, e: String(e && e.message || e) }); }
+      }
+      const m = S.mem;
+      out.after = {
+        reviews: Object.keys(DB.reviews[m.story] || {}).length,
+        consensus: !!DB.consensus[m.story],
+        confirmed: m.clean ? !!DB.confirmed[m.clean] : null,
+        winnerState: m.clean && DB.confirmed[m.clean] ? rowOf(CASE(DB.confirmed[m.clean].order[0]).id).state : null,
+        appeal: DB.appeals[0] ? DB.appeals[0].status : null,
+        log: DB.log.length, registeredCase: m.reg.cid || null,
+        registeredState: m.reg.cid && rowOf(m.reg.cid) ? rowOf(m.reg.cid).state : null,
+        picks: { story: m.story, X: m.X, Y: m.Y, EX: m.EX, cat: m.reg.cat, blocked: m.blocked, clean: m.clean }
+      };
+    } finally {
+      out.misses = S.check; S.check = null;
+      S.on = false; S.tok++;
+      restore(snap); ME = snap.me; BFILTER = snap.bf;
+      out.restored = { log: DB.log.length, cases: CASES.length === snap.n };
+      location.hash = snap.hash; render();
+    }
+    return out;
+  }
+
+  window.startTour = start;
+  window.stopTour = stop;
+  window.tourActive = () => S.on;
+  window.tourCheck = check;
+})();
 
 </script>
 <script>
@@ -3386,7 +4672,7 @@ function buildRail() {
   document.getElementById('rail').innerHTML = `
     <a class="brand" href="#/">
       <span class="brand__mk">أداء</span>
-      <span><span class="brand__t">جائزة أداء الصحة</span><span class="brand__s">${esc(CYCLE.name)} · ${ar(CYCLE.year)}</span></span>
+      <span><span class="brand__t">جائزة أداء الصحة</span><span class="brand__s">${esc(CYCLE.name)} ${ar(CYCLE.year)}</span></span>
     </a>
     <nav class="nav">${html}</nav>
     <div class="rail__foot">
@@ -3409,7 +4695,11 @@ function topbar() {
       ${PEOPLE.map(x => `<option value="${x.id}" ${x.id === ME ? 'selected' : ''}>${esc(x.name)} — ${esc(ROLES[x.role].name)}</option>`).join('')}
     </select>
     <div class="top__ctx">${esc(R.desk)}${comm ? ' · ' + esc(comm.name) : ''}</div>
-    <div class="top__sp">${pill(CYCLE.name + ' · ' + ar(CYCLE.year), 'g')}</div>
+    <div class="top__sp">
+      <button type="button" class="tb" data-open-deck title="العرض التنفيذي — تسع شرائح" aria-label="فتح العرض التنفيذي">${ic('deck')}<span>العرض التنفيذي</span></button>
+      <button type="button" class="tb tb--play" data-tour-start title="شغّل الجولة — تشاهد المنصّة تعمل بالخطوات" aria-label="تشغيل جولة المنصّة">${ic('play')}<span>شغّل الجولة</span></button>
+      ${pill(CYCLE.name + ' ' + ar(CYCLE.year), 'g')}
+    </div>
   </div>`;
 }
 
@@ -3424,7 +4714,7 @@ function render() {
   if (key && CAN[key] && !CAN[key].includes(myRole())) {
     out = `${pageHead('خارج صلاحيّتك', 'هذه الشاشة ليست ضمن ما يفتحه دورُك الحاليّ — وهذا سلوكٌ مقصود: الفصلُ بين اللجان يُفرَض تقنياً لا تنظيمياً فقط.')}
       ${card(note('دورُك الحاليّ: <b>' + esc(ROLES[myRole()].name) + '</b>. بدِّل الدور من أعلى الصفحة لترى المنصّة بعينٍ أخرى — كلُّ دورٍ يرى ما يخصّه وحده.', 'i', 'lock')
-        + `<div class="hr"></div>${link('مصفوفة الصلاحيات', '#/gov')} ${link('الرئيسة', '#/')}`)}`;
+        + `<div class="hr"></div>${link('مصفوفة الصلاحيات', '#/gov')} ${link('الرئيسة', '#/')}`, '', 'data-tour="denied"')}`;
   }
   if (out === null) { out = viewHome(); nav = 'home'; }
 
@@ -3433,10 +4723,13 @@ function render() {
   document.getElementById('top').innerHTML = topbar();
 
   const page = document.getElementById('page');
+  const navigated = h !== _lastHash;
   page.innerHTML = out;
-  if (h !== _lastHash) { window.scrollTo({ top: 0 }); _lastHash = h; }
-  page.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }],
-    { duration: 200, easing: 'cubic-bezier(.2,.8,.3,1)' });
+  if (navigated) {
+    window.scrollTo({ top: 0 }); _lastHash = h;
+    page.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }],
+      { duration: 200, easing: 'cubic-bezier(.2,.8,.3,1)' });
+  }
 
   buildRail();
   document.querySelectorAll('.nav a').forEach(a => {
@@ -3454,24 +4747,20 @@ function render() {
 function createCase(entId, catKey) {
   const exist = CASES.find(c => c.entity === entId && c.key === catKey);
   if (exist) return exist.id;
-  const ent = E(entId), cat = C(catKey), ks = kpisOf(catKey);
-  const vals = {}; ks.forEach(k => { vals[k.id] = series(entId, catKey, k); });
-  const r2 = mulberry32(seedOf(entId + catKey + 'feed'));
-  const missing = [];
-  if (ent.feed === 'partial') {
-    cat.kpis.forEach(k => { if (r2() < 0.28) missing.push(k.id); });
-    if (r2() < 0.45) missing.push('ESAT');
-  }
-  const id = `${entId}-${catKey.replace(':', '-')}`;
-  CASES.push({ id, entity: entId, track: cat.track, cat: cat.id, key: catKey, vals, missing, registeredAt: '2026-02-24' });
+  const c = buildCase(entId, catKey);
+  CASES.push(c);
   refresh();
-  return id;
+  return c.id;
 }
 
 /* ============ الربط ============ */
 function on(sel, ev, fn) { document.querySelectorAll(sel).forEach(el => el.addEventListener(ev, fn)); }
 
 function bind() {
+  /* العرض التنفيذي والجولة */
+  on('[data-open-deck]', 'click', () => window.openDeck && window.openDeck(0));
+  on('[data-tour-start]', 'click', () => window.startTour && window.startTour());
+
   /* تبديل الدور */
   on('[data-me]', 'change', e => {
     ME = e.target.value;
@@ -3544,7 +4833,7 @@ function bind() {
     const cid = e.target.dataset.scSend;
     const rv = (DB.reviews[cid] || {})[ME];
     if (!rv) return;
-    rv.at = new Date().toISOString().slice(0, 10);
+    rv.at = todayISO();
     logIt(me().name, 'إرسالُ درجة', cid, `المُحصّلة ${fmt(reviewScore(rv), 1)} — ${ROLES[myRole()].name}`);
     refresh(); render();
   });
@@ -3577,7 +4866,7 @@ function bind() {
       alert(`لا تُرسَل الاستمارةُ قبل اكتمالها:\n• الأقسام المكتملة ${filled} من ${FORM.length} (٤٠ حرفاً فأكثر لكلّ قسم)\n• الأدلّة المرفوعة ${d.files.length} — ودليلٌ واحدٌ على الأقلّ شرط.\n\nنصُّ الدليل: «أدلّةٌ داعمة لكلّ نتيجةٍ مُبلَّغٍ عنها».`);
       return;
     }
-    d.at = new Date().toISOString().slice(0, 10);
+    d.at = todayISO();
     DB.submissions[cid] = d;
     logIt(me().name, 'إرسالُ استمارة المشاركة', cid, `${d.files.length} دليلاً مرفوعاً`);
     render();
@@ -3595,7 +4884,7 @@ function bind() {
     const evs = a.evals.map(u => rv[u]).filter(Boolean);
     const mid = (o1, o2) => { const o = {}; Object.keys(o1).forEach(k => o[k] = Math.round((o1[k] + o2[k]) / 2)); return o; };
     DB.consensus[cid] = {
-      by: ME, at: new Date().toISOString().slice(0, 10), rationale: r.value.trim(),
+      by: ME, at: todayISO(), rationale: r.value.trim(),
       adli: mid(evs[0].adli, evs[1].adli), letci: mid(evs[0].letci, evs[1].letci), visit: mid(evs[0].visit, evs[1].visit)
     };
     logIt(me().name, 'اعتمادُ درجةٍ موحَّدة', cid, `المُحصّلة ${fmt(reviewScore(DB.consensus[cid]), 1)}`);
@@ -3640,7 +4929,7 @@ function bind() {
     Object.values(bal).forEach(l => l.forEach((id, i) => { if (pts[id] !== undefined) pts[id] += ids.length - i; }));
     DB.confirmed[key] = {
       order: ids.slice().sort((a, c) => pts[c] - pts[a]),
-      by: ME, at: new Date().toISOString().slice(0, 10), rationale: t.value.trim()
+      by: ME, at: todayISO(), rationale: t.value.trim()
     };
     logIt(me().name, 'اعتمادُ فائزي فئة', null, `${catLabel(key)} — ${E(CASE(DB.confirmed[key].order[0]).entity).name}`);
     refresh(); render();
@@ -3653,7 +4942,7 @@ function bind() {
     if (!t || t.value.trim().length < 25) { alert('نصُّ التظلّم شرطٌ — حدِّد الإجراء المُعترَض عليه في خمسةٍ وعشرين حرفاً فأكثر.'); return; }
     DB.appeals.unshift({
       case: cid, text: t.value.trim(), by: me().name,
-      at: new Date().toISOString().slice(0, 10), status: 'قيد النظر', decision: null
+      at: todayISO(), status: 'قيد النظر', decision: null
     });
     logIt(me().name, 'تقديمُ تظلّم', cid, '');
     render();

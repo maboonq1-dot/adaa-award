@@ -198,8 +198,10 @@ function scorecard(cid) {
       </div>`;
     }).join('')}</div>`;
 
-  const complete = [...ADLI, ...LETCI, ...VISIT].every(d =>
-    (d.k in rv.adli) || (d.k in rv.letci) || (d.k in rv.visit));
+  // لكلّ مجموعةٍ فحصُها: المفتاح I مشتركٌ بين ADLI وLeTCI، والفحصُ المختلط كان يقبل بُعداً ناقصاً
+  const complete = ADLI.every(d => d.k in rv.adli)
+    && LETCI.every(d => d.k in rv.letci)
+    && VISIT.every(d => d.k in rv.visit);
 
   return `
   ${group(ADLI, 'adli', 'العمليات · ADLI', CFG.s2.adli)}

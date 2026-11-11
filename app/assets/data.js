@@ -13,6 +13,7 @@ const CYCLE = {
   centenary: 'إحياءً لمرور ١٠٠ عام على تأسيس أول مديرية للصحة عام ١٣٤٣هـ في مكة المكرمة',
   email: 'adaa-award@moh.gov.sa',
   appealWeeks: 6,
+  regOpen: '2026-01-12', regClose: '2026-02-25',
   ceremony: '2026-09-09',
   appealEnds: '2026-10-21'
 };
@@ -225,6 +226,13 @@ const SECTORS = {
   other:    { name: 'جهاتٌ أخرى',            feed: 'partial', note: 'ربطٌ يعتمد على اتفاقيةٍ لكل جهة' }
 };
 
+/* مستشفىً تخصّصيّ لا يدخل إلا فئاتِ تخصّصه: مستشفى العيون في الطوارئ وإنقاذ الأرواح مشهدٌ
+   يكشف المحاكاةَ لأوّل من يعرف المستشفيات. (القلب مُدرَج في «كفاءة الخدمات» كما في النتيجة المعلنة.) */
+const SCOPE = {
+  A06: ['PREV:SCR', 'EFFI:ACC', 'EFFI:EFF'],
+  H10: ['LIFE:MI', 'PREV:SCR', 'EFFI:ACC', 'EFFI:EFF']
+};
+
 /* ============ الجهات ============
    ‏**تصحيحٌ فرضَته نتائجُ الحفل:** وحدةُ التنافس ليست «الجهة» دائماً.
    التجمّعُ الصحيّ يتنافس في الرعاية الأولية والإقلاع عن التبغ،
@@ -294,7 +302,7 @@ const ENTITIES = [
   ['O01','الهلال الأحمر السعودي','other','الرياض','authority'],
   ['O02','مستشفى جونز هوبكنز أرامكو بالظهران','other','الشرقية','hospital'],
   ['O03','مجمع الملك عبدالله الطبي بجدة','other','جدة','hospital']
-].map(([id, name, sector, region, kind]) => ({ id, name, sector, region, kind, feed: SECTORS[sector].feed }));
+].map(([id, name, sector, region, kind]) => ({ id, name, sector, region, kind, feed: SECTORS[sector].feed, scope: SCOPE[id] }));
 
 const E = id => ENTITIES.find(e => e.id === id);
 
@@ -349,7 +357,8 @@ const PEOPLE = [
   { id: 'U-JD3', name: 'عضو لجنة التحكيم ٢', role: 'judge', entity: null },
   { id: 'U-AP1', name: 'لجنة الحجب والتظلّم', role: 'appeals', entity: null },
   { id: 'U-SE1', name: 'أمانة الجائزة',    role: 'sec',    entity: null },
-  { id: 'U-EN1', name: 'ممثّل تجمّع الرياض الصحي الأول', role: 'entity', entity: 'C01' }
+  { id: 'U-EN1', name: 'ممثّل تجمّع الرياض الصحي الأول', role: 'entity', entity: 'C01' },
+  { id: 'U-EN2', name: 'ممثّل مستشفى د. سليمان فقيه', role: 'entity', entity: 'P05' }
 ];
 
 /* ============ مولِّدٌ ببذرةٍ ثابتة ============ */
@@ -402,6 +411,7 @@ function series(entId, catKey, kpi) {
 /** هل تُقبَل هذه الجهةُ في هذه الفئة؟ وحدةُ التنافس تحكم. */
 function fits(ent, cat) {
   if (ent.kind === 'authority') return false;      // الجهةُ الأمّ تُمنَح وساماً ولا تدخل مساراً
+  if (ent.scope && !ent.scope.includes(cat.key)) return false;   // التخصّصيّ لا يخرج عن تخصّصه
   return cat.unit === 'any' || cat.unit === ent.kind;
 }
 

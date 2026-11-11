@@ -81,7 +81,7 @@ function buildRail() {
   document.getElementById('rail').innerHTML = `
     <a class="brand" href="#/">
       <span class="brand__mk">أداء</span>
-      <span><span class="brand__t">جائزة أداء الصحة</span><span class="brand__s">${esc(CYCLE.name)} · ${ar(CYCLE.year)}</span></span>
+      <span><span class="brand__t">جائزة أداء الصحة</span><span class="brand__s">${esc(CYCLE.name)} ${ar(CYCLE.year)}</span></span>
     </a>
     <nav class="nav">${html}</nav>
     <div class="rail__foot">
@@ -104,7 +104,11 @@ function topbar() {
       ${PEOPLE.map(x => `<option value="${x.id}" ${x.id === ME ? 'selected' : ''}>${esc(x.name)} — ${esc(ROLES[x.role].name)}</option>`).join('')}
     </select>
     <div class="top__ctx">${esc(R.desk)}${comm ? ' · ' + esc(comm.name) : ''}</div>
-    <div class="top__sp">${pill(CYCLE.name + ' · ' + ar(CYCLE.year), 'g')}</div>
+    <div class="top__sp">
+      <button type="button" class="tb" data-open-deck title="العرض التنفيذي — تسع شرائح" aria-label="فتح العرض التنفيذي">${ic('deck')}<span>العرض التنفيذي</span></button>
+      <button type="button" class="tb tb--play" data-tour-start title="شغّل الجولة — تشاهد المنصّة تعمل بالخطوات" aria-label="تشغيل جولة المنصّة">${ic('play')}<span>شغّل الجولة</span></button>
+      ${pill(CYCLE.name + ' ' + ar(CYCLE.year), 'g')}
+    </div>
   </div>`;
 }
 
@@ -119,7 +123,7 @@ function render() {
   if (key && CAN[key] && !CAN[key].includes(myRole())) {
     out = `${pageHead('خارج صلاحيّتك', 'هذه الشاشة ليست ضمن ما يفتحه دورُك الحاليّ — وهذا سلوكٌ مقصود: الفصلُ بين اللجان يُفرَض تقنياً لا تنظيمياً فقط.')}
       ${card(note('دورُك الحاليّ: <b>' + esc(ROLES[myRole()].name) + '</b>. بدِّل الدور من أعلى الصفحة لترى المنصّة بعينٍ أخرى — كلُّ دورٍ يرى ما يخصّه وحده.', 'i', 'lock')
-        + `<div class="hr"></div>${link('مصفوفة الصلاحيات', '#/gov')} ${link('الرئيسة', '#/')}`)}`;
+        + `<div class="hr"></div>${link('مصفوفة الصلاحيات', '#/gov')} ${link('الرئيسة', '#/')}`, '', 'data-tour="denied"')}`;
   }
   if (out === null) { out = viewHome(); nav = 'home'; }
 
@@ -128,10 +132,13 @@ function render() {
   document.getElementById('top').innerHTML = topbar();
 
   const page = document.getElementById('page');
+  const navigated = h !== _lastHash;
   page.innerHTML = out;
-  if (h !== _lastHash) { window.scrollTo({ top: 0 }); _lastHash = h; }
-  page.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }],
-    { duration: 200, easing: 'cubic-bezier(.2,.8,.3,1)' });
+  if (navigated) {
+    window.scrollTo({ top: 0 }); _lastHash = h;
+    page.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }],
+      { duration: 200, easing: 'cubic-bezier(.2,.8,.3,1)' });
+  }
 
   buildRail();
   document.querySelectorAll('.nav a').forEach(a => {
@@ -149,24 +156,20 @@ function render() {
 function createCase(entId, catKey) {
   const exist = CASES.find(c => c.entity === entId && c.key === catKey);
   if (exist) return exist.id;
-  const ent = E(entId), cat = C(catKey), ks = kpisOf(catKey);
-  const vals = {}; ks.forEach(k => { vals[k.id] = series(entId, catKey, k); });
-  const r2 = mulberry32(seedOf(entId + catKey + 'feed'));
-  const missing = [];
-  if (ent.feed === 'partial') {
-    cat.kpis.forEach(k => { if (r2() < 0.28) missing.push(k.id); });
-    if (r2() < 0.45) missing.push('ESAT');
-  }
-  const id = `${entId}-${catKey.replace(':', '-')}`;
-  CASES.push({ id, entity: entId, track: cat.track, cat: cat.id, key: catKey, vals, missing, registeredAt: '2026-02-24' });
+  const c = buildCase(entId, catKey);
+  CASES.push(c);
   refresh();
-  return id;
+  return c.id;
 }
 
 /* ============ الربط ============ */
 function on(sel, ev, fn) { document.querySelectorAll(sel).forEach(el => el.addEventListener(ev, fn)); }
 
 function bind() {
+  /* العرض التنفيذي والجولة */
+  on('[data-open-deck]', 'click', () => window.openDeck && window.openDeck(0));
+  on('[data-tour-start]', 'click', () => window.startTour && window.startTour());
+
   /* تبديل الدور */
   on('[data-me]', 'change', e => {
     ME = e.target.value;
@@ -239,7 +242,7 @@ function bind() {
     const cid = e.target.dataset.scSend;
     const rv = (DB.reviews[cid] || {})[ME];
     if (!rv) return;
-    rv.at = new Date().toISOString().slice(0, 10);
+    rv.at = todayISO();
     logIt(me().name, 'إرسالُ درجة', cid, `المُحصّلة ${fmt(reviewScore(rv), 1)} — ${ROLES[myRole()].name}`);
     refresh(); render();
   });
@@ -272,7 +275,7 @@ function bind() {
       alert(`لا تُرسَل الاستمارةُ قبل اكتمالها:\n• الأقسام المكتملة ${filled} من ${FORM.length} (٤٠ حرفاً فأكثر لكلّ قسم)\n• الأدلّة المرفوعة ${d.files.length} — ودليلٌ واحدٌ على الأقلّ شرط.\n\nنصُّ الدليل: «أدلّةٌ داعمة لكلّ نتيجةٍ مُبلَّغٍ عنها».`);
       return;
     }
-    d.at = new Date().toISOString().slice(0, 10);
+    d.at = todayISO();
     DB.submissions[cid] = d;
     logIt(me().name, 'إرسالُ استمارة المشاركة', cid, `${d.files.length} دليلاً مرفوعاً`);
     render();
@@ -290,7 +293,7 @@ function bind() {
     const evs = a.evals.map(u => rv[u]).filter(Boolean);
     const mid = (o1, o2) => { const o = {}; Object.keys(o1).forEach(k => o[k] = Math.round((o1[k] + o2[k]) / 2)); return o; };
     DB.consensus[cid] = {
-      by: ME, at: new Date().toISOString().slice(0, 10), rationale: r.value.trim(),
+      by: ME, at: todayISO(), rationale: r.value.trim(),
       adli: mid(evs[0].adli, evs[1].adli), letci: mid(evs[0].letci, evs[1].letci), visit: mid(evs[0].visit, evs[1].visit)
     };
     logIt(me().name, 'اعتمادُ درجةٍ موحَّدة', cid, `المُحصّلة ${fmt(reviewScore(DB.consensus[cid]), 1)}`);
@@ -335,7 +338,7 @@ function bind() {
     Object.values(bal).forEach(l => l.forEach((id, i) => { if (pts[id] !== undefined) pts[id] += ids.length - i; }));
     DB.confirmed[key] = {
       order: ids.slice().sort((a, c) => pts[c] - pts[a]),
-      by: ME, at: new Date().toISOString().slice(0, 10), rationale: t.value.trim()
+      by: ME, at: todayISO(), rationale: t.value.trim()
     };
     logIt(me().name, 'اعتمادُ فائزي فئة', null, `${catLabel(key)} — ${E(CASE(DB.confirmed[key].order[0]).entity).name}`);
     refresh(); render();
@@ -348,7 +351,7 @@ function bind() {
     if (!t || t.value.trim().length < 25) { alert('نصُّ التظلّم شرطٌ — حدِّد الإجراء المُعترَض عليه في خمسةٍ وعشرين حرفاً فأكثر.'); return; }
     DB.appeals.unshift({
       case: cid, text: t.value.trim(), by: me().name,
-      at: new Date().toISOString().slice(0, 10), status: 'قيد النظر', decision: null
+      at: todayISO(), status: 'قيد النظر', decision: null
     });
     logIt(me().name, 'تقديمُ تظلّم', cid, '');
     render();

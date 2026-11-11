@@ -70,7 +70,15 @@ const I = {
   star:    '<path d="m12 3 2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.4 6.7 19.2l1.1-5.9L3.5 9.2l5.9-.8z"/>',
   gavel:   '<path d="m14 3 7 7-3 3-7-7zM3 21h10M10 10 3 17l3 3 7-7"/>',
   plus:    '<path d="M12 5v14M5 12h14"/>',
-  arrow:   '<path d="M19 12H5M12 5l-7 7 7 7"/>'
+  arrow:   '<path d="M19 12H5M12 5l-7 7 7 7"/>',
+  deck:    '<rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M8 21h8M12 17v4"/>',
+  play:    '<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/>',
+  next:    '<path d="M15 6l-6 6 6 6"/>',
+  prev:    '<path d="M9 6l6 6-6 6"/>',
+  stop:    '<rect x="6" y="6" width="12" height="12" rx="2"/>',
+  pause:   '<path d="M9 6v12M15 6v12"/>',
+  replay:  '<path d="M4 12a8 8 0 1 0 2.6-5.9M4 4v4h4"/>',
+  full:    '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'
 };
 const ic = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
   stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n] || I.file}</svg>`;
@@ -143,9 +151,28 @@ function chip(person, sub = '') {
 }
 
 /* ============ لبنات التخطيط ============ */
-const card = (inner, cls = '') => `<section class="card ${cls}">${inner}</section>`;
-const head = (title, sub = '', right = '') =>
-  `<div class="hd"><div><h2>${esc(title)}</h2>${sub ? `<p class="hd__s">${sub}</p>` : ''}</div>${right ? `<div class="hd__r">${right}</div>` : ''}</div>`;
+const card = (inner, cls = '', attrs = '') => `<section class="card ${cls}"${attrs ? ' ' + attrs : ''}>${inner}</section>`;
+/* مواضعُ الجولة: كلُّ بطاقةٍ تُعرَف بعنوانها، فيجدها المُرشِد دون أن تُلوَّث القوالبُ بسمات.
+   عنوانٌ تغيّر ولم يتغيّر هنا يُسقِط الإطارَ المُضيء فقط، ولا يكسر شيئاً — ويكشفه فحصُ الجولة. */
+const TOUR_HEADS = {
+  'القِمع في الفئات العشر': 'board-funnel',
+  'الأوسمة الثلاثة': 'res-medals',
+  'حكمُ بوّابة الأهليّة — فوريّ': 'gates',
+  '١ — بوّابة الأهليّة': 'gates',
+  'الملفّات المُسنَدة': 'desk-list',
+  'نتائج المؤشّرات · المرحلة الأولى': 's1-break',
+  'الإسناد': 'assign',
+  'بطاقة التسجيل — درجتي': 'scorecard',
+  'الأبعاد المتباعدة': 'dv',
+  'الدرجة الموحَّدة': 'cons',
+  'نافذة التظلّم': 'appeal-window',
+  'التظلّمات': 'appeal-list',
+  '٥ — التظلّم': 'appeal',
+  'من يرى ماذا — مصفوفة الصلاحيات': 'matrix',
+  'الأوزان والعتبات': 'weights'
+};
+const head = (title, sub = '', right = '', tid = TOUR_HEADS[title]) =>
+  `<div class="hd"${tid ? ` data-tour="${tid}"` : ''}><div><h2>${esc(title)}</h2>${sub ? `<p class="hd__s">${sub}</p>` : ''}</div>${right ? `<div class="hd__r">${right}</div>` : ''}</div>`;
 const note = (txt, tone = 'n', icon = 'verdict') =>
   `<div class="note note--${tone}">${ic(icon)}<div>${txt}</div></div>`;
 const kv = rows => `<dl class="kv">${rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
