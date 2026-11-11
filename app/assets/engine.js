@@ -383,7 +383,7 @@ function assignedTo(caseId) {
   const evs = PEOPLE.filter(p => p.role === 'eval' && p.aff !== CASE(caseId).entity);
   const exs = PEOPLE.filter(p => p.role === 'expert' && p.aff !== CASE(caseId).entity);
   const r = mulberry32(seedOf(caseId + 'assign'));
-  const pick = (arr, n) => arr.slice().sort(() => r() - 0.5).slice(0, n).map(p => p.id);
+  const pick = (arr, n) => shuffled(arr, r).slice(0, n).map(p => p.id);
   return { evals: pick(evs, 2), expert: pick(exs, 1)[0] };
 }
 

@@ -370,6 +370,19 @@ function mulberry32(a) {
     return ((t ^ t >>> 14) >>> 0) / 4294967296;
   };
 }
+/* خلطٌ حتميّ حقيقيّ (Fisher–Yates) بمولّدٍ مبذور.
+   لا يصحّ الخلطُ بـ sort(() => r() - 0.5): المقارِنُ غيرُ متّسق، فنتيجتُه ممّا يتركه المحرّك
+   لنفسه — وقد قلبت نتيجةَ الإسناد عند النداء رقم ١٨٦ حين سُخِّنت الدالّة (JIT) فتبدّل اسمُ
+   المقيّم المُسنَد لنفس الملف في منتصف الجلسة، وتختلف النتيجةُ بين المتصفّحات أصلاً. */
+function shuffled(arr, rnd) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 function seedOf(str) {
   let h = 2166136261;
   for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
@@ -422,7 +435,7 @@ const CASES = (() => {
     const pool = CATS.filter(c => fits(ent, c));
     if (!pool.length) return;
     const n = Math.min(pool.length, ent.kind === 'cluster' ? 2 + Math.floor(rnd() * 2) : 3 + Math.floor(rnd() * 3));
-    const picked = pool.slice().sort(() => rnd() - 0.5).slice(0, n);
+    const picked = shuffled(pool, rnd).slice(0, n);
     picked.forEach(cat => {
       const kpis = kpisOf(cat.key);
       const vals = {};
